@@ -23,13 +23,12 @@ enum class TapirTargetID {
   None,     // Perform no lowering
   Serial,   // Lower to serial projection
   Cheetah,  // Lower to the Cheetah ABI
-  Cilk,   // Lower to the Cilk Plus ABI
-  CilkR,  // Lower to the CilkR ABI
-  Cuda,     // Lower to Cuda ABI
+  Cilk,     // Lower to the Cilk Plus ABI
+  CilkR,    // Lower to the CilkR ABI
   OpenCilk, // Lower to OpenCilk ABI
   OpenCL,   // Lower to OpenCL ABI
   OpenMP,   // Lower to OpenMP
-  GPU,   // Lower to OpenCL
+  GPU,      // Lower to Kitsune's multi-GPU runtime.
   Qthreads, // Lower to Qthreads
   Realm,    // Lower to Realm
   Last_TapirTargetID

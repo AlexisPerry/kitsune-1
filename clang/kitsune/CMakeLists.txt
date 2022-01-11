@@ -13,35 +13,27 @@ option(KITSUNE_ENABLE_KOKKOS_SUPPORT
     "Enable custom recognition and compilation of Kokkos." ON)
 
 if (KITSUNE_ENABLE_KOKKOS_SUPPORT)
-  set(KITSUNE_KOKKOS_CFG_FILENAME
-      "kokkos.cfg"
-      CACHE
-      STRING "Default Kokkos .cfg filename.")
+  set(KITSUNE_KOKKOS_CFG_FILENAME "kokkos.cfg"
+    CACHE STRING "Default Kokkos .cfg filename.")
   set(KITSUNE_KOKKOS_CXX_FLAGS
       "-I${CMAKE_INSTALL_PREFIX}/include -I${CMAKE_INSTALL_PREFIX}/include/kokkos"
-      CACHE
-      STRING "Additional C++ compile flags needed by Kokkos applications.")
+      CACHE STRING "Additional C++ compile flags needed by Kokkos applications.")
   set(KITSUNE_KOKKOS_LINK_LIBS_FLAGS
       "-L${CMAKE_INSTALL_PREFIX}/lib -lkokkoscore"
-      CACHE
-      STRING "Library flags (e.g. -lkokkoscore) needed by Kokkos applications.")
+      CACHE STRING "Library flags (e.g. -lkokkoscore) needed by Kokkos applications.")
   set(KITSUNE_KOKKOS_EXTRA_LINK_FLAGS
       ""
-      CACHE
-      STRING "Additional link flags needed for Kokkos applications.")
+      CACHE STRING "Additional link flags needed for Kokkos applications.")
   set(KITSUNE_KOKKOS_EXTRA_LINK_LIBS
      ""
-     CACHE
-     STRING "Additional link libraries needed for Kokkos applications.")
-  #
+     CACHE STRING "Additional link libraries needed for Kokkos applications.")
+
+
   configure_file(${CLANG_SOURCE_DIR}/kitsune/${KITSUNE_KOKKOS_CFG_FILENAME}.in
-      ${LLVM_BINARY_DIR}/share/kitsune/${KITSUNE_KOKKOS_CFG_FILENAME})
+    ${LLVM_BINARY_DIR}/share/kitsune/${KITSUNE_KOKKOS_CFG_FILENAME})
+
 endif()
 
-#
-# Configuration options for enabling the ABI transform targets
-# within Clang.
-#
 
 # The none target (-ftapir=none) is always enabled, just provide a
 # config filename and process the default .cfg.in file so it lands in
@@ -75,6 +67,7 @@ set(KITSUNE_OPENCILK_TARGET_EXTRA_LINK_FLAGS
 configure_file(${CLANG_SOURCE_DIR}/kitsune/opencilk.cfg.in
     ${LLVM_BINARY_DIR}/share/kitsune/${TAPIR_OPENCILK_TARGET_CFG_FILENAME})
 
+
 option(KITSUNE_ENABLE_OPENMP_TARGET
     "Enable the Kitsune+Tapir OpenMP runtime codegen target." OFF)
 if (KITSUNE_ENABLE_OPENMP_TARGET)
@@ -94,6 +87,7 @@ if (KITSUNE_ENABLE_OPENMP_TARGET)
   configure_file(${CLANG_SOURCE_DIR}/kitsune/openmp.cfg.in
       ${LLVM_BINARY_DIR}/share/kitsune/${TAPIR_OPENMP_TARGET_CFG_FILENAME})
 endif()
+
 
 option(KITSUNE_ENABLE_QTHREADS_TARGET
     "Enable the Kitsune+Tapir Qthreads runtime codegen target." OFF)
@@ -115,6 +109,7 @@ if (KITSUNE_ENABLE_QTHREADS_TARGET)
       ${LLVM_BINARY_DIR}/share/kitsune/${TAPIR_QTHREADS_TARGET_CFG_FILENAME})
 endif()
 
+
 option(KITSUNE_ENABLE_REALM_TARGET
     "Enable the Kitsune+Tapir Realm runtime codegen target." OFF)
 if (KITSUNE_ENABLE_REALM_TARGET)
@@ -135,71 +130,42 @@ if (KITSUNE_ENABLE_REALM_TARGET)
       ${LLVM_BINARY_DIR}/share/kitsune/${TAPIR_REALM_TARGET_CFG_FILENAME})
 endif()
 
-option(KITSUNE_ENABLE_CUDA_TARGET
-    "Enable the Kitsune+Tapir CUDA Toolkit target and codegen library." OFF)
-if (KITSUNE_ENABLE_CUDA_TARGET)
-  find_package(CUDAToolkit 10...11 REQUIRED)  # We may need to be a bit more specifc on minor versions here.
-  set(TAPIR_CUDA_TARGET_CFG_FILENAME
-      "cuda.cfg"
+option(KITSUNE_ENABLE_GPU_TARGET "Enable the Kitsune+Tapir GPU target and supporting runtime." ON)
+if (KITSUNE_ENABLE_GPU_TARGET)
+
+  if (NOT LLVM_BUILD_LLVM_DYLIB)
+    set(LLVM_BUILD_LLVM_DYLIB ON)
+  endif()
+
+  find_package(CUDAToolkit 11)
+  if (CUDAToolkit_FOUND)
+    message(STATUS "Kitsune: CUDA Toolkit version found.")
+  endif()
+  option(KITSUNE_ENABLE_CUDA_SUPPORT "Enable the Kitsune+Tapir CUDA Toolkit target and codegen library." ${CUDAToolkit_FOUND})
+  if (KITSUNE_ENABLE_CUDA_SUPPORT)
+    set(KITSUNE_GPU_TARGET_CFG_FILENAME
+      "gpu.cfg"
       CACHE
-      STRING "Default CUDA Toolkit runtime ABI target Clang .cfg filename.")
-  set(KITSUNE_CUDA_TARGET_EXTRA_LINK_FLAGS
-      ""
-      CACHE
+      STRING "Default LLVM GPU ABI Clang .cfg file.")
+    set(KITSUNE_CUDA_TARGET_EXTRA_LINK_FLAGS
+      "" CACHE
       STRING "Additional link flags needed for the CUDA Toolkit runtime ABI target.")
-  set(KITSUNE_CUDA_TARGET_LINK_LIBS_FLAGS
-      "-L${CUDAToolkit_LIBRARY_DIR} -lcudart"
+    set(KITSUNE_CUDA_TARGET_LINK_LIBS_FLAGS
+      "-L${CUDAToolkit_LIBRARY_DIR} -lcudart -lpthread -lLLVM -lrt -ldl -lnvptxcompiler_static"
       CACHE
-      STRING "Link library flags (-L, -lxxx) needed for the CUDA Toolkit runtime ABI target.")
+      STRING "Link library flags (-L, -lxxx) needed for the NVIDIA/CUDA ABI target.")
+    configure_file(${CLANG_SOURCE_DIR}/kitsune/${KITSUNE_GPU_TARGET_CFG_FILENAME}.in
+      ${LLVM_BINARY_DIR}/share/kitsune/${KITSUNE_GPU_TARGET_CFG_FILENAME})
+  endif()
   #
-  configure_file(${CLANG_SOURCE_DIR}/kitsune/cudatk.cfg.in
-      ${LLVM_BINARY_DIR}/share/kitsune/${TAPIR_CUDA_TARGET_CFG_FILENAME})
+  # TODO: Need to get HIP and SPIRV rolled into this when ready...
+  #
 endif()
 
-# TODO: This needs to be connected to reality... --PM
-option(KITSUNE_ENABLE_HIP_TARGET
-    "Enable the Kitsune+Tapir HIP target and codegen library." OFF)
-if (KITSUNE_ENABLE_HIP_TARGET)
-  set(TAPIR_HIP_TARGET_CFG_FILENAME
-      "hip.cfg"
-      CACHE
-      STRING "Default HIP runtime ABI target Clang .cfg filename.")
-  set(KITSUNE_HIP_TARGET_EXTRA_LINK_FLAGS
-      ""
-      CACHE
-      STRING "Additional link flags needed for the HIP runtime ABI target.")
-  set(KITSUNE_HIP_TARGET_LINK_LIBS_FLAGS
-      "-L${-lhip" # I made this up... --PM
-      CACHE STRING "Link library flags (-L, -lxxx) needed for the for the HIP runtime ABI target.")
-  #
-  configure_file(${CLANG_SOURCE_DIR}/kitsune/hip.cfg.in
-      ${LLVM_BINARY_DIR}/share/kitsune/${TAPIR_HIP_TARGET_CFG_FILENAME})
-endif()
-
-# TODO: This needs to be connected to reality... --PM
-option(KITSUNE_ENABLE_OPENCL_TARGET
-    "Enable the Kitsune+Tapir OpenCL target and codegen library." OFF)
-if (KITSUNE_ENABLE_OPENCL_TARGET)
-  set(KITSUNE_OPENCL_TARGET_CFG_FILENAME
-      "opencl.cfg"
-      CACHE
-     STRING "Default OpenCL runtime ABI target Clang .cfg filename.")
-  set(KITSUNE_OPENCL_TARGET_EXTRA_LINK_FLAGS
-      ""
-      CACHE STRING "Additional link flags needed for the OpenCL runtime ABI target.")
-  set(KITSUNE_OPENCL_TARGET_LINK_LIBS_FLAGS
-      "-lopencl" # I made this up... --PM
-      CACHE STRING "Additional link flags needed for OpenCL runtime ABI target.")
-  #
-  configure_file(${CLANG_SOURCE_DIR}/kitsune/opencl.cfg.in
-      ${LLVM_BINARY_DIR}/share/kitsune/${KITSUNE_OPENCL_TARGET_CFG_FILENAME})
-endif()
 
 file(GLOB KITSUNE_CLANG_CFG_FILES
     ${LLVM_BINARY_DIR}/share/kitsune/*.cfg)
 
 install(DIRECTORY ${LLVM_BINARY_DIR}/share/kitsune/
-  DESTINATION share/kitsune
-  COMPONENT install-clang-cfgs
-  FILES_MATCHING
-  PATTERN "*.cfg")
+  DESTINATION share/kitsune  COMPONENT install-clang-cfgs
+  FILES_MATCHING PATTERN "*.cfg")

@@ -20,9 +20,10 @@
 
 #include "Kokkos_DualView.hpp"
 #include "kitsune/timer.h"
+#include "gpu.h"
 
-const size_t WIDTH = 640;
-const size_t HEIGHT = 480;
+const size_t WIDTH  = 2048;
+const size_t HEIGHT = 1024;
 
 typedef Kokkos::View<unsigned char**[3], Kokkos::LayoutRight, Kokkos::DefaultExecutionSpace> ViewVector;
 
@@ -173,8 +174,8 @@ int main(int argc, char **argv) {
   Kokkos::initialize(argc, argv);
   kitsune::timer t;
   {
-    ViewVector img = ViewVector("img", WIDTH, HEIGHT);
-    int samplesCount = 8;
+    unsigned char *img = (unsigned char*)gpuManagedMalloc(WIDTH * HEIGHT * 3);
+    int samplesCount = 1 << 7;
     if (argc > 1 ) {samplesCount = atoi(argv[1]);}
     Kokkos::parallel_for(WIDTH*HEIGHT, KOKKOS_LAMBDA(const int i) {
         const int x = i % WIDTH;

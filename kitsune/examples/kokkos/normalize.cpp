@@ -46,9 +46,9 @@ int main (int argc, char* argv[]) {
   double *out = new double[VEC_SIZE];
 
   random_fill(in, VEC_SIZE);
-  
+
   Kokkos::initialize (argc, argv);
-  timer t;  
+  timer t;
   {
     Kokkos::parallel_for(VEC_SIZE, KOKKOS_LAMBDA(const size_t i) {
       out[i] = in[i] / norm(in, VEC_SIZE);
@@ -57,8 +57,8 @@ int main (int argc, char* argv[]) {
   Kokkos::finalize();
   double loop_secs = t.seconds();
 
-  fprintf(stderr, "(%s) %lf, %lf, %lf, %lf\n", 
-          argv[0], out[0], out[VEC_SIZE/4], out[VEC_SIZE/2], out[VEC_SIZE-1]); 
+  fprintf(stderr, "(%s) %lf, %lf, %lf, %lf\n",
+          argv[0], out[0], out[VEC_SIZE/4], out[VEC_SIZE/2], out[VEC_SIZE-1]);
   fprintf(stdout, "%lf\n", loop_secs);
 
   delete []in;

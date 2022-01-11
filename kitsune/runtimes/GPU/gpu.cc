@@ -5,6 +5,7 @@
 #include<llvm/IR/Module.h>
 #include<llvm/IRReader/IRReader.h>
 #include<llvm/Support/SourceMgr.h>
+#include<fstream>
 
 #include<error.h>
 #include<stdbool.h>
@@ -22,7 +23,7 @@ typedef enum {
 
 runtime globalRuntime = none;
 
-void *gpuManagedMalloc(size_t n){
+void *gpuManagedMalloc(uint64_t n){
 	switch(globalRuntime){
 		case hip:
 			return hipManagedMalloc(n);
@@ -51,17 +52,27 @@ void initRuntime(){
 	err("No gpu runtimes found, needed OpenCL with SPIRV support, HIP, or CUDA\n");
 }
 
-void* launchBCKernel(const char* bc, void** args, size_t n){
+void* launchBCKernel(const char* bc, uint64_t bcsize, void** args, uint64_t n){
   llvm::LLVMContext C; 
   llvm::SMDiagnostic SMD; 
-  llvm::StringRef sr(bc); 
+  std::string strbuf(bc, bcsize); 
+  std::ofstream out("runtime.bc");
+  out << strbuf; 
+  out.close();
+
+  llvm::StringRef sr(bc, bcsize); 
   llvm::MemoryBufferRef mbr(sr, "kernelModRef"); 
   std::unique_ptr<llvm::Module> mod =
       parseIR(mbr, SMD, C);
+  if(!mod){
+    SMD.print("Failed to parse kernel IR: ", llvm::errs()); 
+    exit(1); 
+  }
+    
   return launchKernel(*mod, args, n); 
 }
 
-void* launchKernel(llvm::Module& bc, void** args, size_t n){
+void* launchKernel(llvm::Module& bc, void** args, uint64_t n){
   switch(globalRuntime){
     case spirv: 
       return launchSPIRVKernel(bc, args, n);

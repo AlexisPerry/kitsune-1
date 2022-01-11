@@ -1,7 +1,7 @@
 #ifdef _cplusplus
 extern "C" {
 #endif
-	int gtid();
+	int gtid(void);
 #ifdef _cplusplus
 }
 #endif

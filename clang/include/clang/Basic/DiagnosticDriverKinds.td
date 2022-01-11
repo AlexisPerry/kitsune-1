@@ -628,6 +628,8 @@ def warn_drv_qthreads_target_disabled: Warning<
   "the qthreads runtime ABI transform target was not enabled when clang was built.">;
 def warn_drv_realm_target_disabled: Warning<
   "the realm runtime ABI transform target was not enabled when clang was built.">;
+def warn_drv_gpu_target_disabled: Warning<
+  "the gpu ABI transform target was not enabled when clang was built.">;
 def warn_drv_cuda_tapir_target_disabled: Warning<
   "the cuda toolkit runtime ABI transform target was not enabled when clang was built.">;
 def warn_drv_hip_target_disabled: Warning<

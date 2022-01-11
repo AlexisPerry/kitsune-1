@@ -63,7 +63,7 @@ set(CLANG_CONFIG_FILE_USER_DIR "$ENV{HOME}/.kitsune" CACHE STRING "")
  set(CUDA_HOST_COMPILER "/usr/bin/gcc-8" CACHE STRING "")
 #endif()
 
-set(_runtimes_list "cheetah;cilktools")
+set(_runtimes_list "cheetah;cilktools;kitsune")
 
 # Various helpful LLVM-level settings for development/debugging.
 set(LLVM_ENABLE_WARNINGS OFF CACHE BOOL "")    # sometimes errors get lost in all the warnings...
@@ -76,6 +76,7 @@ set(LLVM_INCLUDE_TESTS ON CACHE BOOL "")
 set(LLVM_INCLUDE_UTILS ON CACHE BOOL "")
 set(LLVM_INSTALL_UTILS ON CACHE BOOL "")
 set(LLVM_INSTALL_BINUTILS_SYMLINKS ON CACHE BOOL "")
+set(LLVM_BUILD_LLVM_DYLIB ON CACHE BOOL "")
 # You should carefully look at the parallel workload parameters as
 # LLVM builds can easily swamp systems if the level of parallelism
 # exceeds system resources -- especially memory during the linking
@@ -100,10 +101,9 @@ set(CLANG_VENDOR_UTI "gov.lanl.kitsune" CACHE STRING "")
 
 # Build a minimal set of targets under the assumption the
 # build host is the appropriate platform.
-set(LLVM_TARGETS_TO_BUILD host;NVPTX;AMDGPU CACHE STRING "")
-message(DEBUG "  --> kitsune-dev: enabled LLVM targets: ${LLVM_TARGETS_TO_BUILD}")
-
-
+set(LLVM_TARGETS_TO_BUILD host;NVPTX CACHE STRING "")
+message(DEBUG
+  "kitsune-dev: enabled LLVM targets: ${LLVM_TARGETS_TO_BUILD}")
 
 # Enable Kitsune mode within the toolchain.
 set(CLANG_ENABLE_KITSUNE ON CACHE BOOL
@@ -119,27 +119,14 @@ set(KITSUNE_ENABLE_KOKKOS_SUPPORT ON CACHE BOOL
 # process).
 
 set(KITSUNE_ENABLE_RUNTIME_ABIS ON CACHE BOOL "")
-set(KITSUNE_ENABLE_ABI_LIBRARIES realm CACHE STRING "")
+set(KITSUNE_ENABLE_ABI_LIBRARIES "realm;llvm-gpu" CACHE STRING "")
 
 set(KITSUNE_ENABLE_QTHREADS_TARGET OFF CACHE BOOL "")
-set(KITSUNE_ENABLE_REALM_TARGET ON CACHE BOOL "")
-set(KITSUNE_ENABLE_CUDATK_TARGET ON CACHE BOOL "")
-set(KITSUNE_ENABLE_HIP_TARGET OFF CACHE BOOL "")
-set(KITSUNE_ENABLE_OPENCL_TARGET OFF CACHE BOOL "")
-
-
-if (KITSUNE_ENABLE_CUDATK_TARGET OR
-    KITSUNE_ENABLE_HIP_TARGET OR
-    KITSUNE_ENABLE_REALM_TARGET OR
-    KITSUNE_ENABLE_EXAMPLES OR
-    KITSUNE_ENABLE_KOKKOS_SUPPORT)
-  list(APPEND _runtimes_list "kitsune")
-endif()
 
 set(LLVM_ENABLE_RUNTIMES ${_runtimes_list} CACHE STRING "")
 message(DEBUG "  --> KITSUNE-DEV - enabled LLVM runtimes: ${LLVM_ENABLE_RUNTIMES}")
 
-set(KITSUNE_BUILD_EXAMPLES ON CACHE BOOL "")
+set(KITSUNE_BUILD_EXAMPLES OFF CACHE BOOL "")
 if (LLVM_INCLUDE_TESTS)
   set(KITSUNE_INCLUDE_TESTS ON CACHE BOOL "")
 endif()

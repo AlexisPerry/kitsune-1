@@ -47,8 +47,6 @@ TapirTarget *llvm::getTapirTargetFromID(Module &M, TapirTargetID ID) {
     return new SerialABI(M);
   case TapirTargetID::Cilk:
     return new CilkABI(M);
-  case TapirTargetID::Cuda:
-    return new CudaABI(M);
   case TapirTargetID::Cheetah:
   case TapirTargetID::OpenCilk:
     return new OpenCilkABI(M);
@@ -1050,7 +1048,7 @@ TaskOutlineInfo llvm::outlineTask(
   return TaskOutlineInfo(Helper, T->getEntry(),
                          dyn_cast_or_null<Instruction>(VMap[DI]),
                          dyn_cast_or_null<Instruction>(ClonedTFCreate), Inputs,
-                         ArgsStart, StorePt, T->getDetach()->getSyncRegion(), 
+                         ArgsStart, StorePt, T->getDetach()->getSyncRegion(),
                          DI->getContinue(), Unwind);
 }
 

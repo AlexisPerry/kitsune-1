@@ -1585,7 +1585,7 @@ void ToolChain::AddTapirRuntimeLibArgs(const ArgList &Args,
           StaticOpenCilk ? ToolChain::FT_Static : ToolChain::FT_Shared)));
 
 
-    // Link the correct Cilk personality fn if running in opencilk mode. 
+    // Link the correct Cilk personality fn if running in opencilk mode.
     if (Args.hasArg(options::OPT_fopencilk)) {
       if (getDriver().CCCIsCXX())
         CmdArgs.push_back("-lopencilk-personality-cpp");
@@ -1603,7 +1603,7 @@ void ToolChain::AddTapirRuntimeLibArgs(const ArgList &Args,
     // Add to the executable's runpath the default directory containing OpenCilk
     // runtime.
     addOpenCilkRuntimeRunPath(*this, Args, CmdArgs, Triple);
-    if (OnlyStaticOpenCilk) 
+    if (OnlyStaticOpenCilk)
       CmdArgs.push_back("-Bdynamic");
     CmdArgs.push_back("-lpthread");
     break;
@@ -1634,19 +1634,13 @@ void ToolChain::AddTapirRuntimeLibArgs(const ArgList &Args,
     }
     break;
 
-  case TapirTargetID::Cuda:
-    if (! KITSUNE_ENABLE_CUDA_TARGET)
-      getDriver().Diag(diag::warn_drv_cuda_tapir_target_disabled);
-    break;
-
-  case TapirTargetID::OpenCL:
-    if (! KITSUNE_ENABLE_OPENCL_TARGET)
-      getDriver().Diag(diag::warn_drv_opencl_target_disabled);
-    break;
-
   case TapirTargetID::GPU:
-    CmdArgs.push_back("-lllvm-gpu");
-    break; 
+    if (! KITSUNE_ENABLE_GPU_TARGET)
+      getDriver().Diag(diag::warn_drv_gpu_target_disabled);
+    else {
+      CmdArgs.push_back("-lllvm-gpu-abi");
+    }
+    break;
 
   case TapirTargetID::Serial:
   case TapirTargetID::None:
@@ -1678,3 +1672,4 @@ void ToolChain::AddTapirRuntimeLibArgs(const ArgList &Args,
     }
   }
 }
+

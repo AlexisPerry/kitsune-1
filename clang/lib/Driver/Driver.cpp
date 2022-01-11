@@ -193,7 +193,12 @@ Driver::Driver(StringRef ClangExecutable, StringRef TargetTriple,
 #if defined(TAPIR_CUDA_TARGET_CFG_FILENAME)
   TapirCudaCfgFile = TAPIR_CUDA_TARGET_CFG_FILENAME;
 #else
-  TapirCudaCfgFile = "cuda.cfg";
+  TapirCudaCfgFile = "gpu.cfg";
+#endif
+#if defined(TAPIR_GPU_TARGET_CFG_FILENAME)
+  TapirGPUCfgFile = TAPIR_GPU_TARGET_CFG_FILENAME;
+#else
+  TapirGPUCfgFile = "gpu.cfg";
 #endif
 #if defined(TAPIR_REALM_TARGET_CFG_FILENAME)
   TapirRealmCfgFile = TAPIR_REALM_TARGET_CFG_FILENAME;
@@ -1018,6 +1023,7 @@ bool Driver::loadConfigFile() {
               .Case("serial", TapirSerialCfgFile)
               .Case("opencilk", TapirOpenCilkCfgFile)
               .Case("cuda", TapirCudaCfgFile)
+              .Case("gpu", TapirGPUCfgFile)
               .Case("openmp", TapirOpenMPCfgFile)
               .Case("qthreads", TapirQthreadsCfgFile)
               .Case("realm", TapirRealmCfgFile)

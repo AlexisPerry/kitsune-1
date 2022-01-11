@@ -198,8 +198,8 @@ void LLVMLoop::postProcessOutline(TapirLoopInfo &TL, TaskOutlineInfo &Out,
   Helper->setName("kitsune_kernel"); 
   // Fix argument pointer types to global, nocapture
   // TODO: read/write attributes?
-  LLVM_DEBUG(dbgs() << "Function type after globalization of argument pointers << " << *Helper->getType() << "\n"); 
-  LLVM_DEBUG(dbgs() << "LLVMM after globalization of argument pointers << " << *Helper->getParent() << "\n"); 
+  //LLVM_DEBUG(dbgs() << "Function type after globalization of argument pointers << " << *Helper->getType() << "\n"); 
+  //LLVM_DEBUG(dbgs() << "LLVMM after globalization of argument pointers << " << *Helper->getParent() << "\n"); 
 
   // Verify that the Thread ID corresponds to a valid iteration.  Because Tapir
   // loops use canonical induction variables, valid iterations range from 0 to
@@ -252,7 +252,7 @@ void LLVMLoop::processOutlinedLoopCall(TapirLoopInfo &TL, TaskOutlineInfo &TOI,
 
   //Task *T = TL.getTask();
   //Instruction *ReplCall = cast<CallBase>(TOI.ReplCall);
-  LLVM_DEBUG(dbgs() << "Running processOutlinedLoopCall: " << LLVMM);
+  //LLVM_DEBUG(dbgs() << "Running processOutlinedLoopCall: " << LLVMM);
   Function *Parent = TOI.ReplCall->getFunction();
   Value *TripCount = OrderedInputs[0];
   BasicBlock* RCBB = TOI.ReplCall->getParent(); 
@@ -356,7 +356,7 @@ void LLVMLoop::processOutlinedLoopCall(TapirLoopInfo &TL, TaskOutlineInfo &TOI,
 
   delete PassManager;
 
-  LLVM_DEBUG(dbgs() << "LLVM Module after passes: " << LLVMM);
+  //LLVM_DEBUG(dbgs() << "LLVM Module after passes: " << LLVMM);
 
 
   // generate llvm kernel code
@@ -399,7 +399,7 @@ void LLVMLoop::processOutlinedLoopCall(TapirLoopInfo &TL, TaskOutlineInfo &TOI,
   int i=0;
   for (Value *V : OrderedInputs) {
     //Value *ElementSize = nullptr;
-    LLVM_DEBUG(dbgs() << "Input set value: " << *V << "\n"); 
+    //LLVM_DEBUG(dbgs() << "Input set value: " << *V << "\n"); 
     Value *VPtr = B.CreateAlloca(V->getType()); 
     B.CreateStore(V, VPtr); 
     Value *VoidVPtr = B.CreateBitCast(VPtr, VoidPtrTy);
@@ -423,6 +423,6 @@ void LLVMLoop::processOutlinedLoopCall(TapirLoopInfo &TL, TaskOutlineInfo &TOI,
   Value* stream = B.CreateCall(GPULaunchKernel, { bcPtr, kernelSize, argsPtr, RunSize });
   B.CreateCall(GPUWaitKernel, stream);
 
-  LLVM_DEBUG(dbgs() << "Finished processOutlinedLoopCall: " << M);
+  //LLVM_DEBUG(dbgs() << "Finished processOutlinedLoopCall: " << M);
 }
 

@@ -89,7 +89,7 @@ void* launchHIPKernel(llvm::Module& m, void** args, size_t n) {
   Triple TT("amdgcn", "amd", "amdhsa"); 
   m.setTargetTriple(TT.str()); 
   
-  Function& F = *m.getFunction("f");
+  Function& F = *m.getFunction("kitsune_kernel");
 
   AttrBuilder Attrs;
   Attrs.addAttribute("target-cpu", gcnarch);
@@ -186,8 +186,8 @@ void* launchHIPKernel(llvm::Module& m, void** args, size_t n) {
   sys::ExecuteAndWait(lld, lldsra);
 
 	// Warning: this changes to from hip- to hipv4- in llvm 13
-	std::string targets = "-targets=host-x86_64-unknown-linux-gnu,hip-" 
-		+ m.getTargetTriple() + "-" + gcnarch; 
+	std::string targets = "-targets=host-x86_64-unknown-linux-gnu,hipv4-" 
+		+ m.getTargetTriple() + "--" + gcnarch; 
 	std::string inputs = "-inputs=/dev/null," + LinkedObjectFile; 
 	std::string bundledFileStr = "--outputs=" + BundledObjectFile; 
 	offloadBundleArgList.push_back(clangOffloadBundle.c_str());
@@ -208,7 +208,7 @@ void* launchHIPKernel(llvm::Module& m, void** args, size_t n) {
 	hipModule_t module;	
 	checkHIP(hipModuleLoadData_p(&module, (const void*)hsaco.c_str())); 
 	hipFunction_t function; 
-	checkHIP(hipModuleGetFunction_p(&function, module, "f")); 
+	checkHIP(hipModuleGetFunction_p(&function, module, "kitsune_kernel")); 
 	hipStream_t stream;
 	hipStreamCreate_p(&stream); 
 	hipModuleLaunchKernel_p(function, 1, 1, 1, n, 1, 1, 0, stream, args, NULL); 

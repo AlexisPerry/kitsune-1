@@ -146,6 +146,7 @@ public:
   std::string TapirNoneCfgFile;
   std::string TapirSerialCfgFile;
   std::string TapirOpenCilkCfgFile;
+  std::string TapirGPUCfgFile;
   std::string TapirCudaCfgFile;
   std::string TapirRealmCfgFile;
   std::string TapirOpenMPCfgFile;

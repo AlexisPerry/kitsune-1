@@ -10,20 +10,33 @@ int main(){
 
   llvm::LLVMContext C; 
   llvm::SMDiagnostic SMD; 
+
   std::unique_ptr<llvm::Module> ExternalModule =
       parseIRFile("kernel.bc", SMD, C);
 
-  int n = 10; 
+  int n = 1024; 
   double* x = (double*) gpuManagedMalloc(n*sizeof(double)); 
+  double* y = (double*) gpuManagedMalloc(n*sizeof(double)); 
+  double* z = (double*) gpuManagedMalloc(n*sizeof(double)); 
 
-  void* args[] = { &x }; 
-  auto w = launchKernel(*ExternalModule.get(), args, 10); 
+  for(int i=0; i<n; i++){
+    x[i] = (double)i;
+    y[i] = 3.14-(double)i;
+  }
+  void* args[] = { &x, &y, &z }; 
+  auto w = launchKernel(*ExternalModule.get(), args, n); 
   std::cout << "Launched kernel...";
   waitKernel(w); 
   std::cout << "done" << std::endl; 
+  std::cout << "Checking results...";
   for(int i=0; i<n; i++){
-    printf("%f\n", x[i]);
+    if(z[i] != sqrt(i) + (3.14 - i)){
+      std::cout << "failure: "; 
+      printf("%f != %f\n",z[i],3.14); 
+      exit(1); 
+    }
   }
+  std::cout << "success" << std::endl; 
 }
 
 
