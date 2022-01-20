@@ -1,20 +1,37 @@
-all: raytrace-kitsune raytrace-kokkos
+all: raytrace-kitsune raytrace-kokkos raytrace-clang
 
+kitsune_prefix=/home/pat/local/kitsune/x86-volta
+kokkos_prefix=/home/pat/local/kitsune/x86-volta/kokkos
+cuda_prefix=/projects/darwin-nv/centos8/x86_64/packages/cuda/11.5.0
 
+cxx_flags=-std=c++17 -fno-exceptions -I${kitsune_prefix}/include 
 opt_flags=-O3
 
-kitsune_prefix=/home/pat/local/x86-volta/
-kitsune_flags=-fno-exceptions -fkokkos -fkokkos-no-init -ftapir=gpu ${opt_flags}
+kitsune_tapir_flags=${cxx_flags} -fkokkos -fkokkos-no-init -ftapir=gpu ${opt_flags} --gcc-toolchain=/projects/opt/centos8/x86_64/gcc/11.1.0/
 
-kokkos_prefix=/home/pat/local/x86-volta/kokkos-cuda/
-nvcc_wrapper=/${kokkos_prefix}/bin/nvcc_wrapper
-kokkos_flags=-fno-exceptions -I${kokkos_prefix}/include -I${kitsune_prefix}/include ${opt_flags}
+kokkos_cxx_flags=${cxx_flags} 
+kokkos_ld_flags=-L${kokkos_prefix}/lib64 -lkokkoscore
+
+nvcc_wrapper=${kokkos_prefix}/bin/nvcc_wrapper
+nvcc_args=--expt-extended-lambda -arch=sm_70
+
+clang=${kitsune_prefix}/bin/clang++ 
+
+clang_cuda_flags=-xcuda --cuda-gpu-arch=sm_70 --cuda-path=/projects/darwin-nv/centos8/x86_64/packages/cuda/11.5.0
+clang_cxx_flags=${kokkos_cxx_flags} ${clang_cuda_flags} --gcc-toolchain=/projects/opt/centos8/x86_64/gcc/9.4.0/ ${opt_flags} 
+clang_ld_flags=-L${kokkos_prefix}/lib64 -L/projects/darwin-nv/centos8/x86_64/packages/cuda/11.5.0/lib64 -lkokkoscore -lcudart -ldl
+
 
 raytrace-kitsune: raytrace-kitsune.cpp
-	${kitsune_prefix}/bin/clang++ ${kitsune_flags} -o raytrace-kitsune raytrace-kitsune.cpp -Xlinker -rpath=${kitsune_prefix}/lib
+	${clang} ${kitsune_tapir_flags} -o raytrace-kitsune raytrace-kitsune.cpp -Xlinker -rpath=${kitsune_prefix}/lib
 
 raytrace-kokkos: raytrace-kokkos.cpp 
-	${nvcc_wrapper} ${kokkos_flags} -o raytrace-kokkos raytrace-kokkos.cpp -L${kokkos_prefix}/lib64 -lkokkoscore -Xlinker -rpath=${kokkos_prefix}/lib64 
+	${nvcc_wrapper} ${cxx_flags} ${kokkos_cxx_flags} ${nvcc_args} -o raytrace-kokkos raytrace-kokkos.cpp ${kokkos_ld_flags} 
+	# -Xlinker -rpath=${kokkos_prefix}/lib64 
+
+raytrace-clang: raytrace-kokkos.cpp
+	${clang} ${clang_cxx_flags} -o raytrace-clang raytrace-kokkos.cpp  ${clang_ld_flags} 
+	# -Xlinker -rpath=${kokkos_prefix}/lib64
 
 .PHONY: clean
 clean:

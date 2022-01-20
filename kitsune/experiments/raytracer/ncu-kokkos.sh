@@ -1,28 +1,14 @@
 #!/bin/bash 
-ncu --export $PWD/kitsune-kokkos.%i \
-    --target-processes application-only \
-    --replay-mode kernel \
-    --kernel-name-base function \
-    --launch-skip-before-match 0 \
-    --section ComputeWorkloadAnalysis \
-    --section InstructionStats \
-    --section LaunchStats \
-    --section MemoryWorkloadAnalysis \
-    --section MemoryWorkloadAnalysis_Chart \
-    --section MemoryWorkloadAnalysis_Tables \
-    --section Occupancy \
-    --section SchedulerStats \
-    --section SourceCounters \
+ncu \
     --section SpeedOfLight \
     --section SpeedOfLight_RooflineChart \
+    --section SchedulerStats \
+    --section ComputeWorkloadAnalysis \
     --section WarpStateStats \
-    --sampling-interval auto \
-    --sampling-max-passes 5 \
-    --sampling-buffer-size 33554432 \
-    --profile-from-start 1 \
-    --cache-control all \
-    --clock-control base \
-    --apply-rules yes \
-    --import-source no \
-    --check-exit-code yes \
-    $PWD/raytrace-kokkos 8
+    --section LaunchStats \
+    --page all \
+    --print-summary per-gpu \
+    --details-all \
+    --log-file $PWD/kokkos-raytrace-ncu.log \
+    --export $PWD/kokkos-raytrace.%i \
+    ./raytrace-kitsune 32

@@ -1,0 +1,4 @@
+*.bc
+raytrace-kitsune
+raytrace-kokkos 
+*.ppm 

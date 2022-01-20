@@ -7,10 +7,10 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <time.h>
+#include "kitsune/timer.h"
 
 #include "Kokkos_DualView.hpp"
 
-#include "kitsune/timer.h"
 
 #define WIDTH 2048
 #define HEIGHT  1024
