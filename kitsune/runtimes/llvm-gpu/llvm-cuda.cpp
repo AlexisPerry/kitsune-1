@@ -322,7 +322,7 @@ std::string LLVMtoPTX(Module& m) {
   legacy::PassManager PM;
   legacy::FunctionPassManager FPM(&m);
   PassManagerBuilder Builder;
-  Builder.OptLevel = 2;
+  Builder.OptLevel = 3;
   Builder.VerifyInput = 1;
   Builder.Inliner = createFunctionInliningPass();
   Builder.populateLTOPassManager(PM);

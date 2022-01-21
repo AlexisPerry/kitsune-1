@@ -19,15 +19,15 @@ typedef Kokkos::DualView<unsigned char**[3], Kokkos::LayoutRight, Kokkos::Defaul
 
 struct Vec {
   float x,y,z;
-  KOKKOS_INLINE_FUNCTION Vec(float v = 0) {x = y = z = v;}
-  KOKKOS_INLINE_FUNCTION Vec(float a, float b, float c = 0) {x = a;y = b;z = c;}
-  KOKKOS_INLINE_FUNCTION Vec operator+(const Vec r) const  { return Vec(x + r.x , y + r.y , z + r.z); }
-  KOKKOS_INLINE_FUNCTION Vec operator*(const Vec r) const { return   Vec(x * r.x , y * r.y , z * r.z); }
-  KOKKOS_INLINE_FUNCTION float operator%(const Vec r) const {return     x * r.x + y * r.y + z * r.z;}
-  KOKKOS_INLINE_FUNCTION Vec operator!() { return *this * (1.0/sqrtf(*this % *this)); }
+  KOKKOS_FORCEINLINE_FUNCTION Vec(float v = 0) {x = y = z = v;}
+  KOKKOS_FORCEINLINE_FUNCTION Vec(float a, float b, float c = 0) {x = a;y = b;z = c;}
+  KOKKOS_FORCEINLINE_FUNCTION Vec operator+(const Vec r) const  { return Vec(x + r.x , y + r.y , z + r.z); }
+  KOKKOS_FORCEINLINE_FUNCTION Vec operator*(const Vec r) const { return   Vec(x * r.x , y * r.y , z * r.z); }
+  KOKKOS_FORCEINLINE_FUNCTION float operator%(const Vec r) const {return     x * r.x + y * r.y + z * r.z;}
+  KOKKOS_FORCEINLINE_FUNCTION Vec operator!() { return *this * (1.0/sqrtf(*this % *this)); }
 };
 
-KOKKOS_INLINE_FUNCTION float randomVal(unsigned int& x) {
+KOKKOS_FORCEINLINE_FUNCTION float randomVal(unsigned int& x) {
   x = (214013*x+2531011);
   return ((x>>16)&0x7FFF) / (float)66635;
 }
@@ -35,7 +35,7 @@ KOKKOS_INLINE_FUNCTION float randomVal(unsigned int& x) {
 // Rectangle CSG equation. Returns minimum signed distance from
 // space carved by
 // lowerLeft vertex and opposite rectangle vertex upperRight.
-KOKKOS_INLINE_FUNCTION float BoxTest(const Vec& position, Vec lowerLeft, Vec upperRight) {
+KOKKOS_FORCEINLINE_FUNCTION float BoxTest(const Vec& position, Vec lowerLeft, Vec upperRight) {
   lowerLeft = position + lowerLeft * -1.0f;
   upperRight = upperRight + position * -1.0f;
   return -fminf(
@@ -49,7 +49,7 @@ KOKKOS_INLINE_FUNCTION float BoxTest(const Vec& position, Vec lowerLeft, Vec upp
 #define HIT_SUN 3
 
 // Sample the world using Signed Distance Fields.
-KOKKOS_INLINE_FUNCTION float QueryDatabase(const Vec& position, int &hitType) {
+KOKKOS_FORCEINLINE_FUNCTION float QueryDatabase(const Vec& position, int &hitType) {
   float distance = 1e9;//FLT_MAX;
   Vec f = position; // Flattened position (z=0)
   f.z = 0;
@@ -96,7 +96,7 @@ KOKKOS_INLINE_FUNCTION float QueryDatabase(const Vec& position, int &hitType) {
 
 // Perform signed sphere marching
 // Returns hitType 0, 1, 2, or 3 and update hit position/normal
-KOKKOS_INLINE_FUNCTION int RayMarching(const Vec& origin, const Vec& direction, Vec& hitPos, Vec& hitNorm) {
+KOKKOS_FORCEINLINE_FUNCTION int RayMarching(const Vec& origin, const Vec& direction, Vec& hitPos, Vec& hitNorm) {
   int hitType = HIT_NONE;
   int noHitCount = 0;
 
@@ -115,7 +115,7 @@ KOKKOS_INLINE_FUNCTION int RayMarching(const Vec& origin, const Vec& direction, 
   return 0;
 }
 
-KOKKOS_INLINE_FUNCTION Vec Trace(Vec origin, Vec direction, unsigned int& rn) {
+KOKKOS_FORCEINLINE_FUNCTION Vec Trace(Vec origin, Vec direction, unsigned int& rn) {
   Vec sampledPosition;
   Vec normal;
   Vec color = 0;
