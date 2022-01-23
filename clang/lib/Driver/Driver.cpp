@@ -163,6 +163,9 @@ Driver::Driver(StringRef ClangExecutable, StringRef TargetTriple,
 
 #if defined(CLANG_CONFIG_FILE_USER_DIR)
   UserConfigDir = CLANG_CONFIG_FILE_USER_DIR;
+#else
+  Optional<std::string> UserHomeDir = sys::Process::GetEnv("HOME");
+  UserConfigDir = UserHomeDir + ".kitsune";
 #endif
 
 #if defined(CLANG_CONFIG_FILE_KITSUNE_DIR)

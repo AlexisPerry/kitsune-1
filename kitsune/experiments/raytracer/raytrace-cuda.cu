@@ -7,9 +7,8 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <time.h>
-#include "Kokkos_Core.hpp"
+#include <cuda_runtime.h>
 #include "kitsune/timer.h"
-#include "kitsune/llvm-gpu-abi/llvm-gpu.h"
 
 #define WIDTH  2048
 #define HEIGHT 1024
@@ -21,15 +20,16 @@ struct Pixel {
 
 struct Vec {
   float x,y,z;
-  KOKKOS_FORCEINLINE_FUNCTION Vec(float v = 0) {x = y = z = v;}
-  KOKKOS_FORCEINLINE_FUNCTION Vec(float a, float b, float c = 0) {x = a;y = b;z = c;}
-  KOKKOS_FORCEINLINE_FUNCTION Vec operator+(const Vec r) const  { return Vec(x + r.x , y + r.y , z + r.z); }
-  KOKKOS_FORCEINLINE_FUNCTION Vec operator*(const Vec r) const { return   Vec(x * r.x , y * r.y , z * r.z); }
-  KOKKOS_FORCEINLINE_FUNCTION float operator%(const Vec r) const {return     x * r.x + y * r.y + z * r.z;}
-  KOKKOS_FORCEINLINE_FUNCTION Vec operator!() { return *this * (1.0/sqrtf(*this % *this)); }
+  __device__ Vec(float v = 0) {x = y = z = v;}
+  __device__ Vec(float a, float b, float c = 0) {x = a;y = b;z = c;}
+  __device__ Vec operator+(const Vec r) const  { return Vec(x + r.x , y + r.y , z + r.z); }
+  __device__ Vec operator*(const Vec r) const { return   Vec(x * r.x , y * r.y , z * r.z); }
+  __device__ float operator%(const Vec r) const {return     x * r.x + y * r.y + z * r.z;}
+  __device__ Vec operator!() { return *this * (1.0/sqrtf(*this % *this)); }
 };
 
-KOKKOS_FORCEINLINE_FUNCTION float randomVal(unsigned int& x) {
+__device__
+float randomVal(unsigned int& x) {
   x = (214013*x+2531011);
   return ((x>>16)&0x7FFF) / (float)66635;
 }
@@ -37,7 +37,8 @@ KOKKOS_FORCEINLINE_FUNCTION float randomVal(unsigned int& x) {
 // Rectangle CSG equation. Returns minimum signed distance from
 // space carved by
 // lowerLeft vertex and opposite rectangle vertex upperRight.
-KOKKOS_FORCEINLINE_FUNCTION float BoxTest(const Vec& position, Vec lowerLeft, Vec upperRight) {
+__device__
+float BoxTest(const Vec& position, Vec lowerLeft, Vec upperRight) {
   lowerLeft = position + lowerLeft * -1.0f;
   upperRight = upperRight + position * -1.0f;
   return -fminf(
@@ -51,7 +52,8 @@ KOKKOS_FORCEINLINE_FUNCTION float BoxTest(const Vec& position, Vec lowerLeft, Ve
 #define HIT_SUN 3
 
 // Sample the world using Signed Distance Fields.
-KOKKOS_FORCEINLINE_FUNCTION float QueryDatabase(const Vec& position, int &hitType) {
+__device__
+float QueryDatabase(const Vec& position, int &hitType) {
   float distance = 1e9;//FLT_MAX;
   Vec f = position; // Flattened position (z=0)
   f.z = 0;
@@ -103,7 +105,7 @@ KOKKOS_FORCEINLINE_FUNCTION float QueryDatabase(const Vec& position, int &hitTyp
 
 // Perform signed sphere marching
 // Returns hitType 0, 1, 2, or 3 and update hit position/normal
-KOKKOS_FORCEINLINE_FUNCTION
+__device__
 int RayMarching(const Vec& origin, const Vec& direction, Vec& hitPos, Vec& hitNorm) {
   int hitType = HIT_NONE;
   int noHitCount = 0;
@@ -122,7 +124,8 @@ int RayMarching(const Vec& origin, const Vec& direction, Vec& hitPos, Vec& hitNo
   return 0;
 }
 
-KOKKOS_FORCEINLINE_FUNCTION Vec Trace(Vec origin, Vec direction, unsigned int& rn) {
+__device__
+Vec Trace(Vec origin, Vec direction, unsigned int& rn) {
   Vec sampledPosition;
   Vec normal;
   Vec color(0.0f, 0.0f, 0.0f);
@@ -169,54 +172,71 @@ KOKKOS_FORCEINLINE_FUNCTION Vec Trace(Vec origin, Vec direction, unsigned int& r
   return color;
 }
 
+__global__
+void PathTracer(int samplesCount, Pixel *img, int N) {
+  int index  = blockIdx.x * blockDim.x + threadIdx.x;
+  int stride = blockDim.x * gridDim.x;
+  for(int i = index; i < N; i += stride) {
+    int x = i % WIDTH;
+    int y = i / WIDTH;
+    unsigned int v = i;
+    const Vec position(-12.0f, 5.0f, 25.0f);
+    const Vec goal = !(Vec(-3.0f, 4.0f, 0.0f) + position * -1.0f);
+    const Vec left = !Vec(goal.z, 0, -goal.x) * (1.0f / WIDTH);
+    // Cross-product to get the up vector
+    const Vec up(goal.y *left.z - goal.z * left.y,
+                 goal.z *left.x - goal.x * left.z,
+                 goal.x *left.y - goal.y * left.x);
+    Vec color;
+    for (unsigned int p = samplesCount; p--;) {
+      Vec rand_left = Vec(randomVal(v), randomVal(v), randomVal(v))*.001;
+      color = color + Trace(position,
+                            !((goal+rand_left) + left *
+                              ((x+randomVal(v)) - WIDTH / 2.0f + randomVal(v)) + up *
+                              ((y+randomVal(v)) - HEIGHT / 2.0f + randomVal(v))), v);
+    }
+    // Reinhard tone mapping
+    color = color * (1.0f / samplesCount) + 14.0f / 241.0f;
+    Vec o = color + 1.0f;
+    color = Vec(color.x / o.x, color.y / o.y, color.z / o.z) * 255.0f;
+    img[i].r = (unsigned char)color.x;
+    img[i].g = (unsigned char)color.y;
+    img[i].b = (unsigned char)color.z;
+  }
+}
+
 int main(int argc, char **argv)
 {
-  Kokkos::initialize(argc, argv);
-  {
-    Pixel *img = (Pixel*)gpuManagedMalloc(WIDTH * HEIGHT * sizeof(Pixel));
-    unsigned int samplesCount = 1 << 7;
-
-    if (argc > 1 )
-      samplesCount = atoi(argv[1]);
-
-    kitsune::timer t;
-    Kokkos::parallel_for(WIDTH * HEIGHT, KOKKOS_LAMBDA(const unsigned int i) {
-      int x = i % WIDTH;
-      int y = i / WIDTH;
-      unsigned int v = i;
-      const Vec position(-12.0f, 5.0f, 25.0f);
-      const Vec goal = !(Vec(-3.0f, 4.0f, 0.0f) + position * -1.0f);
-      const Vec left = !Vec(goal.z, 0, -goal.x) * (1.0f / WIDTH);
-      // Cross-product to get the up vector
-      const Vec up(goal.y *left.z - goal.z * left.y,
-                   goal.z *left.x - goal.x * left.z,
-                   goal.x *left.y - goal.y * left.x);
-      Vec color;
-      for (unsigned int p = samplesCount; p--;) {
-        Vec rand_left = Vec(randomVal(v), randomVal(v), randomVal(v))*.001;
-        color = color + Trace(position,
-                              !((goal+rand_left) + left *
-                               ((x+randomVal(v)) - WIDTH / 2.0f + randomVal(v)) + up *
-                               ((y+randomVal(v)) - HEIGHT / 2.0f + randomVal(v))), v);
-      }
-      // Reinhard tone mapping
-      color = color * (1.0f / samplesCount) + 14.0f / 241.0f;
-      Vec o = color + 1.0f;
-      color = Vec(color.x / o.x, color.y / o.y, color.z / o.z) * 255.0f;
-      img[i].r = (unsigned char)color.x;
-      img[i].g = (unsigned char)color.y;
-      img[i].b = (unsigned char)color.z;
-    });
-    double loop_secs = t.seconds();
-    std::cout << "parallel_for execution time: " << loop_secs << std::endl;
-
-    std::ofstream myfile;
-    myfile.open ("raytrace-kitsune.ppm");
-    myfile << "P6 " << WIDTH << " " << HEIGHT << " 255 ";
-    for(int i = (WIDTH*HEIGHT)-1; i >= 0; i--) {
-      myfile << img[i].r << img[i].g << img[i].b;
-    }
+  cudaError_t err = cudaSuccess;
+  Pixel *img;
+  size_t total_pixels = WIDTH * HEIGHT;
+  err = cudaMallocManaged(&img, total_pixels * sizeof(Pixel));
+  if (err != cudaSuccess) {
+    fprintf(stderr, "failed to allocate managed memory!\n");
+    return 1;
   }
-  Kokkos::finalize();
-  return EXIT_SUCCESS;
+  unsigned int samplesCount = 1 << 7;
+  if (argc > 1 )
+    samplesCount = atoi(argv[1]);
+
+  kitsune::timer t;
+  int threadsPerBlock = 256;
+  int blocksPerGrid = (total_pixels + threadsPerBlock - 1) / threadsPerBlock;
+  PathTracer<<<blocksPerGrid, threadsPerBlock>>>(samplesCount, img, total_pixels);
+  cudaDeviceSynchronize();
+  double loop_secs = t.seconds();
+  err = cudaGetLastError();
+
+  if (err != cudaSuccess) {
+    fprintf(stderr, "Failed to launch vectorAdd kernel (error code %s)!\n", cudaGetErrorString(err));
+    exit(EXIT_FAILURE);
+  }
+  std::cout << "parallel_for execution time: " << loop_secs << std::endl;
+  std::ofstream myfile;
+  myfile.open ("raytrace-cuda.ppm");
+  myfile << "P6 " << WIDTH << " " << HEIGHT << " 255 ";
+  for(int i = (WIDTH*HEIGHT)-1; i >= 0; i--) {
+    myfile << img[i].r << img[i].g << img[i].b;
+  }
+  return 0;
 }

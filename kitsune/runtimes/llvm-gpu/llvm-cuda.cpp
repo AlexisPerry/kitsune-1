@@ -1,6 +1,8 @@
 #include<stdbool.h>
 #include<sstream>
 #include<iostream>
+#include<cstdio>
+#include<cstring>
 #include<dlfcn.h>
 #include<llvm/IR/LegacyPassManager.h>
 #include<llvm/IR/Constants.h>
@@ -31,7 +33,11 @@
 CUcontext context;
 CUdevice device;
 CUstream stream;
+
+int sm_count;
 int warpsize;
+int max_threads_per_blk;
+int max_block_dim_x;
 
 #define declare(name) decltype(name)* name##_p = NULL;
 #define tryLoad(name) name##_p = (decltype(name)*)dlsym(handle, #name)
@@ -122,12 +128,23 @@ void* PTXtoELF(const char* ptx){
   std::string gpuName = "--gpu-name=" + cudaarch;
   //std::string gpuFeatures = "--gpu-features=" + cudafeatures;
 
-  const char* compile_options[] = { gpuName.c_str(),
-                                    //gpuFeatures.c_str(),
-                                    "-O3",
-			            "--generate-line-info"
-                                    //"--verbose"
-                                  };
+  const int MAX_ARGS = 32;
+  const char* compile_options[MAX_ARGS];
+  compile_options[0] = gpuName.c_str();
+  int arg_count = 1;
+  Optional<std::string> env_opts = sys::Process::GetEnv("KITSUNE_CUDA_JIT_ARGS");
+  if (env_opts) {
+    char * pch = std::strtok((char*)env_opts->c_str(),";");
+    while (pch != NULL) {
+      compile_options[arg_count] = pch;
+      pch = strtok (NULL, ";");
+      arg_count++;
+      if (pch != NULL && (arg_count == (MAX_ARGS-1))) {
+        printf("Warning: CUDA JIT environment argument count exceeds options array size!\n");
+        pch = NULL;
+      }
+    }
+  }
 
   NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerGetVersion(&majorVer, &minorVer));
   //printf("Current PTX Compiler API Version : %d.%d\n", majorVer, minorVer);
@@ -137,9 +154,7 @@ void* PTXtoELF(const char* ptx){
                                               ptx)                  /* ptxCode */
                           );
 
-  status = nvPTXCompilerCompile(compiler,
-                                3,                 /* numCompileOptions */
-                                compile_options);  /* compileOptions */
+  status = nvPTXCompilerCompile(compiler, arg_count, compile_options);
 
   if (status != NVPTXCOMPILE_SUCCESS) {
       NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerGetErrorLogSize(compiler, &errorSize));
@@ -180,6 +195,14 @@ std::string LLVMtoPTX(Module& m) {
   cuDeviceGetAttribute_p(&maj, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MAJOR, device);
   cuDeviceGetAttribute_p(&min, CU_DEVICE_ATTRIBUTE_COMPUTE_CAPABILITY_MINOR, device);
   cuDeviceGetAttribute_p(&warpsize, CU_DEVICE_ATTRIBUTE_WARP_SIZE, device);
+  cuDeviceGetAttribute_p(&sm_count, CU_DEVICE_ATTRIBUTE_MULTIPROCESSOR_COUNT, device);
+  cuDeviceGetAttribute_p(&max_threads_per_blk, CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK, device);
+  cuDeviceGetAttribute_p(&max_block_dim_x, CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_X, device);
+
+  fprintf(stderr, "number of SMs on device: %d\n", sm_count);
+  fprintf(stderr, "warp size: %d\n", warpsize);
+  fprintf(stderr, "maximum number of threads per block: %d\n", max_threads_per_blk);
+  fprintf(stderr, "maximum blocks in the x dimension: %d\n", max_block_dim_x);
 
   std::ostringstream arch;
   arch << "sm_" << maj << min;
@@ -248,7 +271,7 @@ std::string LLVMtoPTX(Module& m) {
     llvm::SMDiagnostic SMD;
     Optional<std::string> path = sys::Process::FindInEnvPath("CUDA_PATH","nvvm/libdevice/libdevice.10.bc");
     if(!path){
-      path = "/opt/cuda/nvvm/libdevice/libdevice.10.bc";
+      //path = "/opt/cuda/nvvm/libdevice/libdevice.10.bc";
       std::cerr << "Failed to find libdevice\n";
       exit(1);
     }
@@ -351,10 +374,10 @@ std::string LLVMtoPTX(Module& m) {
   assert(!Fail && "Failed to emit PTX");
 
   FPM.doInitialization();
-  for(Function &F : m) FPM.run(F);
+  for(Function &F : m)
+    FPM.run(F);
   FPM.doFinalization();
   PM.run(m);
-
   //m.print(llvm::errs(), nullptr);
   //  std::cout << ptx.str().str() << std::endl;
   return ptx.str().str();
@@ -364,18 +387,25 @@ CUstream launchCudaELF(void* elf, void** args, size_t n){
   CUmodule module;
   CUfunction kernel;
 
-
   CUDA_SAFE_CALL(cuModuleLoadDataEx_p(&module, elf, 0, 0, 0));
   CUDA_SAFE_CALL(cuModuleGetFunction_p(&kernel, module, "kitsune_kernel"));
 
   CUDA_SAFE_CALL(cuStreamCreate_p(&stream, 0));
   // (8 * warpsize) seems like reasonable default block size
   // TODO: come up with more sophisticated heuristic
-  int blocksize = 8 * warpsize;
+  int blocksize = 4 * warpsize;
   assert(n % blocksize == 0);
+
+  // Testing a new approach to launch configuration...
+  size_t threads_per_block = 256;
+  size_t blocks_per_grid = 1 + ((n - 1) / threads_per_block);
+  fprintf(stderr, "launch parameters:\n");
+  fprintf(stderr, "   n                : %ld\n", n);
+  fprintf(stderr, "   blocks per grid  : %ld\n", blocks_per_grid);
+  fprintf(stderr, "   threads per block: %ld\n", threads_per_block);
   CUDA_SAFE_CALL(cuLaunchKernel_p(kernel,
-                                 n/blocksize, 1, 1, // grid dim
-                                 blocksize, 1, 1, // block dim
+                                 blocks_per_grid, 1, 1, // grid dim
+                                 threads_per_block, 1, 1, // block dim
                                  0, stream, // shared mem and stream
                                  args, NULL)); // arguments
 
