@@ -20,15 +20,15 @@ struct Pixel {
 
 struct Vec {
   float x,y,z;
-  __device__ Vec(float v = 0) {x = y = z = v;}
-  __device__ Vec(float a, float b, float c = 0) {x = a;y = b;z = c;}
-  __device__ Vec operator+(const Vec r) const  { return Vec(x + r.x , y + r.y , z + r.z); }
-  __device__ Vec operator*(const Vec r) const { return   Vec(x * r.x , y * r.y , z * r.z); }
-  __device__ float operator%(const Vec r) const {return     x * r.x + y * r.y + z * r.z;}
-  __device__ Vec operator!() { return *this * (1.0/sqrtf(*this % *this)); }
+  __forceinline__ __device__ Vec(float v = 0) {x = y = z = v;}
+  __forceinline__ __device__ Vec(float a, float b, float c = 0) {x = a;y = b;z = c;}
+  __forceinline__ __device__ Vec operator+(const Vec r) const  { return Vec(x + r.x , y + r.y , z + r.z); }
+  __forceinline__ __device__ Vec operator*(const Vec r) const { return   Vec(x * r.x , y * r.y , z * r.z); }
+  __forceinline__ __device__ float operator%(const Vec r) const {return     x * r.x + y * r.y + z * r.z;}
+  __forceinline__ __device__ Vec operator!() { return *this * (1.0/sqrtf(*this % *this)); }
 };
 
-__device__
+__forceinline__ __device__
 float randomVal(unsigned int& x) {
   x = (214013*x+2531011);
   return ((x>>16)&0x7FFF) / (float)66635;
@@ -37,7 +37,7 @@ float randomVal(unsigned int& x) {
 // Rectangle CSG equation. Returns minimum signed distance from
 // space carved by
 // lowerLeft vertex and opposite rectangle vertex upperRight.
-__device__
+__forceinline__ __device__
 float BoxTest(const Vec& position, Vec lowerLeft, Vec upperRight) {
   lowerLeft = position + lowerLeft * -1.0f;
   upperRight = upperRight + position * -1.0f;
@@ -52,7 +52,7 @@ float BoxTest(const Vec& position, Vec lowerLeft, Vec upperRight) {
 #define HIT_SUN 3
 
 // Sample the world using Signed Distance Fields.
-__device__
+__forceinline__ __device__
 float QueryDatabase(const Vec& position, int &hitType) {
   float distance = 1e9;//FLT_MAX;
   Vec f = position; // Flattened position (z=0)
@@ -105,7 +105,7 @@ float QueryDatabase(const Vec& position, int &hitType) {
 
 // Perform signed sphere marching
 // Returns hitType 0, 1, 2, or 3 and update hit position/normal
-__device__
+__forceinline__ __device__
 int RayMarching(const Vec& origin, const Vec& direction, Vec& hitPos, Vec& hitNorm) {
   int hitType = HIT_NONE;
   int noHitCount = 0;
@@ -124,7 +124,7 @@ int RayMarching(const Vec& origin, const Vec& direction, Vec& hitPos, Vec& hitNo
   return 0;
 }
 
-__device__
+__forceinline__ __device__
 Vec Trace(Vec origin, Vec direction, unsigned int& rn) {
   Vec sampledPosition;
   Vec normal;

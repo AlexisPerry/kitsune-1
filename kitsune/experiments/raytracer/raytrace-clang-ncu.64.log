@@ -1,0 +1,1323 @@
+==PROF== Connected to process 1343071 (/vast/home/pat/Projects/kitsune/kitsune/experiments/raytracer/raytrace-clang)
+==PROF== Profiling "query_cuda_kernel_arch" - 1: 0%....50%....100% - 18 passes
+==PROF== Profiling "init_lock_arrays_cuda_kernel" - 2: 0%....50%....100% - 18 passes
+==PROF== Profiling "init_lock_array_kernel_atomic" - 3: 0%....50%....100% - 18 passes
+==PROF== Profiling "init_lock_array_kernel_threadid" - 4: 0%....50%....100% - 18 passes
+==PROF== Profiling "_ZN6Kokkos4ImplL33cuda_parall..." - 5: 0%....50%....100% - 18 passes
+==PROF== Disconnected from process 1343071
+==PROF== Report: /vast/home/pat/Projects/kitsune/kitsune/experiments/raytracer/raytrace-clang.1.64.ncu-rep
+[1343071] raytrace-clang@127.0.0.1
+  Device 0
+    Kokkos::<unnamed>::init_lock_array_kernel_atomic(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Compute Workload Analysis
+      Metric Name                                                            Metric Unit Minimum   Maximum   Average  
+      ---------------------------------------------------------------------- ----------- --------- --------- ---------
+      sm__inst_executed.avg.per_cycle_active                                 inst/cycle  0.455516  0.455516  0.455516 
+      sm__inst_executed.avg.per_cycle_elapsed                                inst/cycle  0.141538  0.141538  0.141538 
+      sm__inst_executed_pipe_adu.avg.pct_of_peak_sustained_active            %           6.073547  6.073547  6.073547 
+      sm__inst_executed_pipe_cbu.avg.pct_of_peak_sustained_active            %           1.518387  1.518387  1.518387 
+      sm__inst_executed_pipe_fp16.avg.pct_of_peak_sustained_active           %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_fp64.avg.pct_of_peak_sustained_active           %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_lsu.avg.pct_of_peak_sustained_active            %           9.110320  9.110320  9.110320 
+      sm__inst_executed_pipe_tensor_op_dmma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tensor_op_hmma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tensor_op_imma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tex.avg.pct_of_peak_sustained_active            %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_uniform.avg.pct_of_peak_sustained_active        %           4.555160  4.555160  4.555160 
+      sm__inst_executed_pipe_xu.avg.pct_of_peak_sustained_active             %           0.000000  0.000000  0.000000 
+      sm__inst_issued.avg.pct_of_peak_sustained_active                       %           13.263827 13.263827 13.263827
+      sm__inst_issued.avg.per_cycle_active                                   inst/cycle  0.530553  0.530553  0.530553 
+      sm__inst_issued.max.pct_of_peak_sustained_active                       %           14.092527 14.092527 14.092527
+      sm__instruction_throughput.avg.pct_of_peak_sustained_active            %           13.263827 13.263827 13.263827
+      sm__pipe_alu_cycles_active.avg.pct_of_peak_sustained_active            %           6.073547  6.073547  6.073547 
+      sm__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active            %           3.036773  3.036773  3.036773 
+
+    Kokkos::<unnamed>::init_lock_array_kernel_atomic(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: GPU Speed Of Light Roofline Chart
+      Metric Name                                                           Metric Unit   Minimum      Maximum      Average     
+      --------------------------------------------------------------------- ------------- ------------ ------------ ------------
+      derived__sm__sass_thread_inst_executed_op_dfma_pred_on_x2             inst          6912.000000  6912.000000  6912.000000 
+      derived__sm__sass_thread_inst_executed_op_ffma_pred_on_x2             inst          13824.000000 13824.000000 13824.000000
+      derived__smsp__sass_thread_inst_executed_op_dfma_pred_on_x2           inst          0.000000     0.000000     0.000000    
+      derived__smsp__sass_thread_inst_executed_op_ffma_pred_on_x2           inst          0.000000     0.000000     0.000000    
+      dram__bytes.sum.peak_sustained                                        Kbyte/cycle   1.280000     1.280000     1.280000    
+      dram__bytes.sum.per_second                                            Mbyte/second  19.900498    19.900498    19.900498   
+      dram__cycles_elapsed.avg.per_second                                   cycle/usecond 995.024876   995.024876   995.024876  
+      sm__cycles_elapsed.avg.per_second                                     cycle/usecond 624.896352   624.896352   624.896352  
+      sm__sass_thread_inst_executed_op_dfma_pred_on.sum.peak_sustained      inst/cycle    3456.000000  3456.000000  3456.000000 
+      sm__sass_thread_inst_executed_op_ffma_pred_on.sum.peak_sustained      inst/cycle    6912.000000  6912.000000  6912.000000 
+      smsp__cycles_elapsed.avg.per_second                                   cycle/usecond 624.896352   624.896352   624.896352  
+      smsp__sass_thread_inst_executed_op_dadd_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_dfma_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_dmul_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_fadd_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_ffma_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_fmul_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+
+    Kokkos::<unnamed>::init_lock_array_kernel_atomic(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: GPU Speed Of Light Throughput
+      Metric Name                                                              Metric Unit   Minimum     Maximum     Average    
+      ------------------------------------------------------------------------ ------------- ----------- ----------- -----------
+      dram__cycles_active.avg.pct_of_peak_sustained_elapsed                    %             0.001563    0.001563    0.001563   
+      dram__cycles_elapsed.avg.per_second                                      cycle/usecond 995.024876  995.024876  995.024876 
+      fbpa__dram_sectors.avg.pct_of_peak_sustained_elapsed                     %             0.001322    0.001322    0.001322   
+      gpc__cycles_elapsed.avg.per_second                                       cycle/usecond 624.911158  624.911158  624.911158 
+      gpc__cycles_elapsed.max                                                  cycle         4027.000000 4027.000000 4027.000000
+      gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed         %             6.574729    6.574729    6.574729   
+      gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed                   %             0.001563    0.001563    0.001563   
+      gpu__time_duration.sum                                                   usecond       6.432000    6.432000    6.432000   
+      idc__request_cycles_active.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      l1tex__data_bank_reads.avg.pct_of_peak_sustained_elapsed                 %             0.530768    0.530768    0.530768   
+      l1tex__data_bank_writes.avg.pct_of_peak_sustained_elapsed                %             0.474904    0.474904    0.474904   
+      l1tex__data_pipe_lsu_wavefronts.avg.pct_of_peak_sustained_elapsed        %             3.990665    3.990665    3.990665   
+      l1tex__data_pipe_tex_wavefronts.avg.pct_of_peak_sustained_elapsed        %             0.000000    0.000000    0.000000   
+      l1tex__f_wavefronts.avg.pct_of_peak_sustained_elapsed                    %             0.074639    0.074639    0.074639   
+      l1tex__lsu_writeback_active.avg.pct_of_peak_sustained_elapsed            %             2.830762    2.830762    2.830762   
+      l1tex__lsuin_requests.avg.pct_of_peak_sustained_elapsed                  %             2.830762    2.830762    2.830762   
+      l1tex__m_l1tex2xbar_req_cycles_active.avg.pct_of_peak_sustained_elapsed  %             3.898749    3.898749    3.898749   
+      l1tex__m_xbar2l1tex_read_sectors.avg.pct_of_peak_sustained_elapsed       %             0.012440    0.012440    0.012440   
+      l1tex__tex_writeback_active.avg.pct_of_peak_sustained_elapsed            %             0.000000    0.000000    0.000000   
+      l1tex__texin_sm2tex_req_cycles_active.avg.pct_of_peak_sustained_elapsed  %             0.074639    0.074639    0.074639   
+      l1tex__throughput.avg.pct_of_peak_sustained_active                       %             12.843268   12.843268   12.843268  
+      launch__waves_per_multiprocessor                                                       0.592593    0.592593    0.592593   
+      lts__d_atomic_input_cycles_active.avg.pct_of_peak_sustained_elapsed      %             0.000000    0.000000    0.000000   
+      lts__d_sectors.avg.pct_of_peak_sustained_elapsed                         %             2.069011    2.069011    2.069011   
+      lts__d_sectors_fill_device.avg.pct_of_peak_sustained_elapsed             %             0.002314    0.002314    0.002314   
+      lts__d_sectors_fill_sysmem.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      lts__lts2xbar_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.444375    0.444375    0.444375   
+      lts__t_sectors.avg.pct_of_peak_sustained_elapsed                         %             6.574729    6.574729    6.574729   
+      lts__t_tag_requests.avg.pct_of_peak_sustained_elapsed                    %             4.244778    4.244778    4.244778   
+      lts__throughput.avg.pct_of_peak_sustained_elapsed                        %             9.310550    9.310550    9.310550   
+      lts__xbar2lts_cycles_active.avg.pct_of_peak_sustained_elapsed            %             6.276772    6.276772    6.276772   
+      sm__cycles_active.avg                                                    cycle         1248.888889 1248.888889 1248.888889
+      sm__inst_executed.avg.pct_of_peak_sustained_elapsed                      %             3.538453    3.538453    3.538453   
+      sm__inst_executed_pipe_adu.avg.pct_of_peak_sustained_elapsed             %             1.887175    1.887175    1.887175   
+      sm__inst_executed_pipe_cbu_pred_on_any.avg.pct_of_peak_sustained_elapsed %             0.943587    0.943587    0.943587   
+      sm__inst_executed_pipe_fp16.avg.pct_of_peak_sustained_elapsed            %             0.000000    0.000000    0.000000   
+      sm__inst_executed_pipe_ipa.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      sm__inst_executed_pipe_lsu.avg.pct_of_peak_sustained_elapsed             %             2.830762    2.830762    2.830762   
+      sm__inst_executed_pipe_tex.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      sm__inst_executed_pipe_uniform.avg.pct_of_peak_sustained_elapsed         %             1.415381    1.415381    1.415381   
+      sm__inst_executed_pipe_xu.avg.pct_of_peak_sustained_elapsed              %             0.000000    0.000000    0.000000   
+      sm__issue_active.avg.pct_of_peak_sustained_elapsed                       %             4.121342    4.121342    4.121342   
+      sm__mio2rf_writeback_active.avg.pct_of_peak_sustained_elapsed            %             1.887175    1.887175    1.887175   
+      sm__mio_inst_issued.avg.pct_of_peak_sustained_elapsed                    %             1.887175    1.887175    1.887175   
+      sm__mio_pq_read_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000000    0.000000    0.000000   
+      sm__mio_pq_write_cycles_active.avg.pct_of_peak_sustained_elapsed         %             0.000000    0.000000    0.000000   
+      sm__pipe_alu_cycles_active.avg.pct_of_peak_sustained_elapsed             %             1.887175    1.887175    1.887175   
+      sm__pipe_fma_cycles_active.avg.pct_of_peak_sustained_elapsed             %             0.943587    0.943587    0.943587   
+      sm__pipe_fp64_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.000000    0.000000    0.000000   
+      sm__pipe_shared_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000000    0.000000    0.000000   
+      sm__pipe_tensor_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000000    0.000000    0.000000   
+      sm__throughput.avg.pct_of_peak_sustained_elapsed                         %             4.121342    4.121342    4.121342   
+
+    Kokkos::<unnamed>::init_lock_array_kernel_atomic(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Instruction Statistics
+      Metric Name                    Metric Unit Minimum      Maximum      Average     
+      ------------------------------ ----------- ------------ ------------ ------------
+      inst_executed                  inst        61440.000000 61440.000000 61440.000000
+      sass__inst_executed_per_opcode             61440.000000 61440.000000 61440.000000
+      smsp__inst_executed.avg        inst        142.222222   142.222222   142.222222  
+      smsp__inst_executed.sum        inst        61440.000000 61440.000000 61440.000000
+      smsp__inst_issued.avg          inst        165.650463   165.650463   165.650463  
+      smsp__inst_issued.sum          inst        71561.000000 71561.000000 71561.000000
+
+    Kokkos::<unnamed>::init_lock_array_kernel_atomic(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Launch Statistics
+      Metric Name                                       Metric Unit     Minimum       Maximum       Average      
+      ------------------------------------------------- --------------- ------------- ------------- -------------
+      launch__block_size                                                256.000000    256.000000    256.000000   
+      launch__grid_size                                                 512.000000    512.000000    512.000000   
+      launch__registers_per_thread                      register/thread 16.000000     16.000000     16.000000    
+      launch__shared_mem_config_size                    Kbyte           167.936000    167.936000    167.936000   
+      launch__shared_mem_per_block_driver               Kbyte/block     1.024000      1.024000      1.024000     
+      launch__shared_mem_per_block_dynamic              byte/block      0.000000      0.000000      0.000000     
+      launch__shared_mem_per_block_static               byte/block      0.000000      0.000000      0.000000     
+      launch__thread_count                              thread          131072.000000 131072.000000 131072.000000
+      launch__waves_per_multiprocessor                                  0.592593      0.592593      0.592593     
+      sm__maximum_warps_per_active_cycle_pct            %               100.000000    100.000000    100.000000   
+      sm__warps_active.avg.pct_of_peak_sustained_active %               47.256195     47.256195     47.256195    
+
+    Kokkos::<unnamed>::init_lock_array_kernel_atomic(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Memory Workload Analysis
+      Metric Name                                                              Metric Unit  Minimum    Maximum    Average   
+      ------------------------------------------------------------------------ ------------ ---------- ---------- ----------
+      dram__bytes.sum.per_second                                               Mbyte/second 19.900498  19.900498  19.900498 
+      gpu__compute_memory_access_throughput.avg.pct_of_peak_sustained_elapsed  %            6.574729   6.574729   6.574729  
+      gpu__compute_memory_request_throughput.avg.pct_of_peak_sustained_elapsed %            6.276772   6.276772   6.276772  
+      l1tex__t_sector_hit_rate.pct                                             %            19.472656  19.472656  19.472656 
+      lts__average_gcomp_input_sector_success_rate.pct                         %            0.000000   0.000000   0.000000  
+      lts__average_gcomp_output_sector_compression_achieved_rate.ratio                      0.000000   0.000000   0.000000  
+      lts__t_sector_hit_rate.pct                                               %            100.339324 100.339324 100.339324
+      sm__memory_throughput.avg.pct_of_peak_sustained_elapsed                  %            2.830762   2.830762   2.830762  
+
+    Kokkos::<unnamed>::init_lock_array_kernel_atomic(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Occupancy
+      Metric Name                                       Metric Unit     Minimum     Maximum     Average    
+      ------------------------------------------------- --------------- ----------- ----------- -----------
+      launch__block_size                                                256.000000  256.000000  256.000000 
+      launch__occupancy_limit_blocks                    block           32.000000   32.000000   32.000000  
+      launch__occupancy_limit_registers                 block           16.000000   16.000000   16.000000  
+      launch__occupancy_limit_shared_mem                block           164.000000  164.000000  164.000000 
+      launch__occupancy_limit_warps                     block           8.000000    8.000000    8.000000   
+      launch__occupancy_per_block_size                                  3670.000000 3670.000000 3670.000000
+      launch__occupancy_per_register_count                              5504.000000 5504.000000 5504.000000
+      launch__occupancy_per_shared_mem_size                             4672.000000 4672.000000 4672.000000
+      launch__registers_per_thread                      register/thread 16.000000   16.000000   16.000000  
+      launch__shared_mem_per_block                      Kbyte/block     1.024000    1.024000    1.024000   
+      sm__maximum_warps_avg_per_active_cycle            warp            64.000000   64.000000   64.000000  
+      sm__maximum_warps_per_active_cycle_pct            %               100.000000  100.000000  100.000000 
+      sm__warps_active.avg.pct_of_peak_sustained_active %               47.256195   47.256195   47.256195  
+      sm__warps_active.avg.per_cycle_active             warp            30.243965   30.243965   30.243965  
+
+    Kokkos::<unnamed>::init_lock_array_kernel_atomic(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Scheduler Statistics
+      Metric Name                                         Metric Unit Minimum   Maximum   Average  
+      --------------------------------------------------- ----------- --------- --------- ---------
+      smsp__issue_active.avg.pct_of_peak_sustained_active %           13.567044 13.567044 13.567044
+      smsp__issue_active.avg.per_cycle_active                         0.135670  0.135670  0.135670 
+      smsp__issue_inst0.avg.pct_of_peak_sustained_active  %           86.432956 86.432956 86.432956
+      smsp__maximum_warps_avg_per_active_cycle            warp        16.000000 16.000000 16.000000
+      smsp__warps_active.avg.peak_sustained               warp        16.000000 16.000000 16.000000
+      smsp__warps_active.avg.per_cycle_active             warp        7.639834  7.639834  7.639834 
+      smsp__warps_eligible.avg.per_cycle_active           warp        0.181016  0.181016  0.181016 
+
+    Kokkos::<unnamed>::init_lock_array_kernel_atomic(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Source Counters
+      Metric Name                                                    Metric Unit Minimum        Maximum        Average       
+      -------------------------------------------------------------- ----------- -------------- -------------- --------------
+      derived__avg_thread_executed                                   thread      29.000000      29.000000      29.000000     
+      derived__memory_l1_wavefronts_shared_excessive                 byte        0.000000       0.000000       0.000000      
+      derived__memory_l2_theoretical_sectors_global_excessive        byte        0.000000       0.000000       0.000000      
+      derived__smsp__inst_executed_op_branch_pct                     %           0.133333       0.133333       0.133333      
+      gpc__cycles_elapsed.max                                        cycle       4027.000000    4027.000000    4027.000000   
+      inst_executed                                                  inst        61440.000000   61440.000000   61440.000000  
+      memory_l1_tag_requests_global                                  sectors     8192.000000    8192.000000    8192.000000   
+      memory_l1_wavefronts_shared                                    sectors     0.000000       0.000000       0.000000      
+      memory_l1_wavefronts_shared_ideal                              sectors     0.000000       0.000000       0.000000      
+      memory_l2_theoretical_sectors_global                           sectors     20480.000000   20480.000000   20480.000000  
+      memory_l2_theoretical_sectors_global_ideal                     sectors     20480.000000   20480.000000   20480.000000  
+      memory_l2_theoretical_sectors_local                            sectors     0.000000       0.000000       0.000000      
+      smsp__branch_targets_threads_divergent                                     0.000000       0.000000       0.000000      
+      smsp__inst_executed.sum                                        inst        61440.000000   61440.000000   61440.000000  
+      smsp__inst_executed_op_branch.sum                              inst        8192.000000    8192.000000    8192.000000   
+      smsp__pcsamp_sample_count                                                  151.000000     151.000000     151.000000    
+      smsp__pcsamp_warps_issue_stalled_barrier                       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_barrier_not_issued            warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_branch_resolving              warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_branch_resolving_not_issued   warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_dispatch_stall                warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_dispatch_stall_not_issued     warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_drain                         warp        1.000000       1.000000       2.000000      
+      smsp__pcsamp_warps_issue_stalled_drain_not_issued              warp        1.000000       1.000000       2.000000      
+      smsp__pcsamp_warps_issue_stalled_imc_miss                      warp        95.000000      95.000000      190.000000    
+      smsp__pcsamp_warps_issue_stalled_imc_miss_not_issued           warp        86.000000      86.000000      172.000000    
+      smsp__pcsamp_warps_issue_stalled_lg_throttle                   warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_lg_throttle_not_issued        warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_long_scoreboard               warp        42.000000      42.000000      84.000000     
+      smsp__pcsamp_warps_issue_stalled_long_scoreboard_not_issued    warp        42.000000      42.000000      84.000000     
+      smsp__pcsamp_warps_issue_stalled_math_pipe_throttle            warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_math_pipe_throttle_not_issued warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_membar                        byte        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_membar_not_issued             byte        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_mio_throttle                  warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_mio_throttle_not_issued       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_misc                          warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_misc_not_issued               warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_no_instructions               inst        6.000000       6.000000       12.000000     
+      smsp__pcsamp_warps_issue_stalled_no_instructions_not_issued    inst        6.000000       6.000000       12.000000     
+      smsp__pcsamp_warps_issue_stalled_not_selected                  warp        1.000000       1.000000       2.000000      
+      smsp__pcsamp_warps_issue_stalled_not_selected_not_issued       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_selected                      warp        1.000000       1.000000       2.000000      
+      smsp__pcsamp_warps_issue_stalled_selected_not_issued           warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_short_scoreboard              warp        1.000000       1.000000       2.000000      
+      smsp__pcsamp_warps_issue_stalled_short_scoreboard_not_issued   warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_sleeping                      warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_sleeping_not_issued           warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_tex_throttle                  warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_tex_throttle_not_issued       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_wait                          warp        4.000000       4.000000       8.000000      
+      smsp__pcsamp_warps_issue_stalled_wait_not_issued               warp        3.000000       3.000000       6.000000      
+      smsp__sass_average_branch_targets_threads_uniform.pct          %           0.000000       0.000000       0.000000      
+      smsp__sass_branch_targets_threads_divergent.avg                            0.000000       0.000000       0.000000      
+      thread_inst_executed_true                                      inst        1835008.000000 1835008.000000 1835008.000000
+
+    Kokkos::<unnamed>::init_lock_array_kernel_atomic(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Warp State Statistics
+      Metric Name                                                                 Metric Unit Minimum   Maximum   Average  
+      --------------------------------------------------------------------------- ----------- --------- --------- ---------
+      smsp__average_warp_latency_per_inst_issued.ratio                            cycle       56.311706 56.311706 56.311706
+      smsp__average_warps_active_per_inst_executed.ratio                          cycle       65.587923 65.587923 65.587923
+      smsp__average_warps_issue_stalled_barrier_per_issue_active.ratio            inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_branch_resolving_per_issue_active.ratio   inst        0.463814  0.463814  0.463814 
+      smsp__average_warps_issue_stalled_dispatch_stall_per_issue_active.ratio     inst        0.132167  0.132167  0.132167 
+      smsp__average_warps_issue_stalled_drain_per_issue_active.ratio              inst        1.677506  1.677506  1.677506 
+      smsp__average_warps_issue_stalled_imc_miss_per_issue_active.ratio           inst        28.813362 28.813362 28.813362
+      smsp__average_warps_issue_stalled_lg_throttle_per_issue_active.ratio        inst        0.061528  0.061528  0.061528 
+      smsp__average_warps_issue_stalled_long_scoreboard_per_issue_active.ratio    inst        20.933791 20.933791 20.933791
+      smsp__average_warps_issue_stalled_math_pipe_throttle_per_issue_active.ratio inst        0.055044  0.055044  0.055044 
+      smsp__average_warps_issue_stalled_membar_per_issue_active.ratio             inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_mio_throttle_per_issue_active.ratio       inst        0.032937  0.032937  0.032937 
+      smsp__average_warps_issue_stalled_misc_per_issue_active.ratio               inst        0.055491  0.055491  0.055491 
+      smsp__average_warps_issue_stalled_no_instruction_per_issue_active.ratio     inst        1.646218  1.646218  1.646218 
+      smsp__average_warps_issue_stalled_not_selected_per_issue_active.ratio       inst        0.354900  0.354900  0.354900 
+      smsp__average_warps_issue_stalled_selected_per_issue_active.ratio           inst        0.985760  0.985760  0.985760 
+      smsp__average_warps_issue_stalled_short_scoreboard_per_issue_active.ratio   inst        1.894482  1.894482  1.894482 
+      smsp__average_warps_issue_stalled_sleeping_per_issue_active.ratio           inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_tex_throttle_per_issue_active.ratio       inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_wait_per_issue_active.ratio               inst        2.659354  2.659354  2.659354 
+      smsp__issue_active.avg.per_cycle_active                                                 0.135670  0.135670  0.135670 
+      smsp__thread_inst_executed_per_inst_executed.ratio                                      32.000000 32.000000 32.000000
+      smsp__thread_inst_executed_pred_on_per_inst_executed.ratio                              29.866667 29.866667 29.866667
+
+    Kokkos::<unnamed>::init_lock_array_kernel_threadid(int), Block Size 256, Grid Size 864, 1 invocations 
+      Section: Compute Workload Analysis
+      Metric Name                                                            Metric Unit Minimum   Maximum   Average  
+      ---------------------------------------------------------------------- ----------- --------- --------- ---------
+      sm__inst_executed.avg.per_cycle_active                                 inst/cycle  0.653498  0.653498  0.653498 
+      sm__inst_executed.avg.per_cycle_elapsed                                inst/cycle  0.212251  0.212251  0.212251 
+      sm__inst_executed_pipe_adu.avg.pct_of_peak_sustained_active            %           8.713301  8.713301  8.713301 
+      sm__inst_executed_pipe_cbu.avg.pct_of_peak_sustained_active            %           2.178325  2.178325  2.178325 
+      sm__inst_executed_pipe_fp16.avg.pct_of_peak_sustained_active           %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_fp64.avg.pct_of_peak_sustained_active           %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_lsu.avg.pct_of_peak_sustained_active            %           13.069951 13.069951 13.069951
+      sm__inst_executed_pipe_tensor_op_dmma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tensor_op_hmma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tensor_op_imma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tex.avg.pct_of_peak_sustained_active            %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_uniform.avg.pct_of_peak_sustained_active        %           6.534975  6.534975  6.534975 
+      sm__inst_executed_pipe_xu.avg.pct_of_peak_sustained_active             %           0.000000  0.000000  0.000000 
+      sm__inst_issued.avg.pct_of_peak_sustained_active                       %           19.293084 19.293084 19.293084
+      sm__inst_issued.avg.per_cycle_active                                   inst/cycle  0.771723  0.771723  0.771723 
+      sm__inst_issued.max.pct_of_peak_sustained_active                       %           20.115471 20.115471 20.115471
+      sm__instruction_throughput.avg.pct_of_peak_sustained_active            %           19.293084 19.293084 19.293084
+      sm__pipe_alu_cycles_active.avg.pct_of_peak_sustained_active            %           8.713301  8.713301  8.713301 
+      sm__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active            %           4.356650  4.356650  4.356650 
+
+    Kokkos::<unnamed>::init_lock_array_kernel_threadid(int), Block Size 256, Grid Size 864, 1 invocations 
+      Section: GPU Speed Of Light Roofline Chart
+      Metric Name                                                           Metric Unit   Minimum      Maximum      Average     
+      --------------------------------------------------------------------- ------------- ------------ ------------ ------------
+      derived__sm__sass_thread_inst_executed_op_dfma_pred_on_x2             inst          6912.000000  6912.000000  6912.000000 
+      derived__sm__sass_thread_inst_executed_op_ffma_pred_on_x2             inst          13824.000000 13824.000000 13824.000000
+      derived__smsp__sass_thread_inst_executed_op_dfma_pred_on_x2           inst          0.000000     0.000000     0.000000    
+      derived__smsp__sass_thread_inst_executed_op_ffma_pred_on_x2           inst          0.000000     0.000000     0.000000    
+      dram__bytes.sum.peak_sustained                                        Kbyte/cycle   1.280000     1.280000     1.280000    
+      dram__bytes.sum.per_second                                            Mbyte/second  18.433180    18.433180    18.433180   
+      dram__cycles_elapsed.avg.per_second                                   cycle/nsecond 1.035945     1.035945     1.035945    
+      sm__cycles_elapsed.avg.per_second                                     cycle/usecond 651.345686   651.345686   651.345686  
+      sm__sass_thread_inst_executed_op_dfma_pred_on.sum.peak_sustained      inst/cycle    3456.000000  3456.000000  3456.000000 
+      sm__sass_thread_inst_executed_op_ffma_pred_on.sum.peak_sustained      inst/cycle    6912.000000  6912.000000  6912.000000 
+      smsp__cycles_elapsed.avg.per_second                                   cycle/usecond 651.345686   651.345686   651.345686  
+      smsp__sass_thread_inst_executed_op_dadd_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_dfma_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_dmul_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_fadd_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_ffma_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_fmul_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+
+    Kokkos::<unnamed>::init_lock_array_kernel_threadid(int), Block Size 256, Grid Size 864, 1 invocations 
+      Section: GPU Speed Of Light Throughput
+      Metric Name                                                              Metric Unit   Minimum     Maximum     Average    
+      ------------------------------------------------------------------------ ------------- ----------- ----------- -----------
+      dram__cycles_active.avg.pct_of_peak_sustained_elapsed                    %             0.001390    0.001390    0.001390   
+      dram__cycles_elapsed.avg.per_second                                      cycle/nsecond 1.035945    1.035945    1.035945   
+      fbpa__dram_sectors.avg.pct_of_peak_sustained_elapsed                     %             0.001175    0.001175    0.001175   
+      gpc__cycles_elapsed.avg.per_second                                       cycle/usecond 651.353687  651.353687  651.353687 
+      gpc__cycles_elapsed.max                                                  cycle         4531.000000 4531.000000 4531.000000
+      gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed         %             9.184591    9.184591    9.184591   
+      gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed                   %             0.001390    0.001390    0.001390   
+      gpu__time_duration.sum                                                   usecond       6.944000    6.944000    6.944000   
+      idc__request_cycles_active.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      l1tex__data_bank_reads.avg.pct_of_peak_sustained_elapsed                 %             0.795942    0.795942    0.795942   
+      l1tex__data_bank_writes.avg.pct_of_peak_sustained_elapsed                %             0.710267    0.710267    0.710267   
+      l1tex__data_pipe_lsu_wavefronts.avg.pct_of_peak_sustained_elapsed        %             6.360164    6.360164    6.360164   
+      l1tex__data_pipe_tex_wavefronts.avg.pct_of_peak_sustained_elapsed        %             0.000000    0.000000    0.000000   
+      l1tex__f_wavefronts.avg.pct_of_peak_sustained_elapsed                    %             0.066328    0.066328    0.066328   
+      l1tex__lsu_writeback_active.avg.pct_of_peak_sustained_elapsed            %             4.245022    4.245022    4.245022   
+      l1tex__lsuin_requests.avg.pct_of_peak_sustained_elapsed                  %             4.245022    4.245022    4.245022   
+      l1tex__m_l1tex2xbar_req_cycles_active.avg.pct_of_peak_sustained_elapsed  %             5.770577    5.770577    5.770577   
+      l1tex__m_xbar2l1tex_read_sectors.avg.pct_of_peak_sustained_elapsed       %             0.011055    0.011055    0.011055   
+      l1tex__tex_writeback_active.avg.pct_of_peak_sustained_elapsed            %             0.000000    0.000000    0.000000   
+      l1tex__texin_sm2tex_req_cycles_active.avg.pct_of_peak_sustained_elapsed  %             0.066328    0.066328    0.066328   
+      l1tex__throughput.avg.pct_of_peak_sustained_active                       %             19.582236   19.582236   19.582236  
+      launch__waves_per_multiprocessor                                                       1.000000    1.000000    1.000000   
+      lts__d_atomic_input_cycles_active.avg.pct_of_peak_sustained_elapsed      %             0.000000    0.000000    0.000000   
+      lts__d_sectors.avg.pct_of_peak_sustained_elapsed                         %             2.941349    2.941349    2.941349   
+      lts__d_sectors_fill_device.avg.pct_of_peak_sustained_elapsed             %             0.002351    0.002351    0.002351   
+      lts__d_sectors_fill_sysmem.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      lts__lts2xbar_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.541549    0.541549    0.541549   
+      lts__t_sectors.avg.pct_of_peak_sustained_elapsed                         %             9.064557    9.064557    9.064557   
+      lts__t_tag_requests.avg.pct_of_peak_sustained_elapsed                    %             5.754290    5.754290    5.754290   
+      lts__throughput.avg.pct_of_peak_sustained_elapsed                        %             11.965209   11.965209   11.965209  
+      lts__xbar2lts_cycles_active.avg.pct_of_peak_sustained_elapsed            %             9.184591    9.184591    9.184591   
+      sm__cycles_active.avg                                                    cycle         1469.018519 1469.018519 1469.018519
+      sm__inst_executed.avg.pct_of_peak_sustained_elapsed                      %             5.306278    5.306278    5.306278   
+      sm__inst_executed_pipe_adu.avg.pct_of_peak_sustained_elapsed             %             2.830015    2.830015    2.830015   
+      sm__inst_executed_pipe_cbu_pred_on_any.avg.pct_of_peak_sustained_elapsed %             1.415007    1.415007    1.415007   
+      sm__inst_executed_pipe_fp16.avg.pct_of_peak_sustained_elapsed            %             0.000000    0.000000    0.000000   
+      sm__inst_executed_pipe_ipa.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      sm__inst_executed_pipe_lsu.avg.pct_of_peak_sustained_elapsed             %             4.245022    4.245022    4.245022   
+      sm__inst_executed_pipe_tex.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      sm__inst_executed_pipe_uniform.avg.pct_of_peak_sustained_elapsed         %             2.122511    2.122511    2.122511   
+      sm__inst_executed_pipe_xu.avg.pct_of_peak_sustained_elapsed              %             0.000000    0.000000    0.000000   
+      sm__issue_active.avg.pct_of_peak_sustained_elapsed                       %             6.266249    6.266249    6.266249   
+      sm__mio2rf_writeback_active.avg.pct_of_peak_sustained_elapsed            %             2.830015    2.830015    2.830015   
+      sm__mio_inst_issued.avg.pct_of_peak_sustained_elapsed                    %             2.830015    2.830015    2.830015   
+      sm__mio_pq_read_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000000    0.000000    0.000000   
+      sm__mio_pq_write_cycles_active.avg.pct_of_peak_sustained_elapsed         %             0.000000    0.000000    0.000000   
+      sm__pipe_alu_cycles_active.avg.pct_of_peak_sustained_elapsed             %             2.830015    2.830015    2.830015   
+      sm__pipe_fma_cycles_active.avg.pct_of_peak_sustained_elapsed             %             1.415007    1.415007    1.415007   
+      sm__pipe_fp64_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.000000    0.000000    0.000000   
+      sm__pipe_shared_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000000    0.000000    0.000000   
+      sm__pipe_tensor_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000000    0.000000    0.000000   
+      sm__throughput.avg.pct_of_peak_sustained_elapsed                         %             6.266249    6.266249    6.266249   
+
+    Kokkos::<unnamed>::init_lock_array_kernel_threadid(int), Block Size 256, Grid Size 864, 1 invocations 
+      Section: Instruction Statistics
+      Metric Name                    Metric Unit Minimum       Maximum       Average      
+      ------------------------------ ----------- ------------- ------------- -------------
+      inst_executed                  inst        103680.000000 103680.000000 103680.000000
+      sass__inst_executed_per_opcode             103680.000000 103680.000000 103680.000000
+      smsp__inst_executed.avg        inst        240.000000    240.000000    240.000000   
+      smsp__inst_executed.sum        inst        103680.000000 103680.000000 103680.000000
+      smsp__inst_issued.avg          inst        283.418981    283.418981    283.418981   
+      smsp__inst_issued.sum          inst        122437.000000 122437.000000 122437.000000
+
+    Kokkos::<unnamed>::init_lock_array_kernel_threadid(int), Block Size 256, Grid Size 864, 1 invocations 
+      Section: Launch Statistics
+      Metric Name                                       Metric Unit     Minimum       Maximum       Average      
+      ------------------------------------------------- --------------- ------------- ------------- -------------
+      launch__block_size                                                256.000000    256.000000    256.000000   
+      launch__grid_size                                                 864.000000    864.000000    864.000000   
+      launch__registers_per_thread                      register/thread 16.000000     16.000000     16.000000    
+      launch__shared_mem_config_size                    Kbyte           167.936000    167.936000    167.936000   
+      launch__shared_mem_per_block_driver               Kbyte/block     1.024000      1.024000      1.024000     
+      launch__shared_mem_per_block_dynamic              byte/block      0.000000      0.000000      0.000000     
+      launch__shared_mem_per_block_static               byte/block      0.000000      0.000000      0.000000     
+      launch__thread_count                              thread          221184.000000 221184.000000 221184.000000
+      launch__waves_per_multiprocessor                                  1.000000      1.000000      1.000000     
+      sm__maximum_warps_per_active_cycle_pct            %               100.000000    100.000000    100.000000   
+      sm__warps_active.avg.pct_of_peak_sustained_active %               67.766807     67.766807     67.766807    
+
+    Kokkos::<unnamed>::init_lock_array_kernel_threadid(int), Block Size 256, Grid Size 864, 1 invocations 
+      Section: Memory Workload Analysis
+      Metric Name                                                              Metric Unit  Minimum    Maximum    Average   
+      ------------------------------------------------------------------------ ------------ ---------- ---------- ----------
+      dram__bytes.sum.per_second                                               Mbyte/second 18.433180  18.433180  18.433180 
+      gpu__compute_memory_access_throughput.avg.pct_of_peak_sustained_elapsed  %            9.064557   9.064557   9.064557  
+      gpu__compute_memory_request_throughput.avg.pct_of_peak_sustained_elapsed %            9.184591   9.184591   9.184591  
+      l1tex__t_sector_hit_rate.pct                                             %            19.687500  19.687500  19.687500 
+      lts__average_gcomp_input_sector_success_rate.pct                         %            0.000000   0.000000   0.000000  
+      lts__average_gcomp_output_sector_compression_achieved_rate.ratio                      0.000000   0.000000   0.000000  
+      lts__t_sector_hit_rate.pct                                               %            100.828241 100.828241 100.828241
+      sm__memory_throughput.avg.pct_of_peak_sustained_elapsed                  %            4.245022   4.245022   4.245022  
+
+    Kokkos::<unnamed>::init_lock_array_kernel_threadid(int), Block Size 256, Grid Size 864, 1 invocations 
+      Section: Occupancy
+      Metric Name                                       Metric Unit     Minimum     Maximum     Average    
+      ------------------------------------------------- --------------- ----------- ----------- -----------
+      launch__block_size                                                256.000000  256.000000  256.000000 
+      launch__occupancy_limit_blocks                    block           32.000000   32.000000   32.000000  
+      launch__occupancy_limit_registers                 block           16.000000   16.000000   16.000000  
+      launch__occupancy_limit_shared_mem                block           164.000000  164.000000  164.000000 
+      launch__occupancy_limit_warps                     block           8.000000    8.000000    8.000000   
+      launch__occupancy_per_block_size                                  3670.000000 3670.000000 3670.000000
+      launch__occupancy_per_register_count                              5504.000000 5504.000000 5504.000000
+      launch__occupancy_per_shared_mem_size                             4672.000000 4672.000000 4672.000000
+      launch__registers_per_thread                      register/thread 16.000000   16.000000   16.000000  
+      launch__shared_mem_per_block                      Kbyte/block     1.024000    1.024000    1.024000   
+      sm__maximum_warps_avg_per_active_cycle            warp            64.000000   64.000000   64.000000  
+      sm__maximum_warps_per_active_cycle_pct            %               100.000000  100.000000  100.000000 
+      sm__warps_active.avg.pct_of_peak_sustained_active %               67.766807   67.766807   67.766807  
+      sm__warps_active.avg.per_cycle_active             warp            43.370756   43.370756   43.370756  
+
+    Kokkos::<unnamed>::init_lock_array_kernel_threadid(int), Block Size 256, Grid Size 864, 1 invocations 
+      Section: Scheduler Statistics
+      Metric Name                                         Metric Unit Minimum   Maximum   Average  
+      --------------------------------------------------- ----------- --------- --------- ---------
+      smsp__issue_active.avg.pct_of_peak_sustained_active %           19.732626 19.732626 19.732626
+      smsp__issue_active.avg.per_cycle_active                         0.197326  0.197326  0.197326 
+      smsp__issue_inst0.avg.pct_of_peak_sustained_active  %           80.267374 80.267374 80.267374
+      smsp__maximum_warps_avg_per_active_cycle            warp        16.000000 16.000000 16.000000
+      smsp__warps_active.avg.peak_sustained               warp        16.000000 16.000000 16.000000
+      smsp__warps_active.avg.per_cycle_active             warp        10.889876 10.889876 10.889876
+      smsp__warps_eligible.avg.per_cycle_active           warp        0.511449  0.511449  0.511449 
+
+    Kokkos::<unnamed>::init_lock_array_kernel_threadid(int), Block Size 256, Grid Size 864, 1 invocations 
+      Section: Source Counters
+      Metric Name                                                    Metric Unit Minimum        Maximum        Average       
+      -------------------------------------------------------------- ----------- -------------- -------------- --------------
+      derived__avg_thread_executed                                   thread      29.000000      29.000000      29.000000     
+      derived__memory_l1_wavefronts_shared_excessive                 byte        0.000000       0.000000       0.000000      
+      derived__memory_l2_theoretical_sectors_global_excessive        byte        0.000000       0.000000       0.000000      
+      derived__smsp__inst_executed_op_branch_pct                     %           0.133333       0.133333       0.133333      
+      gpc__cycles_elapsed.max                                        cycle       4531.000000    4531.000000    4531.000000   
+      inst_executed                                                  inst        103680.000000  103680.000000  103680.000000 
+      memory_l1_tag_requests_global                                  sectors     13824.000000   13824.000000   13824.000000  
+      memory_l1_wavefronts_shared                                    sectors     0.000000       0.000000       0.000000      
+      memory_l1_wavefronts_shared_ideal                              sectors     0.000000       0.000000       0.000000      
+      memory_l2_theoretical_sectors_global                           sectors     34560.000000   34560.000000   34560.000000  
+      memory_l2_theoretical_sectors_global_ideal                     sectors     34560.000000   34560.000000   34560.000000  
+      memory_l2_theoretical_sectors_local                            sectors     0.000000       0.000000       0.000000      
+      smsp__branch_targets_threads_divergent                                     0.000000       0.000000       0.000000      
+      smsp__inst_executed.sum                                        inst        103680.000000  103680.000000  103680.000000 
+      smsp__inst_executed_op_branch.sum                              inst        13824.000000   13824.000000   13824.000000  
+      smsp__pcsamp_sample_count                                                  152.000000     152.000000     152.000000    
+      smsp__pcsamp_warps_issue_stalled_barrier                       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_barrier_not_issued            warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_branch_resolving              warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_branch_resolving_not_issued   warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_dispatch_stall                warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_dispatch_stall_not_issued     warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_drain                         warp        16.000000      16.000000      32.000000     
+      smsp__pcsamp_warps_issue_stalled_drain_not_issued              warp        12.000000      12.000000      24.000000     
+      smsp__pcsamp_warps_issue_stalled_imc_miss                      warp        100.000000     100.000000     200.000000    
+      smsp__pcsamp_warps_issue_stalled_imc_miss_not_issued           warp        71.000000      71.000000      142.000000    
+      smsp__pcsamp_warps_issue_stalled_lg_throttle                   warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_lg_throttle_not_issued        warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_long_scoreboard               warp        23.000000      23.000000      46.000000     
+      smsp__pcsamp_warps_issue_stalled_long_scoreboard_not_issued    warp        19.000000      19.000000      38.000000     
+      smsp__pcsamp_warps_issue_stalled_math_pipe_throttle            warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_math_pipe_throttle_not_issued warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_membar                        byte        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_membar_not_issued             byte        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_mio_throttle                  warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_mio_throttle_not_issued       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_misc                          warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_misc_not_issued               warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_no_instructions               inst        7.000000       7.000000       14.000000     
+      smsp__pcsamp_warps_issue_stalled_no_instructions_not_issued    inst        7.000000       7.000000       14.000000     
+      smsp__pcsamp_warps_issue_stalled_not_selected                  warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_not_selected_not_issued       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_selected                      warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_selected_not_issued           warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_short_scoreboard              warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_short_scoreboard_not_issued   warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_sleeping                      warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_sleeping_not_issued           warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_tex_throttle                  warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_tex_throttle_not_issued       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_wait                          warp        6.000000       6.000000       12.000000     
+      smsp__pcsamp_warps_issue_stalled_wait_not_issued               warp        1.000000       1.000000       2.000000      
+      smsp__sass_average_branch_targets_threads_uniform.pct          %           0.000000       0.000000       0.000000      
+      smsp__sass_branch_targets_threads_divergent.avg                            0.000000       0.000000       0.000000      
+      thread_inst_executed_true                                      inst        3096576.000000 3096576.000000 3096576.000000
+
+    Kokkos::<unnamed>::init_lock_array_kernel_threadid(int), Block Size 256, Grid Size 864, 1 invocations 
+      Section: Warp State Statistics
+      Metric Name                                                                 Metric Unit Minimum   Maximum   Average  
+      --------------------------------------------------------------------------- ----------- --------- --------- ---------
+      smsp__average_warp_latency_per_inst_issued.ratio                            cycle       55.187157 55.187157 55.187157
+      smsp__average_warps_active_per_inst_executed.ratio                          cycle       65.171200 65.171200 65.171200
+      smsp__average_warps_issue_stalled_barrier_per_issue_active.ratio            inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_branch_resolving_per_issue_active.ratio   inst        0.456855  0.456855  0.456855 
+      smsp__average_warps_issue_stalled_dispatch_stall_per_issue_active.ratio     inst        0.136764  0.136764  0.136764 
+      smsp__average_warps_issue_stalled_drain_per_issue_active.ratio              inst        2.137475  2.137475  2.137475 
+      smsp__average_warps_issue_stalled_imc_miss_per_issue_active.ratio           inst        24.437825 24.437825 24.437825
+      smsp__average_warps_issue_stalled_lg_throttle_per_issue_active.ratio        inst        0.197955  0.197955  0.197955 
+      smsp__average_warps_issue_stalled_long_scoreboard_per_issue_active.ratio    inst        21.113315 21.113315 21.113315
+      smsp__average_warps_issue_stalled_math_pipe_throttle_per_issue_active.ratio inst        0.169932  0.169932  0.169932 
+      smsp__average_warps_issue_stalled_membar_per_issue_active.ratio             inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_mio_throttle_per_issue_active.ratio       inst        0.100893  0.100893  0.100893 
+      smsp__average_warps_issue_stalled_misc_per_issue_active.ratio               inst        0.045476  0.045476  0.045476 
+      smsp__average_warps_issue_stalled_no_instruction_per_issue_active.ratio     inst        2.556629  2.556629  2.556629 
+      smsp__average_warps_issue_stalled_not_selected_per_issue_active.ratio       inst        1.605765  1.605765  1.605765 
+      smsp__average_warps_issue_stalled_selected_per_issue_active.ratio           inst        0.984890  0.984890  0.984890 
+      smsp__average_warps_issue_stalled_short_scoreboard_per_issue_active.ratio   inst        1.757100  1.757100  1.757100 
+      smsp__average_warps_issue_stalled_sleeping_per_issue_active.ratio           inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_tex_throttle_per_issue_active.ratio       inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_wait_per_issue_active.ratio               inst        2.807918  2.807918  2.807918 
+      smsp__issue_active.avg.per_cycle_active                                                 0.197326  0.197326  0.197326 
+      smsp__thread_inst_executed_per_inst_executed.ratio                                      32.000000 32.000000 32.000000
+      smsp__thread_inst_executed_pred_on_per_inst_executed.ratio                              29.866667 29.866667 29.866667
+
+    Kokkos::Impl::<unnamed>::query_cuda_kernel_arch(int *), Block Size 1, Grid Size 1, 1 invocations 
+      Section: Compute Workload Analysis
+      Metric Name                                                            Metric Unit Minimum   Maximum   Average  
+      ---------------------------------------------------------------------- ----------- --------- --------- ---------
+      sm__inst_executed.avg.per_cycle_active                                 inst/cycle  0.006306  0.006306  0.006306 
+      sm__inst_executed.avg.per_cycle_elapsed                                inst/cycle  0.000021  0.000021  0.000021 
+      sm__inst_executed_pipe_adu.avg.pct_of_peak_sustained_active            %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_cbu.avg.pct_of_peak_sustained_active            %           0.022523  0.022523  0.022523 
+      sm__inst_executed_pipe_fp16.avg.pct_of_peak_sustained_active           %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_fp64.avg.pct_of_peak_sustained_active           %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_lsu.avg.pct_of_peak_sustained_active            %           0.090090  0.090090  0.090090 
+      sm__inst_executed_pipe_tensor_op_dmma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tensor_op_hmma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tensor_op_imma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tex.avg.pct_of_peak_sustained_active            %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_uniform.avg.pct_of_peak_sustained_active        %           0.045045  0.045045  0.045045 
+      sm__inst_executed_pipe_xu.avg.pct_of_peak_sustained_active             %           0.000000  0.000000  0.000000 
+      sm__inst_issued.avg.pct_of_peak_sustained_active                       %           0.360360  0.360360  0.360360 
+      sm__inst_issued.avg.per_cycle_active                                   inst/cycle  0.014414  0.014414  0.014414 
+      sm__inst_issued.max.pct_of_peak_sustained_active                       %           38.918919 38.918919 38.918919
+      sm__instruction_throughput.avg.pct_of_peak_sustained_active            %           0.360360  0.360360  0.360360 
+      sm__pipe_alu_cycles_active.avg.pct_of_peak_sustained_active            %           0.090090  0.090090  0.090090 
+      sm__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active            %           0.090090  0.090090  0.090090 
+
+    Kokkos::Impl::<unnamed>::query_cuda_kernel_arch(int *), Block Size 1, Grid Size 1, 1 invocations 
+      Section: GPU Speed Of Light Roofline Chart
+      Metric Name                                                           Metric Unit   Minimum      Maximum      Average     
+      --------------------------------------------------------------------- ------------- ------------ ------------ ------------
+      derived__sm__sass_thread_inst_executed_op_dfma_pred_on_x2             inst          6912.000000  6912.000000  6912.000000 
+      derived__sm__sass_thread_inst_executed_op_ffma_pred_on_x2             inst          13824.000000 13824.000000 13824.000000
+      derived__smsp__sass_thread_inst_executed_op_dfma_pred_on_x2           inst          0.000000     0.000000     0.000000    
+      derived__smsp__sass_thread_inst_executed_op_ffma_pred_on_x2           inst          0.000000     0.000000     0.000000    
+      dram__bytes.sum.peak_sustained                                        Kbyte/cycle   1.280000     1.280000     1.280000    
+      dram__bytes.sum.per_second                                            Mbyte/second  47.337278    47.337278    47.337278   
+      dram__cycles_elapsed.avg.per_second                                   cycle/usecond 921.301775   921.301775   921.301775  
+      sm__cycles_elapsed.avg.per_second                                     cycle/usecond 579.409106   579.409106   579.409106  
+      sm__sass_thread_inst_executed_op_dfma_pred_on.sum.peak_sustained      inst/cycle    3456.000000  3456.000000  3456.000000 
+      sm__sass_thread_inst_executed_op_ffma_pred_on.sum.peak_sustained      inst/cycle    6912.000000  6912.000000  6912.000000 
+      smsp__cycles_elapsed.avg.per_second                                   cycle/usecond 579.409106   579.409106   579.409106  
+      smsp__sass_thread_inst_executed_op_dadd_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_dfma_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_dmul_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_fadd_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_ffma_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_fmul_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+
+    Kokkos::Impl::<unnamed>::query_cuda_kernel_arch(int *), Block Size 1, Grid Size 1, 1 invocations 
+      Section: GPU Speed Of Light Throughput
+      Metric Name                                                              Metric Unit   Minimum     Maximum     Average    
+      ------------------------------------------------------------------------ ------------- ----------- ----------- -----------
+      dram__cycles_active.avg.pct_of_peak_sustained_elapsed                    %             0.004014    0.004014    0.004014   
+      dram__cycles_elapsed.avg.per_second                                      cycle/usecond 921.301775  921.301775  921.301775 
+      fbpa__dram_sectors.avg.pct_of_peak_sustained_elapsed                     %             0.003390    0.003390    0.003390   
+      gpc__cycles_elapsed.avg.per_second                                       cycle/usecond 579.406171  579.406171  579.406171 
+      gpc__cycles_elapsed.max                                                  cycle         3134.000000 3134.000000 3134.000000
+      gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed         %             0.592585    0.592585    0.592585   
+      gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed                   %             0.004014    0.004014    0.004014   
+      gpu__time_duration.sum                                                   usecond       5.408000    5.408000    5.408000   
+      idc__request_cycles_active.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      l1tex__data_bank_reads.avg.pct_of_peak_sustained_elapsed                 %             0.000009    0.000009    0.000009   
+      l1tex__data_bank_writes.avg.pct_of_peak_sustained_elapsed                %             0.000009    0.000009    0.000009   
+      l1tex__data_pipe_lsu_wavefronts.avg.pct_of_peak_sustained_elapsed        %             0.000295    0.000295    0.000295   
+      l1tex__data_pipe_tex_wavefronts.avg.pct_of_peak_sustained_elapsed        %             0.000000    0.000000    0.000000   
+      l1tex__f_wavefronts.avg.pct_of_peak_sustained_elapsed                    %             0.095741    0.095741    0.095741   
+      l1tex__lsu_writeback_active.avg.pct_of_peak_sustained_elapsed            %             0.000000    0.000000    0.000000   
+      l1tex__lsuin_requests.avg.pct_of_peak_sustained_elapsed                  %             0.000295    0.000295    0.000295   
+      l1tex__m_l1tex2xbar_req_cycles_active.avg.pct_of_peak_sustained_elapsed  %             0.128246    0.128246    0.128246   
+      l1tex__m_xbar2l1tex_read_sectors.avg.pct_of_peak_sustained_elapsed       %             0.000000    0.000000    0.000000   
+      l1tex__tex_writeback_active.avg.pct_of_peak_sustained_elapsed            %             0.000000    0.000000    0.000000   
+      l1tex__texin_sm2tex_req_cycles_active.avg.pct_of_peak_sustained_elapsed  %             0.095741    0.095741    0.095741   
+      l1tex__throughput.avg.pct_of_peak_sustained_active                       %             39.099099   39.099099   39.099099  
+      launch__waves_per_multiprocessor                                                       0.000289    0.000289    0.000289   
+      lts__d_atomic_input_cycles_active.avg.pct_of_peak_sustained_elapsed      %             0.000000    0.000000    0.000000   
+      lts__d_sectors.avg.pct_of_peak_sustained_elapsed                         %             0.002542    0.002542    0.002542   
+      lts__d_sectors_fill_device.avg.pct_of_peak_sustained_elapsed             %             0.002119    0.002119    0.002119   
+      lts__d_sectors_fill_sysmem.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      lts__lts2xbar_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.177542    0.177542    0.177542   
+      lts__t_sectors.avg.pct_of_peak_sustained_elapsed                         %             0.592585    0.592585    0.592585   
+      lts__t_tag_requests.avg.pct_of_peak_sustained_elapsed                    %             0.398305    0.398305    0.398305   
+      lts__throughput.avg.pct_of_peak_sustained_elapsed                        %             0.592585    0.592585    0.592585   
+      lts__xbar2lts_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.351695    0.351695    0.351695   
+      sm__cycles_active.avg                                                    cycle         10.277778   10.277778   10.277778  
+      sm__inst_executed.avg.pct_of_peak_sustained_elapsed                      %             0.000517    0.000517    0.000517   
+      sm__inst_executed_pipe_adu.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      sm__inst_executed_pipe_cbu_pred_on_any.avg.pct_of_peak_sustained_elapsed %             0.000295    0.000295    0.000295   
+      sm__inst_executed_pipe_fp16.avg.pct_of_peak_sustained_elapsed            %             0.000000    0.000000    0.000000   
+      sm__inst_executed_pipe_ipa.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      sm__inst_executed_pipe_lsu.avg.pct_of_peak_sustained_elapsed             %             0.000295    0.000295    0.000295   
+      sm__inst_executed_pipe_tex.avg.pct_of_peak_sustained_elapsed             %             0.000000    0.000000    0.000000   
+      sm__inst_executed_pipe_uniform.avg.pct_of_peak_sustained_elapsed         %             0.000148    0.000148    0.000148   
+      sm__inst_executed_pipe_xu.avg.pct_of_peak_sustained_elapsed              %             0.000000    0.000000    0.000000   
+      sm__issue_active.avg.pct_of_peak_sustained_elapsed                       %             0.001182    0.001182    0.001182   
+      sm__mio2rf_writeback_active.avg.pct_of_peak_sustained_elapsed            %             0.000000    0.000000    0.000000   
+      sm__mio_inst_issued.avg.pct_of_peak_sustained_elapsed                    %             0.000148    0.000148    0.000148   
+      sm__mio_pq_read_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000295    0.000295    0.000295   
+      sm__mio_pq_write_cycles_active.avg.pct_of_peak_sustained_elapsed         %             0.000295    0.000295    0.000295   
+      sm__pipe_alu_cycles_active.avg.pct_of_peak_sustained_elapsed             %             0.000295    0.000295    0.000295   
+      sm__pipe_fma_cycles_active.avg.pct_of_peak_sustained_elapsed             %             0.000295    0.000295    0.000295   
+      sm__pipe_fp64_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.000000    0.000000    0.000000   
+      sm__pipe_shared_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000000    0.000000    0.000000   
+      sm__pipe_tensor_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000000    0.000000    0.000000   
+      sm__throughput.avg.pct_of_peak_sustained_elapsed                         %             0.001182    0.001182    0.001182   
+
+    Kokkos::Impl::<unnamed>::query_cuda_kernel_arch(int *), Block Size 1, Grid Size 1, 1 invocations 
+      Section: Instruction Statistics
+      Metric Name                    Metric Unit Minimum   Maximum   Average  
+      ------------------------------ ----------- --------- --------- ---------
+      inst_executed                  inst        7.000000  7.000000  7.000000 
+      sass__inst_executed_per_opcode             7.000000  7.000000  7.000000 
+      smsp__inst_executed.avg        inst        0.016204  0.016204  0.016204 
+      smsp__inst_executed.sum        inst        7.000000  7.000000  7.000000 
+      smsp__inst_issued.avg          inst        0.037037  0.037037  0.037037 
+      smsp__inst_issued.sum          inst        16.000000 16.000000 16.000000
+
+    Kokkos::Impl::<unnamed>::query_cuda_kernel_arch(int *), Block Size 1, Grid Size 1, 1 invocations 
+      Section: Launch Statistics
+      Metric Name                                       Metric Unit     Minimum   Maximum   Average  
+      ------------------------------------------------- --------------- --------- --------- ---------
+      launch__block_size                                                1.000000  1.000000  1.000000 
+      launch__grid_size                                                 1.000000  1.000000  1.000000 
+      launch__registers_per_thread                      register/thread 16.000000 16.000000 16.000000
+      launch__shared_mem_config_size                    Kbyte           32.768000 32.768000 32.768000
+      launch__shared_mem_per_block_driver               Kbyte/block     1.024000  1.024000  1.024000 
+      launch__shared_mem_per_block_dynamic              byte/block      0.000000  0.000000  0.000000 
+      launch__shared_mem_per_block_static               byte/block      0.000000  0.000000  0.000000 
+      launch__thread_count                              thread          1.000000  1.000000  1.000000 
+      launch__waves_per_multiprocessor                                  0.000289  0.000289  0.000289 
+      sm__maximum_warps_per_active_cycle_pct            %               50.000000 50.000000 50.000000
+      sm__warps_active.avg.pct_of_peak_sustained_active %               1.562500  1.562500  1.562500 
+
+    Kokkos::Impl::<unnamed>::query_cuda_kernel_arch(int *), Block Size 1, Grid Size 1, 1 invocations 
+      Section: Memory Workload Analysis
+      Metric Name                                                              Metric Unit  Minimum    Maximum    Average   
+      ------------------------------------------------------------------------ ------------ ---------- ---------- ----------
+      dram__bytes.sum.per_second                                               Mbyte/second 47.337278  47.337278  47.337278 
+      gpu__compute_memory_access_throughput.avg.pct_of_peak_sustained_elapsed  %            0.592585   0.592585   0.592585  
+      gpu__compute_memory_request_throughput.avg.pct_of_peak_sustained_elapsed %            0.351695   0.351695   0.351695  
+      l1tex__t_sector_hit_rate.pct                                             %            0.000000   0.000000   0.000000  
+      lts__average_gcomp_input_sector_success_rate.pct                         %            0.000000   0.000000   0.000000  
+      lts__average_gcomp_output_sector_compression_achieved_rate.ratio                      0.000000   0.000000   0.000000  
+      lts__t_sector_hit_rate.pct                                               %            115.337862 115.337862 115.337862
+      sm__memory_throughput.avg.pct_of_peak_sustained_elapsed                  %            0.000295   0.000295   0.000295  
+
+    Kokkos::Impl::<unnamed>::query_cuda_kernel_arch(int *), Block Size 1, Grid Size 1, 1 invocations 
+      Section: Occupancy
+      Metric Name                                       Metric Unit     Minimum     Maximum     Average    
+      ------------------------------------------------- --------------- ----------- ----------- -----------
+      launch__block_size                                                1.000000    1.000000    1.000000   
+      launch__occupancy_limit_blocks                    block           32.000000   32.000000   32.000000  
+      launch__occupancy_limit_registers                 block           128.000000  128.000000  128.000000 
+      launch__occupancy_limit_shared_mem                block           164.000000  164.000000  164.000000 
+      launch__occupancy_limit_warps                     block           64.000000   64.000000   64.000000  
+      launch__occupancy_per_block_size                                  3670.000000 3670.000000 3670.000000
+      launch__occupancy_per_register_count                              4512.000000 4512.000000 4512.000000
+      launch__occupancy_per_shared_mem_size                             1036.000000 1036.000000 1036.000000
+      launch__registers_per_thread                      register/thread 16.000000   16.000000   16.000000  
+      launch__shared_mem_per_block                      Kbyte/block     1.024000    1.024000    1.024000   
+      sm__maximum_warps_avg_per_active_cycle            warp            32.000000   32.000000   32.000000  
+      sm__maximum_warps_per_active_cycle_pct            %               50.000000   50.000000   50.000000  
+      sm__warps_active.avg.pct_of_peak_sustained_active %               1.562500    1.562500    1.562500   
+      sm__warps_active.avg.per_cycle_active             warp            1.000000    1.000000    1.000000   
+
+    Kokkos::Impl::<unnamed>::query_cuda_kernel_arch(int *), Block Size 1, Grid Size 1, 1 invocations 
+      Section: Scheduler Statistics
+      Metric Name                                         Metric Unit Minimum   Maximum   Average  
+      --------------------------------------------------- ----------- --------- --------- ---------
+      smsp__issue_active.avg.pct_of_peak_sustained_active %           1.459854  1.459854  1.459854 
+      smsp__issue_active.avg.per_cycle_active                         0.014599  0.014599  0.014599 
+      smsp__issue_inst0.avg.pct_of_peak_sustained_active  %           98.540146 98.540146 98.540146
+      smsp__maximum_warps_avg_per_active_cycle            warp        8.000000  8.000000  8.000000 
+      smsp__warps_active.avg.peak_sustained               warp        16.000000 16.000000 16.000000
+      smsp__warps_active.avg.per_cycle_active             warp        0.998175  0.998175  0.998175 
+      smsp__warps_eligible.avg.per_cycle_active           warp        0.014599  0.014599  0.014599 
+
+    Kokkos::Impl::<unnamed>::query_cuda_kernel_arch(int *), Block Size 1, Grid Size 1, 1 invocations 
+      Section: Source Counters
+      Metric Name                                                    Metric Unit Minimum     Maximum     Average    
+      -------------------------------------------------------------- ----------- ----------- ----------- -----------
+      derived__avg_thread_executed                                   thread      1.000000    1.000000    1.000000   
+      derived__memory_l1_wavefronts_shared_excessive                 byte        0.000000    0.000000    0.000000   
+      derived__memory_l2_theoretical_sectors_global_excessive        byte        0.000000    0.000000    0.000000   
+      derived__smsp__inst_executed_op_branch_pct                     %           0.142857    0.142857    0.142857   
+      gpc__cycles_elapsed.max                                        cycle       3134.000000 3134.000000 3134.000000
+      inst_executed                                                  inst        7.000000    7.000000    7.000000   
+      memory_l1_tag_requests_global                                  sectors     1.000000    1.000000    1.000000   
+      memory_l1_wavefronts_shared                                    sectors     0.000000    0.000000    0.000000   
+      memory_l1_wavefronts_shared_ideal                              sectors     0.000000    0.000000    0.000000   
+      memory_l2_theoretical_sectors_global                           sectors     1.000000    1.000000    1.000000   
+      memory_l2_theoretical_sectors_global_ideal                     sectors     1.000000    1.000000    1.000000   
+      memory_l2_theoretical_sectors_local                            sectors     0.000000    0.000000    0.000000   
+      smsp__branch_targets_threads_divergent                                     0.000000    0.000000    0.000000   
+      smsp__inst_executed.sum                                        inst        7.000000    7.000000    7.000000   
+      smsp__inst_executed_op_branch.sum                              inst        1.000000    1.000000    1.000000   
+      smsp__pcsamp_sample_count                                                  1.000000    1.000000    1.000000   
+      smsp__pcsamp_warps_issue_stalled_barrier                       warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_barrier_not_issued            warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_branch_resolving              warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_branch_resolving_not_issued   warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_dispatch_stall                warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_dispatch_stall_not_issued     warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_drain                         warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_drain_not_issued              warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_imc_miss                      warp        1.000000    1.000000    2.000000   
+      smsp__pcsamp_warps_issue_stalled_imc_miss_not_issued           warp        1.000000    1.000000    2.000000   
+      smsp__pcsamp_warps_issue_stalled_lg_throttle                   warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_lg_throttle_not_issued        warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_long_scoreboard               warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_long_scoreboard_not_issued    warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_math_pipe_throttle            warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_math_pipe_throttle_not_issued warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_membar                        byte        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_membar_not_issued             byte        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_mio_throttle                  warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_mio_throttle_not_issued       warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_misc                          warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_misc_not_issued               warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_no_instructions               inst        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_no_instructions_not_issued    inst        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_not_selected                  warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_not_selected_not_issued       warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_selected                      warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_selected_not_issued           warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_short_scoreboard              warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_short_scoreboard_not_issued   warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_sleeping                      warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_sleeping_not_issued           warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_tex_throttle                  warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_tex_throttle_not_issued       warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_wait                          warp        0.000000    0.000000    0.000000   
+      smsp__pcsamp_warps_issue_stalled_wait_not_issued               warp        0.000000    0.000000    0.000000   
+      smsp__sass_average_branch_targets_threads_uniform.pct          %           0.000000    0.000000    0.000000   
+      smsp__sass_branch_targets_threads_divergent.avg                            0.000000    0.000000    0.000000   
+      thread_inst_executed_true                                      inst        7.000000    7.000000    7.000000   
+
+    Kokkos::Impl::<unnamed>::query_cuda_kernel_arch(int *), Block Size 1, Grid Size 1, 1 invocations 
+      Section: Warp State Statistics
+      Metric Name                                                                 Metric Unit Minimum    Maximum    Average   
+      --------------------------------------------------------------------------- ----------- ---------- ---------- ----------
+      smsp__average_warp_latency_per_inst_issued.ratio                            cycle       68.375000  68.375000  68.375000 
+      smsp__average_warps_active_per_inst_executed.ratio                          cycle       156.285714 156.285714 156.285714
+      smsp__average_warps_issue_stalled_barrier_per_issue_active.ratio            inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_branch_resolving_per_issue_active.ratio   inst        0.500000   0.500000   0.500000  
+      smsp__average_warps_issue_stalled_dispatch_stall_per_issue_active.ratio     inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_drain_per_issue_active.ratio              inst        1.312500   1.312500   1.312500  
+      smsp__average_warps_issue_stalled_imc_miss_per_issue_active.ratio           inst        63.687500  63.687500  63.687500 
+      smsp__average_warps_issue_stalled_lg_throttle_per_issue_active.ratio        inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_long_scoreboard_per_issue_active.ratio    inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_math_pipe_throttle_per_issue_active.ratio inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_membar_per_issue_active.ratio             inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_mio_throttle_per_issue_active.ratio       inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_misc_per_issue_active.ratio               inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_no_instruction_per_issue_active.ratio     inst        2.000000   2.000000   2.000000  
+      smsp__average_warps_issue_stalled_not_selected_per_issue_active.ratio       inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_selected_per_issue_active.ratio           inst        1.000000   1.000000   1.000000  
+      smsp__average_warps_issue_stalled_short_scoreboard_per_issue_active.ratio   inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_sleeping_per_issue_active.ratio           inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_tex_throttle_per_issue_active.ratio       inst        0.000000   0.000000   0.000000  
+      smsp__average_warps_issue_stalled_wait_per_issue_active.ratio               inst        1.062500   1.062500   1.062500  
+      smsp__issue_active.avg.per_cycle_active                                                 0.014599   0.014599   0.014599  
+      smsp__thread_inst_executed_per_inst_executed.ratio                                      1.000000   1.000000   1.000000  
+      smsp__thread_inst_executed_pred_on_per_inst_executed.ratio                              1.000000   1.000000   1.000000  
+
+    _ZN6Kokkos4ImplL33cuda_parallel_launch_local_memoryINS0_11ParallelForIZ4mainEUlRKiE_NS_11RangePolicyIJNS_4CudaEEEES7_EEEEvT_, Block Size 128, Grid Size 16384, 1 invocations 
+      Section: Compute Workload Analysis
+      Metric Name                                                            Metric Unit Minimum   Maximum   Average  
+      ---------------------------------------------------------------------- ----------- --------- --------- ---------
+      sm__inst_executed.avg.per_cycle_active                                 inst/cycle  2.636720  2.636720  2.636720 
+      sm__inst_executed.avg.per_cycle_elapsed                                inst/cycle  2.626762  2.626762  2.626762 
+      sm__inst_executed_pipe_adu.avg.pct_of_peak_sustained_active            %           14.949291 14.949291 14.949291
+      sm__inst_executed_pipe_cbu.avg.pct_of_peak_sustained_active            %           2.912332  2.912332  2.912332 
+      sm__inst_executed_pipe_fp16.avg.pct_of_peak_sustained_active           %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_fp64.avg.pct_of_peak_sustained_active           %           0.517616  0.517616  0.517616 
+      sm__inst_executed_pipe_lsu.avg.pct_of_peak_sustained_active            %           0.000152  0.000152  0.000152 
+      sm__inst_executed_pipe_tensor_op_dmma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tensor_op_hmma.avg.pct_of_peak_sustained_active %           0.456102  0.456102  0.456102 
+      sm__inst_executed_pipe_tensor_op_imma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tex.avg.pct_of_peak_sustained_active            %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_uniform.avg.pct_of_peak_sustained_active        %           0.000029  0.000029  0.000029 
+      sm__inst_executed_pipe_xu.avg.pct_of_peak_sustained_active             %           26.852611 26.852611 26.852611
+      sm__inst_issued.avg.pct_of_peak_sustained_active                       %           65.919888 65.919888 65.919888
+      sm__inst_issued.avg.per_cycle_active                                   inst/cycle  2.636796  2.636796  2.636796 
+      sm__inst_issued.max.pct_of_peak_sustained_active                       %           67.160035 67.160035 67.160035
+      sm__instruction_throughput.avg.pct_of_peak_sustained_active            %           81.737484 81.737484 81.737484
+      sm__pipe_alu_cycles_active.avg.pct_of_peak_sustained_active            %           27.868513 27.868513 27.868513
+      sm__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active            %           81.737484 81.737484 81.737484
+
+    _ZN6Kokkos4ImplL33cuda_parallel_launch_local_memoryINS0_11ParallelForIZ4mainEUlRKiE_NS_11RangePolicyIJNS_4CudaEEEES7_EEEEvT_, Block Size 128, Grid Size 16384, 1 invocations 
+      Section: GPU Speed Of Light Roofline Chart
+      Metric Name                                                           Metric Unit   Minimum      Maximum      Average     
+      --------------------------------------------------------------------- ------------- ------------ ------------ ------------
+      derived__sm__sass_thread_inst_executed_op_dfma_pred_on_x2             inst          6912.000000  6912.000000  6912.000000 
+      derived__sm__sass_thread_inst_executed_op_ffma_pred_on_x2             inst          13824.000000 13824.000000 13824.000000
+      derived__smsp__sass_thread_inst_executed_op_dfma_pred_on_x2           inst          0.000000     0.000000     0.000000    
+      derived__smsp__sass_thread_inst_executed_op_ffma_pred_on_x2           inst          1271.613430  1271.613430  1271.613430 
+      dram__bytes.sum.peak_sustained                                        Kbyte/cycle   1.280000     1.280000     1.280000    
+      dram__bytes.sum.per_second                                            Mbyte/second  1.085789     1.085789     1.085789    
+      dram__cycles_elapsed.avg.per_second                                   cycle/nsecond 1.214311     1.214311     1.214311    
+      sm__cycles_elapsed.avg.per_second                                     cycle/usecond 764.566172   764.566172   764.566172  
+      sm__sass_thread_inst_executed_op_dfma_pred_on.sum.peak_sustained      inst/cycle    3456.000000  3456.000000  3456.000000 
+      sm__sass_thread_inst_executed_op_ffma_pred_on.sum.peak_sustained      inst/cycle    6912.000000  6912.000000  6912.000000 
+      smsp__cycles_elapsed.avg.per_second                                   cycle/usecond 764.566172   764.566172   764.566172  
+      smsp__sass_thread_inst_executed_op_dadd_pred_on.sum.per_cycle_elapsed inst/cycle    2.512843     2.512843     2.512843    
+      smsp__sass_thread_inst_executed_op_dfma_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_dmul_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_fadd_pred_on.sum.per_cycle_elapsed inst/cycle    308.832519   308.832519   308.832519  
+      smsp__sass_thread_inst_executed_op_ffma_pred_on.sum.per_cycle_elapsed inst/cycle    635.806715   635.806715   635.806715  
+      smsp__sass_thread_inst_executed_op_fmul_pred_on.sum.per_cycle_elapsed inst/cycle    204.226375   204.226375   204.226375  
+
+    _ZN6Kokkos4ImplL33cuda_parallel_launch_local_memoryINS0_11ParallelForIZ4mainEUlRKiE_NS_11RangePolicyIJNS_4CudaEEEES7_EEEEvT_, Block Size 128, Grid Size 16384, 1 invocations 
+      Section: GPU Speed Of Light Throughput
+      Metric Name                                                              Metric Unit   Minimum            Maximum            Average           
+      ------------------------------------------------------------------------ ------------- ------------------ ------------------ ------------------
+      dram__cycles_active.avg.pct_of_peak_sustained_elapsed                    %             0.000070           0.000070           0.000070          
+      dram__cycles_elapsed.avg.per_second                                      cycle/nsecond 1.214311           1.214311           1.214311          
+      fbpa__dram_sectors.avg.pct_of_peak_sustained_elapsed                     %             0.000059           0.000059           0.000059          
+      gpc__cycles_elapsed.avg.per_second                                       cycle/usecond 764.566172         764.566172         764.566172        
+      gpc__cycles_elapsed.max                                                  cycle         11585407796.000000 11585407796.000000 11585407796.000000
+      gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed         %             0.002548           0.002548           0.002548          
+      gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed                   %             0.000070           0.000070           0.000070          
+      gpu__time_duration.sum                                                   second        15.152917          15.152917          15.152917         
+      idc__request_cycles_active.avg.pct_of_peak_sustained_elapsed             %             14.892810          14.892810          14.892810         
+      l1tex__data_bank_reads.avg.pct_of_peak_sustained_elapsed                 %             0.000141           0.000141           0.000141          
+      l1tex__data_bank_writes.avg.pct_of_peak_sustained_elapsed                %             0.000103           0.000103           0.000103          
+      l1tex__data_pipe_lsu_wavefronts.avg.pct_of_peak_sustained_elapsed        %             0.000860           0.000860           0.000860          
+      l1tex__data_pipe_tex_wavefronts.avg.pct_of_peak_sustained_elapsed        %             0.000000           0.000000           0.000000          
+      l1tex__f_wavefronts.avg.pct_of_peak_sustained_elapsed                    %             0.000000           0.000000           0.000000          
+      l1tex__lsu_writeback_active.avg.pct_of_peak_sustained_elapsed            %             0.000073           0.000073           0.000073          
+      l1tex__lsuin_requests.avg.pct_of_peak_sustained_elapsed                  %             0.000152           0.000152           0.000152          
+      l1tex__m_l1tex2xbar_req_cycles_active.avg.pct_of_peak_sustained_elapsed  %             0.001743           0.001743           0.001743          
+      l1tex__m_xbar2l1tex_read_sectors.avg.pct_of_peak_sustained_elapsed       %             0.000012           0.000012           0.000012          
+      l1tex__tex_writeback_active.avg.pct_of_peak_sustained_elapsed            %             0.000000           0.000000           0.000000          
+      l1tex__texin_sm2tex_req_cycles_active.avg.pct_of_peak_sustained_elapsed  %             0.000000           0.000000           0.000000          
+      l1tex__throughput.avg.pct_of_peak_sustained_active                       %             0.001750           0.001750           0.001750          
+      launch__waves_per_multiprocessor                                                       30.340741          30.340741          30.340741         
+      lts__d_atomic_input_cycles_active.avg.pct_of_peak_sustained_elapsed      %             0.000000           0.000000           0.000000          
+      lts__d_sectors.avg.pct_of_peak_sustained_elapsed                         %             0.000771           0.000771           0.000771          
+      lts__d_sectors_fill_device.avg.pct_of_peak_sustained_elapsed             %             0.000010           0.000010           0.000010          
+      lts__d_sectors_fill_sysmem.avg.pct_of_peak_sustained_elapsed             %             0.000000           0.000000           0.000000          
+      lts__lts2xbar_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.000185           0.000185           0.000185          
+      lts__t_sectors.avg.pct_of_peak_sustained_elapsed                         %             0.001556           0.001556           0.001556          
+      lts__t_tag_requests.avg.pct_of_peak_sustained_elapsed                    %             0.001635           0.001635           0.001635          
+      lts__throughput.avg.pct_of_peak_sustained_elapsed                        %             0.002980           0.002980           0.002980          
+      lts__xbar2lts_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.002548           0.002548           0.002548          
+      sm__cycles_active.avg                                                    cycle         11541652897.509260 11541652897.509260 11541652897.509260
+      sm__inst_executed.avg.pct_of_peak_sustained_elapsed                      %             65.669038          65.669038          65.669038         
+      sm__inst_executed_pipe_adu.avg.pct_of_peak_sustained_elapsed             %             14.892831          14.892831          14.892831         
+      sm__inst_executed_pipe_cbu_pred_on_any.avg.pct_of_peak_sustained_elapsed %             11.413331          11.413331          11.413331         
+      sm__inst_executed_pipe_fp16.avg.pct_of_peak_sustained_elapsed            %             0.000000           0.000000           0.000000          
+      sm__inst_executed_pipe_ipa.avg.pct_of_peak_sustained_elapsed             %             0.000000           0.000000           0.000000          
+      sm__inst_executed_pipe_lsu.avg.pct_of_peak_sustained_elapsed             %             0.000152           0.000152           0.000152          
+      sm__inst_executed_pipe_tex.avg.pct_of_peak_sustained_elapsed             %             0.000000           0.000000           0.000000          
+      sm__inst_executed_pipe_uniform.avg.pct_of_peak_sustained_elapsed         %             0.000029           0.000029           0.000029          
+      sm__inst_executed_pipe_xu.avg.pct_of_peak_sustained_elapsed              %             26.751196          26.751196          26.751196         
+      sm__issue_active.avg.pct_of_peak_sustained_elapsed                       %             65.670927          65.670927          65.670927         
+      sm__mio2rf_writeback_active.avg.pct_of_peak_sustained_elapsed            %             3.723242           3.723242           3.723242          
+      sm__mio_inst_issued.avg.pct_of_peak_sustained_elapsed                    %             3.723284           3.723284           3.723284          
+      sm__mio_pq_read_cycles_active.avg.pct_of_peak_sustained_elapsed          %             7.458543           7.458543           7.458543          
+      sm__mio_pq_write_cycles_active.avg.pct_of_peak_sustained_elapsed         %             7.458419           7.458419           7.458419          
+      sm__pipe_alu_cycles_active.avg.pct_of_peak_sustained_elapsed             %             27.763262          27.763262          27.763262         
+      sm__pipe_fma_cycles_active.avg.pct_of_peak_sustained_elapsed             %             81.428784          81.428784          81.428784         
+      sm__pipe_fp64_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.515661           0.515661           0.515661          
+      sm__pipe_shared_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.970041           0.970041           0.970041          
+      sm__pipe_tensor_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.454380           0.454380           0.454380          
+      sm__throughput.avg.pct_of_peak_sustained_elapsed                         %             81.428784          81.428784          81.428784         
+
+    _ZN6Kokkos4ImplL33cuda_parallel_launch_local_memoryINS0_11ParallelForIZ4mainEUlRKiE_NS_11RangePolicyIJNS_4CudaEEEES7_EEEEvT_, Block Size 128, Grid Size 16384, 1 invocations 
+      Section: Instruction Statistics
+      Metric Name                    Metric Unit Minimum              Maximum              Average             
+      ------------------------------ ----------- -------------------- -------------------- --------------------
+      inst_executed                  inst        3286667185502.000000 3286667185502.000000 3286667185502.000000
+      sass__inst_executed_per_opcode             3286667185502.000000 3286667185502.000000 3286667185502.000000
+      smsp__inst_executed.avg        inst        7608025893.578704    7608025893.578704    7608025893.578704   
+      smsp__inst_executed.sum        inst        3286667186026.000000 3286667186026.000000 3286667186026.000000
+      smsp__inst_issued.avg          inst        7608244642.601851    7608244642.601851    7608244642.601851   
+      smsp__inst_issued.sum          inst        3286761685604.000000 3286761685604.000000 3286761685604.000000
+
+    _ZN6Kokkos4ImplL33cuda_parallel_launch_local_memoryINS0_11ParallelForIZ4mainEUlRKiE_NS_11RangePolicyIJNS_4CudaEEEES7_EEEEvT_, Block Size 128, Grid Size 16384, 1 invocations 
+      Section: Launch Statistics
+      Metric Name                                       Metric Unit     Minimum        Maximum        Average       
+      ------------------------------------------------- --------------- -------------- -------------- --------------
+      launch__block_size                                                128.000000     128.000000     128.000000    
+      launch__grid_size                                                 16384.000000   16384.000000   16384.000000  
+      launch__registers_per_thread                      register/thread 82.000000      82.000000      82.000000     
+      launch__shared_mem_config_size                    Kbyte           16.384000      16.384000      16.384000     
+      launch__shared_mem_per_block_driver               Kbyte/block     1.024000       1.024000       1.024000      
+      launch__shared_mem_per_block_dynamic              byte/block      0.000000       0.000000       0.000000      
+      launch__shared_mem_per_block_static               byte/block      0.000000       0.000000       0.000000      
+      launch__thread_count                              thread          2097152.000000 2097152.000000 2097152.000000
+      launch__waves_per_multiprocessor                                  30.340741      30.340741      30.340741     
+      sm__maximum_warps_per_active_cycle_pct            %               31.250000      31.250000      31.250000     
+      sm__warps_active.avg.pct_of_peak_sustained_active %               29.376629      29.376629      29.376629     
+
+    _ZN6Kokkos4ImplL33cuda_parallel_launch_local_memoryINS0_11ParallelForIZ4mainEUlRKiE_NS_11RangePolicyIJNS_4CudaEEEES7_EEEEvT_, Block Size 128, Grid Size 16384, 1 invocations 
+      Section: Memory Workload Analysis
+      Metric Name                                                              Metric Unit  Minimum   Maximum   Average  
+      ------------------------------------------------------------------------ ------------ --------- --------- ---------
+      dram__bytes.sum.per_second                                               Mbyte/second 1.085789  1.085789  1.085789 
+      gpu__compute_memory_access_throughput.avg.pct_of_peak_sustained_elapsed  %            0.001636  0.001636  0.001636 
+      gpu__compute_memory_request_throughput.avg.pct_of_peak_sustained_elapsed %            0.002548  0.002548  0.002548 
+      l1tex__t_sector_hit_rate.pct                                             %            64.510319 64.510319 64.510319
+      lts__average_gcomp_input_sector_success_rate.pct                         %            0.000000  0.000000  0.000000 
+      lts__average_gcomp_output_sector_compression_achieved_rate.ratio                      0.000000  0.000000  0.000000 
+      lts__t_sector_hit_rate.pct                                               %            99.798402 99.798402 99.798402
+      sm__memory_throughput.avg.pct_of_peak_sustained_elapsed                  %            14.892831 14.892831 14.892831
+
+    _ZN6Kokkos4ImplL33cuda_parallel_launch_local_memoryINS0_11ParallelForIZ4mainEUlRKiE_NS_11RangePolicyIJNS_4CudaEEEES7_EEEEvT_, Block Size 128, Grid Size 16384, 1 invocations 
+      Section: Occupancy
+      Metric Name                                       Metric Unit     Minimum     Maximum     Average    
+      ------------------------------------------------- --------------- ----------- ----------- -----------
+      launch__block_size                                                128.000000  128.000000  128.000000 
+      launch__occupancy_limit_blocks                    block           32.000000   32.000000   32.000000  
+      launch__occupancy_limit_registers                 block           5.000000    5.000000    5.000000   
+      launch__occupancy_limit_shared_mem                block           164.000000  164.000000  164.000000 
+      launch__occupancy_limit_warps                     block           16.000000   16.000000   16.000000  
+      launch__occupancy_per_block_size                                  698.000000  698.000000  698.000000 
+      launch__occupancy_per_register_count                              5792.000000 5792.000000 5792.000000
+      launch__occupancy_per_shared_mem_size                             1760.000000 1760.000000 1760.000000
+      launch__registers_per_thread                      register/thread 82.000000   82.000000   82.000000  
+      launch__shared_mem_per_block                      Kbyte/block     1.024000    1.024000    1.024000   
+      sm__maximum_warps_avg_per_active_cycle            warp            20.000000   20.000000   20.000000  
+      sm__maximum_warps_per_active_cycle_pct            %               31.250000   31.250000   31.250000  
+      sm__warps_active.avg.pct_of_peak_sustained_active %               29.376629   29.376629   29.376629  
+      sm__warps_active.avg.per_cycle_active             warp            18.801043   18.801043   18.801043  
+
+    _ZN6Kokkos4ImplL33cuda_parallel_launch_local_memoryINS0_11ParallelForIZ4mainEUlRKiE_NS_11RangePolicyIJNS_4CudaEEEES7_EEEEvT_, Block Size 128, Grid Size 16384, 1 invocations 
+      Section: Scheduler Statistics
+      Metric Name                                         Metric Unit Minimum   Maximum   Average  
+      --------------------------------------------------- ----------- --------- --------- ---------
+      smsp__issue_active.avg.pct_of_peak_sustained_active %           65.945523 65.945523 65.945523
+      smsp__issue_active.avg.per_cycle_active                         0.659455  0.659455  0.659455 
+      smsp__issue_inst0.avg.pct_of_peak_sustained_active  %           34.054477 34.054477 34.054477
+      smsp__maximum_warps_avg_per_active_cycle            warp        5.000000  5.000000  5.000000 
+      smsp__warps_active.avg.peak_sustained               warp        16.000000 16.000000 16.000000
+      smsp__warps_active.avg.per_cycle_active             warp        4.702555  4.702555  4.702555 
+      smsp__warps_eligible.avg.per_cycle_active           warp        1.576480  1.576480  1.576480 
+
+    _ZN6Kokkos4ImplL33cuda_parallel_launch_local_memoryINS0_11ParallelForIZ4mainEUlRKiE_NS_11RangePolicyIJNS_4CudaEEEES7_EEEEvT_, Block Size 128, Grid Size 16384, 1 invocations 
+      Section: Source Counters
+      Metric Name                                                    Metric Unit Minimum               Maximum               Average              
+      -------------------------------------------------------------- ----------- --------------------- --------------------- ---------------------
+      derived__avg_thread_executed                                   thread      6.000000              6.000000              6.000000             
+      derived__memory_l1_wavefronts_shared_excessive                 byte        0.000000              0.000000              0.000000             
+      derived__memory_l2_theoretical_sectors_global_excessive        Mbyte       6.094848              6.094848              6.094848             
+      derived__smsp__inst_executed_op_branch_pct                     %           0.062473              0.062473              0.062473             
+      gpc__cycles_elapsed.max                                        cycle       11585407796.000000    11585407796.000000    11585407796.000000   
+      inst_executed                                                  inst        3286667185502.000000  3286667185502.000000  3286667185502.000000 
+      memory_l1_tag_requests_global                                  sectors     6326705.000000        6326705.000000        6326705.000000       
+      memory_l1_wavefronts_shared                                    sectors     0.000000              0.000000              0.000000             
+      memory_l1_wavefronts_shared_ideal                              sectors     0.000000              0.000000              0.000000             
+      memory_l2_theoretical_sectors_global                           sectors     6296952.000000        6296952.000000        6296952.000000       
+      memory_l2_theoretical_sectors_global_ideal                     sectors     202104.000000         202104.000000         202104.000000        
+      memory_l2_theoretical_sectors_local                            sectors     12582912.000000       12582912.000000       12582912.000000      
+      smsp__branch_targets_threads_divergent                                     1698770208.000000     1698770208.000000     1698770208.000000    
+      smsp__inst_executed.sum                                        inst        3286667186026.000000  3286667186026.000000  3286667186026.000000 
+      smsp__inst_executed_op_branch.sum                              inst        205327703225.000000   205327703225.000000   205327703225.000000  
+      smsp__pcsamp_sample_count                                                  3669964.000000        3669964.000000        3669964.000000       
+      smsp__pcsamp_warps_issue_stalled_barrier                       warp        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_barrier_not_issued            warp        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_branch_resolving              warp        154570.000000         154570.000000         154570.000000        
+      smsp__pcsamp_warps_issue_stalled_branch_resolving_not_issued   warp        48566.000000          48566.000000          48566.000000         
+      smsp__pcsamp_warps_issue_stalled_dispatch_stall                warp        25480.000000          25480.000000          50960.000000         
+      smsp__pcsamp_warps_issue_stalled_dispatch_stall_not_issued     warp        4719.000000           4719.000000           9438.000000          
+      smsp__pcsamp_warps_issue_stalled_drain                         warp        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_drain_not_issued              warp        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_imc_miss                      warp        153.000000            153.000000            306.000000           
+      smsp__pcsamp_warps_issue_stalled_imc_miss_not_issued           warp        145.000000            145.000000            290.000000           
+      smsp__pcsamp_warps_issue_stalled_lg_throttle                   warp        65.000000             65.000000             130.000000           
+      smsp__pcsamp_warps_issue_stalled_lg_throttle_not_issued        warp        63.000000             63.000000             126.000000           
+      smsp__pcsamp_warps_issue_stalled_long_scoreboard               warp        77.000000             77.000000             154.000000           
+      smsp__pcsamp_warps_issue_stalled_long_scoreboard_not_issued    warp        70.000000             70.000000             140.000000           
+      smsp__pcsamp_warps_issue_stalled_math_pipe_throttle            warp        664378.000000         664378.000000         1328756.000000       
+      smsp__pcsamp_warps_issue_stalled_math_pipe_throttle_not_issued warp        430527.000000         430527.000000         861054.000000        
+      smsp__pcsamp_warps_issue_stalled_membar                        byte        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_membar_not_issued             byte        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_mio_throttle                  warp        7965.000000           7965.000000           15930.000000         
+      smsp__pcsamp_warps_issue_stalled_mio_throttle_not_issued       warp        3064.000000           3064.000000           6128.000000          
+      smsp__pcsamp_warps_issue_stalled_misc                          warp        27.000000             27.000000             54.000000            
+      smsp__pcsamp_warps_issue_stalled_misc_not_issued               warp        11.000000             11.000000             22.000000            
+      smsp__pcsamp_warps_issue_stalled_no_instructions               inst        425267.000000         425267.000000         850534.000000        
+      smsp__pcsamp_warps_issue_stalled_no_instructions_not_issued    inst        168223.000000         168223.000000         336446.000000        
+      smsp__pcsamp_warps_issue_stalled_not_selected                  warp        792034.000000         792034.000000         1584068.000000       
+      smsp__pcsamp_warps_issue_stalled_not_selected_not_issued       warp        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_selected                      warp        500482.000000         500482.000000         1000964.000000       
+      smsp__pcsamp_warps_issue_stalled_selected_not_issued           warp        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_short_scoreboard              warp        256997.000000         256997.000000         513994.000000        
+      smsp__pcsamp_warps_issue_stalled_short_scoreboard_not_issued   warp        86802.000000          86802.000000          173604.000000        
+      smsp__pcsamp_warps_issue_stalled_sleeping                      warp        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_sleeping_not_issued           warp        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_tex_throttle                  warp        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_tex_throttle_not_issued       warp        0.000000              0.000000              0.000000             
+      smsp__pcsamp_warps_issue_stalled_wait                          warp        842469.000000         842469.000000         1684938.000000       
+      smsp__pcsamp_warps_issue_stalled_wait_not_issued               warp        347113.000000         347113.000000         694226.000000        
+      smsp__sass_average_branch_targets_threads_uniform.pct          %           98.723755             98.723755             98.723755            
+      smsp__sass_branch_targets_threads_divergent.avg                            3932338.444444        3932338.444444        3932338.444444       
+      thread_inst_executed_true                                      inst        21414290259131.000000 21414290259131.000000 21414290259131.000000
+
+    _ZN6Kokkos4ImplL33cuda_parallel_launch_local_memoryINS0_11ParallelForIZ4mainEUlRKiE_NS_11RangePolicyIJNS_4CudaEEEES7_EEEEvT_, Block Size 128, Grid Size 16384, 1 invocations 
+      Section: Warp State Statistics
+      Metric Name                                                                 Metric Unit Minimum  Maximum  Average 
+      --------------------------------------------------------------------------- ----------- -------- -------- --------
+      smsp__average_warp_latency_per_inst_issued.ratio                            cycle       7.130970 7.130970 7.130970
+      smsp__average_warps_active_per_inst_executed.ratio                          cycle       7.131175 7.131175 7.131175
+      smsp__average_warps_issue_stalled_barrier_per_issue_active.ratio            inst        0.000000 0.000000 0.000000
+      smsp__average_warps_issue_stalled_branch_resolving_per_issue_active.ratio   inst        0.309160 0.309160 0.309160
+      smsp__average_warps_issue_stalled_dispatch_stall_per_issue_active.ratio     inst        0.044712 0.044712 0.044712
+      smsp__average_warps_issue_stalled_drain_per_issue_active.ratio              inst        0.000000 0.000000 0.000000
+      smsp__average_warps_issue_stalled_imc_miss_per_issue_active.ratio           inst        0.000001 0.000001 0.000001
+      smsp__average_warps_issue_stalled_lg_throttle_per_issue_active.ratio        inst        0.000001 0.000001 0.000001
+      smsp__average_warps_issue_stalled_long_scoreboard_per_issue_active.ratio    inst        0.000007 0.000007 0.000007
+      smsp__average_warps_issue_stalled_math_pipe_throttle_per_issue_active.ratio inst        1.165491 1.165491 1.165491
+      smsp__average_warps_issue_stalled_membar_per_issue_active.ratio             inst        0.000000 0.000000 0.000000
+      smsp__average_warps_issue_stalled_mio_throttle_per_issue_active.ratio       inst        0.015724 0.015724 0.015724
+      smsp__average_warps_issue_stalled_misc_per_issue_active.ratio               inst        0.000045 0.000045 0.000045
+      smsp__average_warps_issue_stalled_no_instruction_per_issue_active.ratio     inst        1.006751 1.006751 1.006751
+      smsp__average_warps_issue_stalled_not_selected_per_issue_active.ratio       inst        1.391047 1.391047 1.391047
+      smsp__average_warps_issue_stalled_selected_per_issue_active.ratio           inst        1.000000 1.000000 1.000000
+      smsp__average_warps_issue_stalled_short_scoreboard_per_issue_active.ratio   inst        0.515628 0.515628 0.515628
+      smsp__average_warps_issue_stalled_sleeping_per_issue_active.ratio           inst        0.000000 0.000000 0.000000
+      smsp__average_warps_issue_stalled_tex_throttle_per_issue_active.ratio       inst        0.000000 0.000000 0.000000
+      smsp__average_warps_issue_stalled_wait_per_issue_active.ratio               inst        1.682791 1.682791 1.682791
+      smsp__issue_active.avg.per_cycle_active                                                 0.659455 0.659455 0.659455
+      smsp__thread_inst_executed_per_inst_executed.ratio                                      6.640351 6.640351 6.640351
+      smsp__thread_inst_executed_pred_on_per_inst_executed.ratio                              6.508515 6.508515 6.508515
+
+    desul::<unnamed>::init_lock_arrays_cuda_kernel(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Compute Workload Analysis
+      Metric Name                                                            Metric Unit Minimum   Maximum   Average  
+      ---------------------------------------------------------------------- ----------- --------- --------- ---------
+      sm__inst_executed.avg.per_cycle_active                                 inst/cycle  0.499692  0.499692  0.499692 
+      sm__inst_executed.avg.per_cycle_elapsed                                inst/cycle  0.027034  0.027034  0.027034 
+      sm__inst_executed_pipe_adu.avg.pct_of_peak_sustained_active            %           4.542657  4.542657  4.542657 
+      sm__inst_executed_pipe_cbu.avg.pct_of_peak_sustained_active            %           1.135664  1.135664  1.135664 
+      sm__inst_executed_pipe_fp16.avg.pct_of_peak_sustained_active           %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_fp64.avg.pct_of_peak_sustained_active           %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_lsu.avg.pct_of_peak_sustained_active            %           11.356642 11.356642 11.356642
+      sm__inst_executed_pipe_tensor_op_dmma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tensor_op_hmma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tensor_op_imma.avg.pct_of_peak_sustained_active %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_tex.avg.pct_of_peak_sustained_active            %           0.000000  0.000000  0.000000 
+      sm__inst_executed_pipe_uniform.avg.pct_of_peak_sustained_active        %           5.678321  5.678321  5.678321 
+      sm__inst_executed_pipe_xu.avg.pct_of_peak_sustained_active             %           0.000000  0.000000  0.000000 
+      sm__inst_issued.avg.pct_of_peak_sustained_active                       %           13.889151 13.889151 13.889151
+      sm__inst_issued.avg.per_cycle_active                                   inst/cycle  0.555566  0.555566  0.555566 
+      sm__inst_issued.max.pct_of_peak_sustained_active                       %           14.732581 14.732581 14.732581
+      sm__instruction_throughput.avg.pct_of_peak_sustained_active            %           13.889151 13.889151 13.889151
+      sm__pipe_alu_cycles_active.avg.pct_of_peak_sustained_active            %           6.813985  6.813985  6.813985 
+      sm__pipe_fma_cycles_active.avg.pct_of_peak_sustained_active            %           3.406993  3.406993  3.406993 
+
+    desul::<unnamed>::init_lock_arrays_cuda_kernel(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: GPU Speed Of Light Roofline Chart
+      Metric Name                                                           Metric Unit   Minimum      Maximum      Average     
+      --------------------------------------------------------------------- ------------- ------------ ------------ ------------
+      derived__sm__sass_thread_inst_executed_op_dfma_pred_on_x2             inst          6912.000000  6912.000000  6912.000000 
+      derived__sm__sass_thread_inst_executed_op_ffma_pred_on_x2             inst          13824.000000 13824.000000 13824.000000
+      derived__smsp__sass_thread_inst_executed_op_dfma_pred_on_x2           inst          0.000000     0.000000     0.000000    
+      derived__smsp__sass_thread_inst_executed_op_ffma_pred_on_x2           inst          0.000000     0.000000     0.000000    
+      dram__bytes.sum.peak_sustained                                        Kbyte/cycle   1.280000     1.280000     1.280000    
+      dram__bytes.sum.per_second                                            Mbyte/second  9.097801     9.097801     9.097801    
+      dram__cycles_elapsed.avg.per_second                                   cycle/nsecond 1.161183     1.161183     1.161183    
+      sm__cycles_elapsed.avg.per_second                                     cycle/usecond 731.225694   731.225694   731.225694  
+      sm__sass_thread_inst_executed_op_dfma_pred_on.sum.peak_sustained      inst/cycle    3456.000000  3456.000000  3456.000000 
+      sm__sass_thread_inst_executed_op_ffma_pred_on.sum.peak_sustained      inst/cycle    6912.000000  6912.000000  6912.000000 
+      smsp__cycles_elapsed.avg.per_second                                   cycle/usecond 731.225694   731.225694   731.225694  
+      smsp__sass_thread_inst_executed_op_dadd_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_dfma_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_dmul_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_fadd_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_ffma_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+      smsp__sass_thread_inst_executed_op_fmul_pred_on.sum.per_cycle_elapsed inst/cycle    0.000000     0.000000     0.000000    
+
+    desul::<unnamed>::init_lock_arrays_cuda_kernel(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: GPU Speed Of Light Throughput
+      Metric Name                                                              Metric Unit   Minimum      Maximum      Average     
+      ------------------------------------------------------------------------ ------------- ------------ ------------ ------------
+      dram__cycles_active.avg.pct_of_peak_sustained_elapsed                    %             0.000612     0.000612     0.000612    
+      dram__cycles_elapsed.avg.per_second                                      cycle/nsecond 1.161183     1.161183     1.161183    
+      fbpa__dram_sectors.avg.pct_of_peak_sustained_elapsed                     %             0.000516     0.000516     0.000516    
+      gpc__cycles_elapsed.avg.per_second                                       cycle/usecond 731.225631   731.225631   731.225631  
+      gpc__cycles_elapsed.max                                                  cycle         30864.000000 30864.000000 30864.000000
+      gpu__compute_memory_throughput.avg.pct_of_peak_sustained_elapsed         %             23.517032    23.517032    23.517032   
+      gpu__dram_throughput.avg.pct_of_peak_sustained_elapsed                   %             0.000612     0.000612     0.000612    
+      gpu__time_duration.sum                                                   usecond       42.208000    42.208000    42.208000   
+      idc__request_cycles_active.avg.pct_of_peak_sustained_elapsed             %             0.000000     0.000000     0.000000    
+      l1tex__data_bank_reads.avg.pct_of_peak_sustained_elapsed                 %             0.138243     0.138243     0.138243    
+      l1tex__data_bank_writes.avg.pct_of_peak_sustained_elapsed                %             0.123704     0.123704     0.123704    
+      l1tex__data_pipe_lsu_wavefronts.avg.pct_of_peak_sustained_elapsed        %             0.918619     0.918619     0.918619    
+      l1tex__data_pipe_tex_wavefronts.avg.pct_of_peak_sustained_elapsed        %             0.000000     0.000000     0.000000    
+      l1tex__f_wavefronts.avg.pct_of_peak_sustained_elapsed                    %             0.009720     0.009720     0.009720    
+      l1tex__lsu_writeback_active.avg.pct_of_peak_sustained_elapsed            %             0.614412     0.614412     0.614412    
+      l1tex__lsuin_requests.avg.pct_of_peak_sustained_elapsed                  %             0.614412     0.614412     0.614412    
+      l1tex__m_l1tex2xbar_req_cycles_active.avg.pct_of_peak_sustained_elapsed  %             1.002530     1.002530     1.002530    
+      l1tex__m_xbar2l1tex_read_sectors.avg.pct_of_peak_sustained_elapsed       %             0.003255     0.003255     0.003255    
+      l1tex__tex_writeback_active.avg.pct_of_peak_sustained_elapsed            %             0.000000     0.000000     0.000000    
+      l1tex__texin_sm2tex_req_cycles_active.avg.pct_of_peak_sustained_elapsed  %             0.009720     0.009720     0.009720    
+      l1tex__throughput.avg.pct_of_peak_sustained_active                       %             18.530513    18.530513    18.530513   
+      launch__waves_per_multiprocessor                                                       0.592593     0.592593     0.592593    
+      lts__d_atomic_input_cycles_active.avg.pct_of_peak_sustained_elapsed      %             0.000000     0.000000     0.000000    
+      lts__d_sectors.avg.pct_of_peak_sustained_elapsed                         %             0.531258     0.531258     0.531258    
+      lts__d_sectors_fill_device.avg.pct_of_peak_sustained_elapsed             %             0.000387     0.000387     0.000387    
+      lts__d_sectors_fill_sysmem.avg.pct_of_peak_sustained_elapsed             %             0.000000     0.000000     0.000000    
+      lts__lts2xbar_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.566543     0.566543     0.566543    
+      lts__t_sectors.avg.pct_of_peak_sustained_elapsed                         %             1.706363     1.706363     1.706363    
+      lts__t_tag_requests.avg.pct_of_peak_sustained_elapsed                    %             1.084289     1.084289     1.084289    
+      lts__throughput.avg.pct_of_peak_sustained_elapsed                        %             23.517032    23.517032    23.517032   
+      lts__xbar2lts_cycles_active.avg.pct_of_peak_sustained_elapsed            %             1.834228     1.834228     1.834228    
+      sm__cycles_active.avg                                                    cycle         1669.768519  1669.768519  1669.768519 
+      sm__inst_executed.avg.pct_of_peak_sustained_elapsed                      %             0.675854     0.675854     0.675854    
+      sm__inst_executed_pipe_adu.avg.pct_of_peak_sustained_elapsed             %             0.245765     0.245765     0.245765    
+      sm__inst_executed_pipe_cbu_pred_on_any.avg.pct_of_peak_sustained_elapsed %             0.122882     0.122882     0.122882    
+      sm__inst_executed_pipe_fp16.avg.pct_of_peak_sustained_elapsed            %             0.000000     0.000000     0.000000    
+      sm__inst_executed_pipe_ipa.avg.pct_of_peak_sustained_elapsed             %             0.000000     0.000000     0.000000    
+      sm__inst_executed_pipe_lsu.avg.pct_of_peak_sustained_elapsed             %             0.614412     0.614412     0.614412    
+      sm__inst_executed_pipe_tex.avg.pct_of_peak_sustained_elapsed             %             0.000000     0.000000     0.000000    
+      sm__inst_executed_pipe_uniform.avg.pct_of_peak_sustained_elapsed         %             0.307206     0.307206     0.307206    
+      sm__inst_executed_pipe_xu.avg.pct_of_peak_sustained_elapsed              %             0.000000     0.000000     0.000000    
+      sm__issue_active.avg.pct_of_peak_sustained_elapsed                       %             0.751425     0.751425     0.751425    
+      sm__mio2rf_writeback_active.avg.pct_of_peak_sustained_elapsed            %             0.368647     0.368647     0.368647    
+      sm__mio_inst_issued.avg.pct_of_peak_sustained_elapsed                    %             0.368647     0.368647     0.368647    
+      sm__mio_pq_read_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000000     0.000000     0.000000    
+      sm__mio_pq_write_cycles_active.avg.pct_of_peak_sustained_elapsed         %             0.000000     0.000000     0.000000    
+      sm__pipe_alu_cycles_active.avg.pct_of_peak_sustained_elapsed             %             0.368647     0.368647     0.368647    
+      sm__pipe_fma_cycles_active.avg.pct_of_peak_sustained_elapsed             %             0.184324     0.184324     0.184324    
+      sm__pipe_fp64_cycles_active.avg.pct_of_peak_sustained_elapsed            %             0.000000     0.000000     0.000000    
+      sm__pipe_shared_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000000     0.000000     0.000000    
+      sm__pipe_tensor_cycles_active.avg.pct_of_peak_sustained_elapsed          %             0.000000     0.000000     0.000000    
+      sm__throughput.avg.pct_of_peak_sustained_elapsed                         %             0.751425     0.751425     0.751425    
+
+    desul::<unnamed>::init_lock_arrays_cuda_kernel(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Instruction Statistics
+      Metric Name                    Metric Unit Minimum       Maximum       Average      
+      ------------------------------ ----------- ------------- ------------- -------------
+      inst_executed                  inst        90112.000000  90112.000000  90112.000000 
+      sass__inst_executed_per_opcode             90112.000000  90112.000000  90112.000000 
+      smsp__inst_executed.avg        inst        208.592593    208.592593    208.592593   
+      smsp__inst_executed.sum        inst        90112.000000  90112.000000  90112.000000 
+      smsp__inst_issued.avg          inst        231.916667    231.916667    231.916667   
+      smsp__inst_issued.sum          inst        100188.000000 100188.000000 100188.000000
+
+    desul::<unnamed>::init_lock_arrays_cuda_kernel(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Launch Statistics
+      Metric Name                                       Metric Unit     Minimum       Maximum       Average      
+      ------------------------------------------------- --------------- ------------- ------------- -------------
+      launch__block_size                                                256.000000    256.000000    256.000000   
+      launch__grid_size                                                 512.000000    512.000000    512.000000   
+      launch__registers_per_thread                      register/thread 16.000000     16.000000     16.000000    
+      launch__shared_mem_config_size                    Kbyte           167.936000    167.936000    167.936000   
+      launch__shared_mem_per_block_driver               Kbyte/block     1.024000      1.024000      1.024000     
+      launch__shared_mem_per_block_dynamic              byte/block      0.000000      0.000000      0.000000     
+      launch__shared_mem_per_block_static               byte/block      0.000000      0.000000      0.000000     
+      launch__thread_count                              thread          131072.000000 131072.000000 131072.000000
+      launch__waves_per_multiprocessor                                  0.592593      0.592593      0.592593     
+      sm__maximum_warps_per_active_cycle_pct            %               100.000000    100.000000    100.000000   
+      sm__warps_active.avg.pct_of_peak_sustained_active %               50.159737     50.159737     50.159737    
+
+    desul::<unnamed>::init_lock_arrays_cuda_kernel(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Memory Workload Analysis
+      Metric Name                                                              Metric Unit  Minimum   Maximum   Average  
+      ------------------------------------------------------------------------ ------------ --------- --------- ---------
+      dram__bytes.sum.per_second                                               Mbyte/second 9.097801  9.097801  9.097801 
+      gpu__compute_memory_access_throughput.avg.pct_of_peak_sustained_elapsed  %            23.517032 23.517032 23.517032
+      gpu__compute_memory_request_throughput.avg.pct_of_peak_sustained_elapsed %            1.834228  1.834228  1.834228 
+      l1tex__t_sector_hit_rate.pct                                             %            19.472656 19.472656 19.472656
+      lts__average_gcomp_input_sector_success_rate.pct                         %            0.000000  0.000000  0.000000 
+      lts__average_gcomp_output_sector_compression_achieved_rate.ratio                      0.000000  0.000000  0.000000 
+      lts__t_sector_hit_rate.pct                                               %            98.624368 98.624368 98.624368
+      sm__memory_throughput.avg.pct_of_peak_sustained_elapsed                  %            0.614412  0.614412  0.614412 
+
+    desul::<unnamed>::init_lock_arrays_cuda_kernel(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Occupancy
+      Metric Name                                       Metric Unit     Minimum     Maximum     Average    
+      ------------------------------------------------- --------------- ----------- ----------- -----------
+      launch__block_size                                                256.000000  256.000000  256.000000 
+      launch__occupancy_limit_blocks                    block           32.000000   32.000000   32.000000  
+      launch__occupancy_limit_registers                 block           16.000000   16.000000   16.000000  
+      launch__occupancy_limit_shared_mem                block           164.000000  164.000000  164.000000 
+      launch__occupancy_limit_warps                     block           8.000000    8.000000    8.000000   
+      launch__occupancy_per_block_size                                  3670.000000 3670.000000 3670.000000
+      launch__occupancy_per_register_count                              5504.000000 5504.000000 5504.000000
+      launch__occupancy_per_shared_mem_size                             4672.000000 4672.000000 4672.000000
+      launch__registers_per_thread                      register/thread 16.000000   16.000000   16.000000  
+      launch__shared_mem_per_block                      Kbyte/block     1.024000    1.024000    1.024000   
+      sm__maximum_warps_avg_per_active_cycle            warp            64.000000   64.000000   64.000000  
+      sm__maximum_warps_per_active_cycle_pct            %               100.000000  100.000000  100.000000 
+      sm__warps_active.avg.pct_of_peak_sustained_active %               50.159737   50.159737   50.159737  
+      sm__warps_active.avg.per_cycle_active             warp            32.102232   32.102232   32.102232  
+
+    desul::<unnamed>::init_lock_arrays_cuda_kernel(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Scheduler Statistics
+      Metric Name                                         Metric Unit Minimum   Maximum   Average  
+      --------------------------------------------------- ----------- --------- --------- ---------
+      smsp__issue_active.avg.pct_of_peak_sustained_active %           13.487611 13.487611 13.487611
+      smsp__issue_active.avg.per_cycle_active                         0.134876  0.134876  0.134876 
+      smsp__issue_inst0.avg.pct_of_peak_sustained_active  %           86.512389 86.512389 86.512389
+      smsp__maximum_warps_avg_per_active_cycle            warp        16.000000 16.000000 16.000000
+      smsp__warps_active.avg.peak_sustained               warp        16.000000 16.000000 16.000000
+      smsp__warps_active.avg.per_cycle_active             warp        7.655889  7.655889  7.655889 
+      smsp__warps_eligible.avg.per_cycle_active           warp        0.262977  0.262977  0.262977 
+
+    desul::<unnamed>::init_lock_arrays_cuda_kernel(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Source Counters
+      Metric Name                                                    Metric Unit Minimum        Maximum        Average       
+      -------------------------------------------------------------- ----------- -------------- -------------- --------------
+      derived__avg_thread_executed                                   thread      30.000000      30.000000      30.000000     
+      derived__memory_l1_wavefronts_shared_excessive                 byte        0.000000       0.000000       0.000000      
+      derived__memory_l2_theoretical_sectors_global_excessive        byte        0.000000       0.000000       0.000000      
+      derived__smsp__inst_executed_op_branch_pct                     %           0.090909       0.090909       0.090909      
+      gpc__cycles_elapsed.max                                        cycle       30864.000000   30864.000000   30864.000000  
+      inst_executed                                                  inst        90112.000000   90112.000000   90112.000000  
+      memory_l1_tag_requests_global                                  sectors     16384.000000   16384.000000   16384.000000  
+      memory_l1_wavefronts_shared                                    sectors     0.000000       0.000000       0.000000      
+      memory_l1_wavefronts_shared_ideal                              sectors     0.000000       0.000000       0.000000      
+      memory_l2_theoretical_sectors_global                           sectors     40714.000000   40714.000000   40714.000000  
+      memory_l2_theoretical_sectors_global_ideal                     sectors     40714.000000   40714.000000   40714.000000  
+      memory_l2_theoretical_sectors_local                            sectors     0.000000       0.000000       0.000000      
+      smsp__branch_targets_threads_divergent                                     0.000000       0.000000       0.000000      
+      smsp__inst_executed.sum                                        inst        90112.000000   90112.000000   90112.000000  
+      smsp__inst_executed_op_branch.sum                              inst        8192.000000    8192.000000    8192.000000   
+      smsp__pcsamp_sample_count                                                  187.000000     187.000000     187.000000    
+      smsp__pcsamp_warps_issue_stalled_barrier                       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_barrier_not_issued            warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_branch_resolving              warp        5.000000       5.000000       5.000000      
+      smsp__pcsamp_warps_issue_stalled_branch_resolving_not_issued   warp        4.000000       4.000000       4.000000      
+      smsp__pcsamp_warps_issue_stalled_dispatch_stall                warp        2.000000       2.000000       4.000000      
+      smsp__pcsamp_warps_issue_stalled_dispatch_stall_not_issued     warp        2.000000       2.000000       4.000000      
+      smsp__pcsamp_warps_issue_stalled_drain                         warp        13.000000      13.000000      26.000000     
+      smsp__pcsamp_warps_issue_stalled_drain_not_issued              warp        10.000000      10.000000      20.000000     
+      smsp__pcsamp_warps_issue_stalled_imc_miss                      warp        84.000000      84.000000      168.000000    
+      smsp__pcsamp_warps_issue_stalled_imc_miss_not_issued           warp        72.000000      72.000000      144.000000    
+      smsp__pcsamp_warps_issue_stalled_lg_throttle                   warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_lg_throttle_not_issued        warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_long_scoreboard               warp        69.000000      69.000000      138.000000    
+      smsp__pcsamp_warps_issue_stalled_long_scoreboard_not_issued    warp        64.000000      64.000000      128.000000    
+      smsp__pcsamp_warps_issue_stalled_math_pipe_throttle            warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_math_pipe_throttle_not_issued warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_membar                        byte        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_membar_not_issued             byte        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_mio_throttle                  warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_mio_throttle_not_issued       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_misc                          warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_misc_not_issued               warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_no_instructions               inst        8.000000       8.000000       16.000000     
+      smsp__pcsamp_warps_issue_stalled_no_instructions_not_issued    inst        6.000000       6.000000       12.000000     
+      smsp__pcsamp_warps_issue_stalled_not_selected                  warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_not_selected_not_issued       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_selected                      warp        2.000000       2.000000       4.000000      
+      smsp__pcsamp_warps_issue_stalled_selected_not_issued           warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_short_scoreboard              warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_short_scoreboard_not_issued   warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_sleeping                      warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_sleeping_not_issued           warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_tex_throttle                  warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_tex_throttle_not_issued       warp        0.000000       0.000000       0.000000      
+      smsp__pcsamp_warps_issue_stalled_wait                          warp        4.000000       4.000000       8.000000      
+      smsp__pcsamp_warps_issue_stalled_wait_not_issued               warp        2.000000       2.000000       4.000000      
+      smsp__sass_average_branch_targets_threads_uniform.pct          %           0.000000       0.000000       0.000000      
+      smsp__sass_branch_targets_threads_divergent.avg                            0.000000       0.000000       0.000000      
+      thread_inst_executed_true                                      inst        2752512.000000 2752512.000000 2752512.000000
+
+    desul::<unnamed>::init_lock_arrays_cuda_kernel(), Block Size 256, Grid Size 512, 1 invocations 
+      Section: Warp State Statistics
+      Metric Name                                                                 Metric Unit Minimum   Maximum   Average  
+      --------------------------------------------------------------------------- ----------- --------- --------- ---------
+      smsp__average_warp_latency_per_inst_issued.ratio                            cycle       56.762377 56.762377 56.762377
+      smsp__average_warps_active_per_inst_executed.ratio                          cycle       63.109342 63.109342 63.109342
+      smsp__average_warps_issue_stalled_barrier_per_issue_active.ratio            inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_branch_resolving_per_issue_active.ratio   inst        0.332625  0.332625  0.332625 
+      smsp__average_warps_issue_stalled_dispatch_stall_per_issue_active.ratio     inst        0.211522  0.211522  0.211522 
+      smsp__average_warps_issue_stalled_drain_per_issue_active.ratio              inst        1.195512  1.195512  1.195512 
+      smsp__average_warps_issue_stalled_imc_miss_per_issue_active.ratio           inst        20.355452 20.355452 20.355452
+      smsp__average_warps_issue_stalled_lg_throttle_per_issue_active.ratio        inst        0.039526  0.039526  0.039526 
+      smsp__average_warps_issue_stalled_long_scoreboard_per_issue_active.ratio    inst        30.181429 30.181429 30.181429
+      smsp__average_warps_issue_stalled_math_pipe_throttle_per_issue_active.ratio inst        0.060686  0.060686  0.060686 
+      smsp__average_warps_issue_stalled_membar_per_issue_active.ratio             inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_mio_throttle_per_issue_active.ratio       inst        0.019813  0.019813  0.019813 
+      smsp__average_warps_issue_stalled_misc_per_issue_active.ratio               inst        0.039586  0.039586  0.039586 
+      smsp__average_warps_issue_stalled_no_instruction_per_issue_active.ratio     inst        1.311285  1.311285  1.311285 
+      smsp__average_warps_issue_stalled_not_selected_per_issue_active.ratio       inst        0.960135  0.960135  0.960135 
+      smsp__average_warps_issue_stalled_selected_per_issue_active.ratio           inst        0.990079  0.990079  0.990079 
+      smsp__average_warps_issue_stalled_short_scoreboard_per_issue_active.ratio   inst        1.351369  1.351369  1.351369 
+      smsp__average_warps_issue_stalled_sleeping_per_issue_active.ratio           inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_tex_throttle_per_issue_active.ratio       inst        0.000000  0.000000  0.000000 
+      smsp__average_warps_issue_stalled_wait_per_issue_active.ratio               inst        2.269423  2.269423  2.269423 
+      smsp__issue_active.avg.per_cycle_active                                                 0.134876  0.134876  0.134876 
+      smsp__thread_inst_executed_per_inst_executed.ratio                                      32.000000 32.000000 32.000000
+      smsp__thread_inst_executed_pred_on_per_inst_executed.ratio                              30.545455 30.545455 30.545455
+
+Note: The shown averages are calculated as the arithmetic mean of the metric values after the evaluation of the metrics for each individual kernel launch.
+If aggregating across varying launch configurations (like shared memory, cache config settings), the arithmetic mean can be misleading and looking at the individual results is recommended instead.
+This output mode is backwards compatible to the per-kernel summary output of nvprof

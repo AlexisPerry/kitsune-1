@@ -1,10 +1,10 @@
 #!/bin/bash 
 
-profile_samples=256
-for exe in raytrace-kitsune raytrace-kokkos raytrace-clang
+profile_samples=64
+for exe in raytrace-cuda raytrace-kitsune raytrace-kokkos raytrace-clang
 do 
 	echo "Executable: $exe"
-	for num_samples in 2 4 8 16 32 64 128 256 512 1024 2048 4096
+	for num_samples in 64 # 1 2 4 8 16 32 64 128 256 512
 	do 
 		echo -n "   samples: $num_samples"
 		echo -n ", "
@@ -17,6 +17,10 @@ do
             --section ComputeWorkloadAnalysis \
             --section WarpStateStats \
             --section LaunchStats \
+	    --section InstructionStats \
+            --section SourceCounters \
+            --section Occupancy \
+            --section MemoryWorkloadAnalysis \
             --page details \
             --print-summary per-gpu \
             --details-all \

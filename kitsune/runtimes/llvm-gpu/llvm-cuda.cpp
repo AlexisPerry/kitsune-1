@@ -112,7 +112,7 @@ bool initCUDA(){
   return true;
 }
 
-std::string cudaarch = "sm_70";
+std::string cudaarch = "sm_80";
 std::string cudafeatures = "+ptx64";
 bool verbose_mode = false;
 

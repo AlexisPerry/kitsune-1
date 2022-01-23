@@ -1,45 +1,16 @@
+Executable: raytrace-cuda
+   samples: 64, parallel_for execution time: 9.34785
+Profiling...
+parallel_for execution time: 3211.46
 Executable: raytrace-kitsune
-   samples: 2, running time: 1.94397
-   samples: 4, running time: 2.18746
-   samples: 8, running time: 2.69251
-   samples: 16, running time: 3.66969
-   samples: 32, running time: 5.66363
-   samples: 64, running time: 9.65087
-   samples: 128, running time: 17.5737
-   samples: 256, running time: 33.4411
-   samples: 512, running time: 65.2038
-   samples: 1024, running time: 128.825
-   samples: 2048, running time: 255.85
-   samples: 4096, running time: 509.785
+   samples: 64, parallel_for execution time: 6.08603
 Profiling...
-running time: 4034.23
+parallel_for execution time: 2454.31
 Executable: raytrace-kokkos
-   samples: 2, running time: 0.580748
-   samples: 4, running time: 1.15994
-   samples: 8, running time: 2.3217
-   samples: 16, running time: 4.63693
-   samples: 32, running time: 9.26725
-   samples: 64, running time: 18.5123
-   samples: 128, running time: 37.0512
-   samples: 256, running time: 74.0126
-   samples: 512, running time: 148.142
-   samples: 1024, running time: 295.749
-   samples: 2048, running time: 592.57
-   samples: 4096, running time: 1184.37
+   samples: 64, running time: 10.1742
 Profiling...
-running time: 5312.04
+running time: 3324.43
 Executable: raytrace-clang
-   samples: 2, running time: 0.473793
-   samples: 4, running time: 0.948573
-   samples: 8, running time: 1.89568
-   samples: 16, running time: 3.78953
-   samples: 32, running time: 7.57401
-   samples: 64, running time: 15.1557
-   samples: 128, running time: 30.2794
-   samples: 256, running time: 60.6092
-   samples: 512, running time: 121.215
-   samples: 1024, running time: 242.064
-   samples: 2048, running time: 484.86
-   samples: 4096, running time: 968.979
+   samples: 64, running time: 8.31689
 Profiling...
-running time: 1820.21
+running time: 1115.52
