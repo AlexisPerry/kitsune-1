@@ -66,7 +66,7 @@ void GPUABI::processSubTaskCall(TaskOutlineInfo &TOI, DominatorTree &DT) {
 
 LoopOutlineProcessor *GPUABI::getLoopOutlineProcessor(
     const TapirLoopInfo *TL) const {
-  if(!LOP) 
+  if(!LOP)
     return new LLVMLoop(M);
   return LOP;
 }
@@ -87,7 +87,7 @@ LLVMLoop::LLVMLoop(Module &M)
   Type *LLVMInt32Ty = Type::getInt32Ty(LLVMM.getContext());
   Type *LLVMInt64Ty = Type::getInt64Ty(LLVMM.getContext());
   GetThreadIdx = LLVMM.getOrInsertFunction("gtid", LLVMInt32Ty);
-  Function* getid = LLVMM.getFunction("gtid"); 
+  Function* getid = LLVMM.getFunction("gtid");
 
   Type *VoidTy = Type::getVoidTy(M.getContext());
   Type *VoidPtrTy = Type::getInt8PtrTy(M.getContext());
@@ -143,7 +143,7 @@ void LLVMLoop::setupLoopOutlineArgs(
 
   // Add the loop control inputs.
   for (Value *V : TLInputsFixed) {
-    HelperArgs.insert(V); 
+    HelperArgs.insert(V);
     HelperInputs.push_back(V);
   }
 
@@ -195,11 +195,11 @@ void LLVMLoop::postProcessOutline(TapirLoopInfo &TL, TaskOutlineInfo &Out,
 
 
   Function *Helper = Out.Outline;
-  Helper->setName("kitsune_kernel"); 
+  Helper->setName("kitsune_kernel");
   // Fix argument pointer types to global, nocapture
   // TODO: read/write attributes?
-  //LLVM_DEBUG(dbgs() << "Function type after globalization of argument pointers << " << *Helper->getType() << "\n"); 
-  //LLVM_DEBUG(dbgs() << "LLVMM after globalization of argument pointers << " << *Helper->getParent() << "\n"); 
+  //LLVM_DEBUG(dbgs() << "Function type after globalization of argument pointers << " << *Helper->getType() << "\n");
+  //LLVM_DEBUG(dbgs() << "LLVMM after globalization of argument pointers << " << *Helper->getParent() << "\n");
 
   // Verify that the Thread ID corresponds to a valid iteration.  Because Tapir
   // loops use canonical induction variables, valid iterations range from 0 to
@@ -222,8 +222,8 @@ void LLVMLoop::postProcessOutline(TapirLoopInfo &TL, TaskOutlineInfo &Out,
   }
   ThreadID = B.CreateMul(ThreadID, Grainsize);
   Value *ThreadEndGrain = B.CreateAdd(ThreadID, Grainsize);
-  Value *Cmp = B.CreateICmp(ICmpInst::ICMP_ULT, ThreadEndGrain, End); 
-  Value *ThreadEnd = B.CreateSelect(Cmp, ThreadEndGrain, End); 
+  Value *Cmp = B.CreateICmp(ICmpInst::ICMP_ULT, ThreadEndGrain, End);
+  Value *ThreadEnd = B.CreateSelect(Cmp, ThreadEndGrain, End);
   Value *Cond = B.CreateICmpUGE(ThreadID, ThreadEnd);
 
   ReplaceInstWithInst(Entry->getTerminator(), BranchInst::Create(Exit, Header,
@@ -255,35 +255,35 @@ void LLVMLoop::processOutlinedLoopCall(TapirLoopInfo &TL, TaskOutlineInfo &TOI,
   //LLVM_DEBUG(dbgs() << "Running processOutlinedLoopCall: " << LLVMM);
   Function *Parent = TOI.ReplCall->getFunction();
   Value *TripCount = OrderedInputs[0];
-  BasicBlock* RCBB = TOI.ReplCall->getParent(); 
-  BasicBlock* NBB = RCBB->splitBasicBlock(TOI.ReplCall); 
-  TOI.ReplCall->eraseFromParent(); 
+  BasicBlock* RCBB = TOI.ReplCall->getParent();
+  BasicBlock* NBB = RCBB->splitBasicBlock(TOI.ReplCall);
+  TOI.ReplCall->eraseFromParent();
 
   IRBuilder<> B(&NBB->front());
 
-  // Compile the kernel 
-  //LLVMM.getFunctionList().remove(TOI.Outline); 
-  //TOI.Outline->eraseFromParent(); 
+  // Compile the kernel
+  //LLVMM.getFunctionList().remove(TOI.Outline);
+  //TOI.Outline->eraseFromParent();
   LLVMContext &LLVMCtx = LLVMM.getContext();
 
-  ValueToValueMapTy VMap; 
+  ValueToValueMapTy VMap;
   // We recursively add definitions and declarations to the device module
   SmallVector<Function*> todo;
   todo.push_back(LLVMM.getFunction("kitsune_kernel"));
   while(!todo.empty()){
-    auto *F = todo.back(); 
-    todo.pop_back(); 
+    auto *F = todo.back();
+    todo.pop_back();
     for(auto &BB : *F){
       for(auto &I : BB){
         if(auto *CI = dyn_cast<CallInst>(&I)){
           if(Function *f = CI->getCalledFunction()){
             if(f->getParent() != &LLVMM){
               // TODO: improve check for function, could be overloaded
-              auto *deviceF = LLVMM.getFunction(f->getName()); 
+              auto *deviceF = LLVMM.getFunction(f->getName());
               if(!deviceF){
                 if(f->getParent() == &M){
-                  deviceF = Function::Create(f->getFunctionType(), f->getLinkage(), f->getName(), LLVMM);  
-                  VMap[f] = deviceF; 
+                  deviceF = Function::Create(f->getFunctionType(), f->getLinkage(), f->getName(), LLVMM);
+                  VMap[f] = deviceF;
                   auto *NewFArgIt = deviceF->arg_begin();
                   for (auto &Arg : f->args()) {
                     auto ArgName = Arg.getName();
@@ -291,13 +291,13 @@ void LLVMLoop::processOutlinedLoopCall(TapirLoopInfo &TL, TaskOutlineInfo &TOI,
                     VMap[&Arg] = &(*NewFArgIt++);
                   }
                   SmallVector<ReturnInst*, 8> Returns;
-                  CloneFunctionInto(deviceF, f, VMap, false, Returns); 
+                  CloneFunctionInto(deviceF, f, VMap, false, Returns);
                   // GPU calls are slow as balls, try to force inlining
-                  deviceF->addFnAttr(Attribute::AlwaysInline); 
+                  deviceF->addFnAttr(Attribute::AlwaysInline);
                   todo.push_back(deviceF);
                 }
-              } 
-              CI->setCalledFunction(deviceF); 
+              }
+              CI->setCalledFunction(deviceF);
             }
           }
         }
@@ -316,9 +316,9 @@ void LLVMLoop::processOutlinedLoopCall(TapirLoopInfo &TL, TaskOutlineInfo &TOI,
               Comdat *DC = NewGV->getParent()->getOrInsertComdat(SC->getName());
               DC->setSelectionKind(SC->getSelectionKind());
               NewGV->setComdat(DC);
-              NewGV->setLinkage(GV->getLinkage()); 
-              NewGV->setInitializer(GV->getInitializer()); 
-              op = NewGV; 
+              NewGV->setLinkage(GV->getLinkage());
+              NewGV->setInitializer(GV->getInitializer());
+              op = NewGV;
             }
           }
         }
@@ -342,8 +342,8 @@ void LLVMLoop::processOutlinedLoopCall(TapirLoopInfo &TL, TaskOutlineInfo &TOI,
   PassManager->add(createReassociatePass());
   PassManager->add(createGVNPass());
   PassManager->add(createCFGSimplificationPass());
-  PassManager->add(createLoopVectorizePass());
-  PassManager->add(createSLPVectorizerPass());
+  //PassManager->add(createLoopVectorizePass());
+  //PassManager->add(createSLPVectorizerPass());
   //PassManager->add(createBreakCriticalEdgesPass());
   //PassManager->add(createConstantPropagationPass());
   PassManager->add(createDeadCodeEliminationPass());
@@ -362,14 +362,14 @@ void LLVMLoop::processOutlinedLoopCall(TapirLoopInfo &TL, TaskOutlineInfo &TOI,
   // generate llvm kernel code
   SmallVector<char, 1<<20> mbuf;
   BitcodeWriter bcw(mbuf);
-  bcw.writeModule(LLVMM); 
-  bcw.writeStrtab(); 
+  bcw.writeModule(LLVMM);
+  bcw.writeStrtab();
 
   char* heapbuf = new char[mbuf.size()];
-  for(int i=0; i<mbuf.size(); i++) { heapbuf[i] = mbuf[i]; } 
+  for(int i=0; i<mbuf.size(); i++) { heapbuf[i] = mbuf[i]; }
 
-  std::string strbuf(mbuf.data(), mbuf.size()); 
-  std::ofstream out("compile_time.bc"); 
+  std::string strbuf(mbuf.data(), mbuf.size());
+  std::ofstream out("compile_time.bc");
   out << strbuf;
   out.close();
 
@@ -378,7 +378,7 @@ void LLVMLoop::processOutlinedLoopCall(TapirLoopInfo &TL, TaskOutlineInfo &TOI,
                                  GlobalValue::PrivateLinkage, LLVMBC,
                                  "gpu_" + Twine("kitsune_kernel"));
 
-  //Value* TripCount = isSRetInput(TOI.InputSet[0]) ? TOI.InputSet[1] : TOI.InputSet[0]; 
+  //Value* TripCount = isSRetInput(TOI.InputSet[0]) ? TOI.InputSet[1] : TOI.InputSet[0];
   //Value *RunStart = ReplCall->getArgOperand(getIVArgIndex(*Parent,
   //                                                        TOI.InputSet));
   //Value *TripCount = ReplCall->getArgOperand(getLimitArgIndex(*Parent,
@@ -388,41 +388,40 @@ void LLVMLoop::processOutlinedLoopCall(TapirLoopInfo &TL, TaskOutlineInfo &TOI,
   Value *LLVMPtr = B.CreateBitCast(LLVMGlobal, VoidPtrTy);
   Type *VoidPtrPtrTy = VoidPtrTy->getPointerTo();
 
-  Constant *kernelSize = ConstantInt::get(Int64Ty, 
-    LLVMGlobal->getInitializer()->getType()->getArrayNumElements()); 
-  BasicBlock &EBB = Parent->getEntryBlock(); 
-  IRBuilder<> EB(&EBB.front()); 
+  Constant *kernelSize = ConstantInt::get(Int64Ty,
+    LLVMGlobal->getInitializer()->getType()->getArrayNumElements());
+  BasicBlock &EBB = Parent->getEntryBlock();
+  IRBuilder<> EB(&EBB.front());
   EB.CreateCall(GPUInit, {});
 
-  ArrayType* arrayType = ArrayType::get(VoidPtrTy, OrderedInputs.size()); 
-  Value* argArray = B.CreateAlloca(arrayType); 
+  ArrayType* arrayType = ArrayType::get(VoidPtrTy, OrderedInputs.size());
+  Value* argArray = B.CreateAlloca(arrayType);
   int i=0;
   for (Value *V : OrderedInputs) {
     //Value *ElementSize = nullptr;
-    //LLVM_DEBUG(dbgs() << "Input set value: " << *V << "\n"); 
-    Value *VPtr = B.CreateAlloca(V->getType()); 
-    B.CreateStore(V, VPtr); 
+    //LLVM_DEBUG(dbgs() << "Input set value: " << *V << "\n");
+    Value *VPtr = B.CreateAlloca(V->getType());
+    B.CreateStore(V, VPtr);
     Value *VoidVPtr = B.CreateBitCast(VPtr, VoidPtrTy);
-    Value *argPtr = B.CreateConstInBoundsGEP2_32(arrayType, argArray, 0, i++); 
-    B.CreateStore(VoidVPtr, argPtr); 
+    Value *argPtr = B.CreateConstInBoundsGEP2_32(arrayType, argArray, 0, i++);
+    B.CreateStore(VoidVPtr, argPtr);
   }
 
-  Value *Grainsize = TL.getGrainsize() ?  
+  Value *Grainsize = TL.getGrainsize() ?
     ConstantInt::get(TripCount->getType(), TL.getGrainsize()) :
-    OrderedInputs[2]; 
+    OrderedInputs[2];
 
   //Type *Int64Ty = Type::getInt64Ty(LLVMM.getContext());
   Value *RunSizeQ = B.CreateUDiv(TripCount, Grainsize);
   Value *RunRem = B.CreateURem(TripCount, Grainsize);
-  Value *IsRem = B.CreateICmp(ICmpInst::ICMP_UGT, RunRem, ConstantInt::get(RunRem->getType(), 0)); 
-  Value *IsRemAdd = B.CreateZExt(IsRem, RunSizeQ->getType()); 
-  Value *RunSize = B.CreateZExt(B.CreateAdd(RunSizeQ, IsRemAdd), Int64Ty);  
+  Value *IsRem = B.CreateICmp(ICmpInst::ICMP_UGT, RunRem, ConstantInt::get(RunRem->getType(), 0));
+  Value *IsRemAdd = B.CreateZExt(IsRem, RunSizeQ->getType());
+  Value *RunSize = B.CreateZExt(B.CreateAdd(RunSizeQ, IsRemAdd), Int64Ty);
 
-  Value* argsPtr = B.CreateConstInBoundsGEP2_32(arrayType, argArray, 0, 0); 
-  Value* bcPtr = B.CreateConstInBoundsGEP2_32(LLVMGlobal->getValueType(), LLVMGlobal, 0, 0); 
+  Value* argsPtr = B.CreateConstInBoundsGEP2_32(arrayType, argArray, 0, 0);
+  Value* bcPtr = B.CreateConstInBoundsGEP2_32(LLVMGlobal->getValueType(), LLVMGlobal, 0, 0);
   Value* stream = B.CreateCall(GPULaunchKernel, { bcPtr, kernelSize, argsPtr, RunSize });
   B.CreateCall(GPUWaitKernel, stream);
 
   //LLVM_DEBUG(dbgs() << "Finished processOutlinedLoopCall: " << M);
 }
-
