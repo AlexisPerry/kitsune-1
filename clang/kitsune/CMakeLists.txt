@@ -137,7 +137,7 @@ if (KITSUNE_ENABLE_GPU_TARGET)
     set(LLVM_BUILD_LLVM_DYLIB ON)
   endif()
 
-  find_package(CUDAToolkit 11)
+  find_package(CUDAToolkit 11.5)
   if (CUDAToolkit_FOUND)
     message(STATUS "Kitsune: CUDA Toolkit version found.")
   endif()

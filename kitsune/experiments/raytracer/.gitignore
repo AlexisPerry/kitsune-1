@@ -1,4 +1,4 @@
-*.bc
+#*.bc
 raytrace-kitsune
 raytrace-kokkos 
 raytrace-clang

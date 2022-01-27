@@ -1,16 +1,88 @@
+Thu Jan 27 10:29:59 2022       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 470.57.02    Driver Version: 470.57.02    CUDA Version: 11.5     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  NVIDIA A100-SXM...  On   | 00000000:01:00.0 Off |                    0 |
+| N/A   25C    P0    51W / 400W |      0MiB / 40536MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   1  NVIDIA A100-SXM...  On   | 00000000:41:00.0 Off |                    0 |
+| N/A   26C    P0    51W / 400W |      0MiB / 40536MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   2  NVIDIA A100-SXM...  On   | 00000000:81:00.0 Off |                    0 |
+| N/A   24C    P0    54W / 400W |      0MiB / 40536MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+|   3  NVIDIA A100-SXM...  On   | 00000000:C1:00.0 Off |                    0 |
+| N/A   22C    P0    49W / 400W |      0MiB / 40536MiB |      0%      Default |
+|                               |                      |             Disabled |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
 Executable: raytrace-cuda
-   samples: 64, parallel_for execution time: 9.34785
-Profiling...
-parallel_for execution time: 3211.46
+   samples: 1, parallel_for execution time: 0.187798
+   samples: 2, parallel_for execution time: 0.29077
+   samples: 4, parallel_for execution time: 0.580153
+   samples: 8, parallel_for execution time: 1.15909
+   samples: 16, parallel_for execution time: 2.31215
+   samples: 32, parallel_for execution time: 4.61318
+   samples: 64, parallel_for execution time: 9.23069
+   samples: 128, parallel_for execution time: 18.4386
+   samples: 256, parallel_for execution time: 36.8827
+   samples: 512, parallel_for execution time: 73.7447
+   samples: 1024, parallel_for execution time: 147.479
+---------------------------
+  
 Executable: raytrace-kitsune
-   samples: 64, parallel_for execution time: 6.08603
-Profiling...
-parallel_for execution time: 2454.31
+   samples: 1, Avg. parallel_for execution time: 1.77203
+   samples: 2, Avg. parallel_for execution time: 1.83321
+   samples: 4, Avg. parallel_for execution time: 1.95056
+   samples: 8, Avg. parallel_for execution time: 2.21727
+   samples: 16, Avg. parallel_for execution time: 2.75372
+   samples: 32, Avg. parallel_for execution time: 3.83706
+   samples: 64, Avg. parallel_for execution time: 5.96208
+   samples: 128, Avg. parallel_for execution time: 10.2629
+   samples: 256, Avg. parallel_for execution time: 18.83
+   samples: 512, Avg. parallel_for execution time: 35.9695
+   samples: 1024, Avg. parallel_for execution time: 70.2289
+---------------------------
+  
 Executable: raytrace-kokkos
-   samples: 64, running time: 10.1742
-Profiling...
-running time: 3324.43
+   samples: 1, running time: 0.163182
+   samples: 2, running time: 0.31767
+   samples: 4, running time: 0.633212
+   samples: 8, running time: 1.26387
+   samples: 16, running time: 2.51988
+   samples: 32, running time: 5.03958
+   samples: 64, running time: 10.0747
+   samples: 128, running time: 20.0886
+   samples: 256, running time: 40.235
+   samples: 512, running time: 80.3936
+   samples: 1024, running time: 160.913
+---------------------------
+  
 Executable: raytrace-clang
-   samples: 64, running time: 8.31689
-Profiling...
-running time: 1115.52
+   samples: 1, running time: 0.128872
+   samples: 2, running time: 0.257901
+   samples: 4, running time: 0.51509
+   samples: 8, running time: 1.0297
+   samples: 16, running time: 2.05771
+   samples: 32, running time: 4.11255
+   samples: 64, running time: 8.22518
+   samples: 128, running time: 16.4397
+   samples: 256, running time: 32.8937
+   samples: 512, running time: 65.7445
+   samples: 1024, running time: 131.478
+---------------------------
+  

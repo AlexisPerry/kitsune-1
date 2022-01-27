@@ -180,6 +180,8 @@ int main(int argc, char **argv)
       samplesCount = atoi(argv[1]);
 
     kitsune::timer t;
+    for(int launches = 0; launches < 10; launches++) { 
+
     Kokkos::parallel_for(WIDTH * HEIGHT, KOKKOS_LAMBDA(const unsigned int i) {
       int x = i % WIDTH;
       int y = i / WIDTH;
@@ -207,8 +209,9 @@ int main(int argc, char **argv)
       img[i].g = (unsigned char)color.y;
       img[i].b = (unsigned char)color.z;
     });
-    double loop_secs = t.seconds();
-    std::cout << "parallel_for execution time: " << loop_secs << std::endl;
+    }
+    double loop_secs = t.seconds() / 10.0;
+    std::cout << "Avg. parallel_for execution time: " << loop_secs << std::endl;
 
     std::ofstream myfile;
     myfile.open ("raytrace-kitsune.ppm");

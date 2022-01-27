@@ -29,6 +29,8 @@
 #include<nvPTXCompiler.h>
 #include<cuda.h>
 
+#include "kitsune/timer.h"
+
 // TODO: do better than just global versions of these
 CUcontext context;
 CUdevice device;
@@ -118,7 +120,7 @@ bool verbose_mode = false;
 
 
 void* PTXtoELF(const char* ptx){
-	nvPTXCompilerHandle compiler = NULL;
+  nvPTXCompilerHandle compiler = NULL;
   nvPTXCompileResult status;
 
   size_t elfSize, infoSize, errorSize;
@@ -146,26 +148,24 @@ void* PTXtoELF(const char* ptx){
     }
   }
 
+
   NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerGetVersion(&majorVer, &minorVer));
-  //printf("Current PTX Compiler API Version : %d.%d\n", majorVer, minorVer);
 
   NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerCreate(&compiler,
                                               (size_t)strlen(ptx),  /* ptxCodeLen */
-                                              ptx)                  /* ptxCode */
-                          );
-
+                                              ptx));                /* ptxCode */
   status = nvPTXCompilerCompile(compiler, arg_count, compile_options);
 
   if (status != NVPTXCOMPILE_SUCCESS) {
-      NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerGetErrorLogSize(compiler, &errorSize));
+    NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerGetErrorLogSize(compiler, &errorSize));
 
-      if (errorSize != 0) {
-          errorLog = (char*)malloc(errorSize+1);
-          NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerGetErrorLog(compiler, errorLog));
-          printf("Error log: %s\n", errorLog);
-          free(errorLog);
-      }
-      exit(1);
+    if (errorSize != 0) {
+      errorLog = (char*)malloc(errorSize+1);
+      NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerGetErrorLog(compiler, errorLog));
+      printf("Error log: %s\n", errorLog);
+      free(errorLog);
+    }
+    exit(1);
   }
 
   NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerGetCompiledProgramSize(compiler, &elfSize));
@@ -176,14 +176,13 @@ void* PTXtoELF(const char* ptx){
   NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerGetInfoLogSize(compiler, &infoSize));
 
   if (infoSize != 0) {
-      infoLog = (char*)malloc(infoSize+1);
-      NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerGetInfoLog(compiler, infoLog));
-      printf("Info log: %s\n", infoLog);
-      free(infoLog);
+    infoLog = (char*)malloc(infoSize+1);
+    NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerGetInfoLog(compiler, infoLog));
+    printf("Info log: %s\n", infoLog);
+    free(infoLog);
   }
 
   NVPTXCOMPILER_SAFE_CALL(nvPTXCompilerDestroy(&compiler));
-
   return elf;
 }
 
@@ -199,10 +198,10 @@ std::string LLVMtoPTX(Module& m) {
   cuDeviceGetAttribute_p(&max_threads_per_blk, CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK, device);
   cuDeviceGetAttribute_p(&max_block_dim_x, CU_DEVICE_ATTRIBUTE_MAX_BLOCK_DIM_X, device);
 
-  fprintf(stderr, "number of SMs on device: %d\n", sm_count);
-  fprintf(stderr, "warp size: %d\n", warpsize);
-  fprintf(stderr, "maximum number of threads per block: %d\n", max_threads_per_blk);
-  fprintf(stderr, "maximum blocks in the x dimension: %d\n", max_block_dim_x);
+  //fprintf(stderr, "number of SMs on device: %d\n", sm_count);
+  //fprintf(stderr, "warp size: %d\n", warpsize);
+  //fprintf(stderr, "maximum number of threads per block: %d\n", max_threads_per_blk);
+  //fprintf(stderr, "maximum blocks in the x dimension: %d\n", max_block_dim_x);
 
   std::ostringstream arch;
   arch << "sm_" << maj << min;
@@ -399,10 +398,10 @@ CUstream launchCudaELF(void* elf, void** args, size_t n){
   // Testing a new approach to launch configuration...
   size_t threads_per_block = 256;
   size_t blocks_per_grid = 1 + ((n - 1) / threads_per_block);
-  fprintf(stderr, "launch parameters:\n");
-  fprintf(stderr, "   n                : %ld\n", n);
-  fprintf(stderr, "   blocks per grid  : %ld\n", blocks_per_grid);
-  fprintf(stderr, "   threads per block: %ld\n", threads_per_block);
+  //fprintf(stderr, "launch parameters:\n");
+  //fprintf(stderr, "   n                : %ld\n", n);
+  //fprintf(stderr, "   blocks per grid  : %ld\n", blocks_per_grid);
+  //fprintf(stderr, "   threads per block: %ld\n", threads_per_block);
   CUDA_SAFE_CALL(cuLaunchKernel_p(kernel,
                                  blocks_per_grid, 1, 1, // grid dim
                                  threads_per_block, 1, 1, // block dim
@@ -416,9 +415,13 @@ CUstream launchCudaELF(void* elf, void** args, size_t n){
 }
 
 void* launchCUDAKernel(Module& m, void** args, size_t n) {
+  kitsune::timer t;
   std::string ptx = LLVMtoPTX(m);
   void* elf = PTXtoELF(ptx.c_str());
-  return (void*)launchCudaELF(elf, args, n);
+  void *lptr = (void*)launchCudaELF(elf, args, n);
+  double launch_time = t.seconds(); 
+  fprintf(stderr, "launch/jit time: %lf secs.\n", launch_time);
+  return lptr;
 }
 
 void waitCUDAKernel(void* vwait) {
