@@ -174,34 +174,39 @@ Vec Trace(Vec origin, Vec direction, unsigned int& rn) {
 
 __global__
 void PathTracer(int samplesCount, Pixel *img, int N) {
+  //int index  = blockIdx.x * blockDim.x + threadIdx.x;
   int index  = blockIdx.x * blockDim.x + threadIdx.x;
-  int stride = blockDim.x * gridDim.x;
-  for(int i = index; i < N; i += stride) {
-    int x = i % WIDTH;
-    int y = i / WIDTH;
-    unsigned int v = i;
-    const Vec position(-12.0f, 5.0f, 25.0f);
-    const Vec goal = !(Vec(-3.0f, 4.0f, 0.0f) + position * -1.0f);
-    const Vec left = !Vec(goal.z, 0, -goal.x) * (1.0f / WIDTH);
-    // Cross-product to get the up vector
-    const Vec up(goal.y *left.z - goal.z * left.y,
+  if (index < N) {
+    //int stride = blockDim.x * gridDim.x;
+    // for(int i = index; i < N; i += stride) {
+    int work_size = N/(blockDim.x*gridDim.x);
+    for(int i = index * work_size; i < (index+1)*work_size; i++) {
+      int x = i % WIDTH;
+      int y = i / WIDTH;
+      unsigned int v = i;
+      const Vec position(-12.0f, 5.0f, 25.0f);
+      const Vec goal = !(Vec(-3.0f, 4.0f, 0.0f) + position * -1.0f);
+      const Vec left = !Vec(goal.z, 0, -goal.x) * (1.0f / WIDTH);
+      // Cross-product to get the up vector
+      const Vec up(goal.y *left.z - goal.z * left.y,
                  goal.z *left.x - goal.x * left.z,
                  goal.x *left.y - goal.y * left.x);
-    Vec color;
-    for (unsigned int p = samplesCount; p--;) {
-      Vec rand_left = Vec(randomVal(v), randomVal(v), randomVal(v))*.001;
-      color = color + Trace(position,
+      Vec color;
+      for (unsigned int p = samplesCount; p--;) {
+        Vec rand_left = Vec(randomVal(v), randomVal(v), randomVal(v))*.001;
+        color = color + Trace(position,
                             !((goal+rand_left) + left *
                               ((x+randomVal(v)) - WIDTH / 2.0f + randomVal(v)) + up *
                               ((y+randomVal(v)) - HEIGHT / 2.0f + randomVal(v))), v);
+      }
+      // Reinhard tone mapping
+      color = color * (1.0f / samplesCount) + 14.0f / 241.0f;
+      Vec o = color + 1.0f;
+      color = Vec(color.x / o.x, color.y / o.y, color.z / o.z) * 255.0f;
+      img[i].r = (unsigned char)color.x;
+      img[i].g = (unsigned char)color.y;
+      img[i].b = (unsigned char)color.z;
     }
-    // Reinhard tone mapping
-    color = color * (1.0f / samplesCount) + 14.0f / 241.0f;
-    Vec o = color + 1.0f;
-    color = Vec(color.x / o.x, color.y / o.y, color.z / o.z) * 255.0f;
-    img[i].r = (unsigned char)color.x;
-    img[i].g = (unsigned char)color.y;
-    img[i].b = (unsigned char)color.z;
   }
 }
 
@@ -221,7 +226,7 @@ int main(int argc, char **argv)
 
   kitsune::timer t;
   int threadsPerBlock = 256;
-  int blocksPerGrid = (total_pixels + threadsPerBlock - 1) / threadsPerBlock;
+  int blocksPerGrid = ((total_pixels/8) + threadsPerBlock - 1) / threadsPerBlock;
   PathTracer<<<blocksPerGrid, threadsPerBlock>>>(samplesCount, img, total_pixels);
   cudaDeviceSynchronize();
   double loop_secs = t.seconds();

@@ -28,8 +28,8 @@ if (KITSUNE_ENABLE_KOKKOS_SUPPORT)
   # it has already been run previously.  This is a pain when developing.
   # So...  the patch command has been hacked to always return success to
   # avoid failed application of the patch from stopping the build.  Ideally
-  # we need to deal with the exception handling in kitsune+tapir to address 
-  # this... 
+  # we need to deal with the exception handling in kitsune+tapir to address
+  # this...
   FetchContent_Declare(kokkos
     GIT_REPOSITORY      https://github.com/kokkos/kokkos.git
     GIT_TAG             3.5.00
@@ -77,11 +77,9 @@ if (KITSUNE_BUILD_EXAMPLES)
   add_subdirectory(examples)
 endif()
 
-option(KITSUNE_BUILD_EXPERIMENTS "Build the Kitsune experimental features example programs." OFF)
-if (KITSUNE_BUILD_EXPERIMENTS)
-  add_subdirectory(experiments)
-endif()
-
 add_subdirectory(include)
 
-option(KITSUNE_INCLUDE_TESTS "Enable Kitsune test suite." OFF)
+option(KITSUNE_EXPERIMENTS "Enable the Kitsune experiments setup for use." ON)
+if (KITSUNE_EXPERIMENTS)
+  add_subdirectory(experiments)
+endif()

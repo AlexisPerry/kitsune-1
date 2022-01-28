@@ -167,5 +167,5 @@ file(GLOB KITSUNE_CLANG_CFG_FILES
     ${LLVM_BINARY_DIR}/share/kitsune/*.cfg)
 
 install(DIRECTORY ${LLVM_BINARY_DIR}/share/kitsune/
-  DESTINATION share/kitsune  COMPONENT install-clang-cfgs
+  DESTINATION share/kitsune
   FILES_MATCHING PATTERN "*.cfg")

@@ -159,6 +159,9 @@ Driver::Driver(StringRef ClangExecutable, StringRef TargetTriple,
 
 #if defined(CLANG_CONFIG_FILE_SYSTEM_DIR)
   SystemConfigDir = CLANG_CONFIG_FILE_SYSTEM_DIR;
+#else
+  llvm::StringRef PrefixDir = llvm::sys::path::parent_path(Dir);
+  SystemConfigDir = PrefixDir.str() + std::string("/share/kitsune");
 #endif
 
 #if defined(CLANG_CONFIG_FILE_USER_DIR)
