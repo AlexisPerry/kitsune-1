@@ -14,6 +14,7 @@
 #include<llvm/IR/IntrinsicsNVPTX.h>
 #include<llvm/IRReader/IRReader.h>
 #include<llvm/Transforms/Utils/BasicBlockUtils.h>
+#include "llvm/Support/InitLLVM.h"
 #include<llvm/Support/TargetSelect.h>
 #include<llvm/Support/CommandLine.h>
 #include<llvm/Support/raw_os_ostream.h>
@@ -354,9 +355,18 @@ std::string LLVMtoPTX(Module& m) {
   // TODO: Hard coded machine configuration, use cuda to check
   std::string error;
   raw_os_ostream ostr(std::cout);
-  InitializeAllTargets();
-  InitializeAllTargetMCs();
-  InitializeAllAsmPrinters();
+
+  //InitializeAllTargets();
+  //InitializeAllTargetMCs();
+  //InitializeAllAsmPrinters();
+
+  InitializeNativeTarget();
+  InitializeNativeTargetAsmPrinter();
+
+  LLVMInitializeNVPTXTarget();
+  LLVMInitializeNVPTXTargetInfo();
+  LLVMInitializeNVPTXTargetMC();
+  LLVMInitializeNVPTXAsmPrinter();
 
   const Target *PTXTarget = TargetRegistry::lookupTarget("", TT, error);
   if(!PTXTarget){
@@ -373,6 +383,8 @@ std::string LLVMtoPTX(Module& m) {
   assert(!Fail && "Failed to emit PTX");
 
   FPM.doInitialization();
+  if (PTXTargetMachine)  
+    PTXTargetMachine->adjustPassManager(Builder);
   for(Function &F : m)
     FPM.run(F);
   FPM.doFinalization();
@@ -425,8 +437,8 @@ void* launchCUDAKernel(Module& m, void** args, size_t n) {
 }
 
 void waitCUDAKernel(void* vwait) {
-	//CUstream wait = (CUstream)vwait;
-	CUstream wait = stream;
+  //CUstream wait = (CUstream)vwait;
+  CUstream wait = stream;
   CUDA_SAFE_CALL(cuStreamSynchronize_p(stream));
   //CUDA_SAFE_CALL(cuStreamDestroy_v2_p(wait));
   //CUDA_SAFE_CALL(cuCtxDestroy_v2_p(context));

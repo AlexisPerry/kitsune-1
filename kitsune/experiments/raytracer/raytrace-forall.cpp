@@ -7,8 +7,8 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <time.h>
-#include "Kokkos_Core.hpp"
 #include "kitsune/timer.h"
+#include <kitsune.h>
 #include "kitsune/llvm-gpu-abi/llvm-gpu.h"
 
 #define WIDTH  2048
@@ -21,15 +21,16 @@ struct Pixel {
 
 struct Vec {
   float x,y,z;
-  KOKKOS_FORCEINLINE_FUNCTION Vec(float v = 0) {x = y = z = v;}
-  KOKKOS_FORCEINLINE_FUNCTION Vec(float a, float b, float c = 0) {x = a;y = b;z = c;}
-  KOKKOS_FORCEINLINE_FUNCTION Vec operator+(const Vec r) const  { return Vec(x + r.x , y + r.y , z + r.z); }
-  KOKKOS_FORCEINLINE_FUNCTION Vec operator*(const Vec r) const { return   Vec(x * r.x , y * r.y , z * r.z); }
-  KOKKOS_FORCEINLINE_FUNCTION float operator%(const Vec r) const {return     x * r.x + y * r.y + z * r.z;}
-  KOKKOS_FORCEINLINE_FUNCTION Vec operator!() { return *this * (1.0/sqrtf(*this % *this)); }
+  inline __attribute__((always_inline)) Vec(float v = 0) {x = y = z = v;}
+  inline __attribute__((always_inline)) Vec(float a, float b, float c = 0) {x = a;y = b;z = c;}
+  inline __attribute__((always_inline)) Vec operator+(const Vec r) const  { return Vec(x + r.x , y + r.y , z + r.z); }
+  inline __attribute__((always_inline)) Vec operator*(const Vec r) const { return   Vec(x * r.x , y * r.y , z * r.z); }
+  inline __attribute__((always_inline)) float operator%(const Vec r) const {return     x * r.x + y * r.y + z * r.z;}
+  inline __attribute__((always_inline)) Vec operator!() { return *this * (1.0/sqrtf(*this % *this)); }
 };
 
-KOKKOS_FORCEINLINE_FUNCTION float randomVal(unsigned int& x) {
+inline __attribute__((always_inline))
+float randomVal(unsigned int& x) {
   x = (214013*x+2531011);
   return ((x>>16)&0x7FFF) / (float)66635;
 }
@@ -37,7 +38,8 @@ KOKKOS_FORCEINLINE_FUNCTION float randomVal(unsigned int& x) {
 // Rectangle CSG equation. Returns minimum signed distance from
 // space carved by
 // lowerLeft vertex and opposite rectangle vertex upperRight.
-KOKKOS_FORCEINLINE_FUNCTION float BoxTest(const Vec& position, Vec lowerLeft, Vec upperRight) {
+inline __attribute__((always_inline))
+float BoxTest(const Vec& position, Vec lowerLeft, Vec upperRight) {
   lowerLeft = position + lowerLeft * -1.0f;
   upperRight = upperRight + position * -1.0f;
   return -fminf(
@@ -51,7 +53,8 @@ KOKKOS_FORCEINLINE_FUNCTION float BoxTest(const Vec& position, Vec lowerLeft, Ve
 #define HIT_SUN 3
 
 // Sample the world using Signed Distance Fields.
-KOKKOS_FORCEINLINE_FUNCTION float QueryDatabase(const Vec& position, int &hitType) {
+inline __attribute__((always_inline))
+float QueryDatabase(const Vec& position, int &hitType) {
   float distance = 1e9;//FLT_MAX;
   Vec f = position; // Flattened position (z=0)
   f.z = 0;
@@ -103,7 +106,8 @@ KOKKOS_FORCEINLINE_FUNCTION float QueryDatabase(const Vec& position, int &hitTyp
 
 // Perform signed sphere marching
 // Returns hitType 0, 1, 2, or 3 and update hit position/normal
-KOKKOS_FORCEINLINE_FUNCTION
+
+inline __attribute__((always_inline)) 
 int RayMarching(const Vec& origin, const Vec& direction, Vec& hitPos, Vec& hitNorm) {
   int hitType = HIT_NONE;
   int noHitCount = 0;
@@ -122,7 +126,8 @@ int RayMarching(const Vec& origin, const Vec& direction, Vec& hitPos, Vec& hitNo
   return 0;
 }
 
-KOKKOS_FORCEINLINE_FUNCTION Vec Trace(Vec origin, Vec direction, unsigned int& rn) {
+inline __attribute__((always_inline))
+Vec Trace(Vec origin, Vec direction, unsigned int& rn) {
   Vec sampledPosition;
   Vec normal;
   Vec color(0.0f, 0.0f, 0.0f);
@@ -171,52 +176,49 @@ KOKKOS_FORCEINLINE_FUNCTION Vec Trace(Vec origin, Vec direction, unsigned int& r
 
 int main(int argc, char **argv)
 {
-  Kokkos::initialize(argc, argv);
-  {
-    Pixel *img = (Pixel*)gpuManagedMalloc(WIDTH * HEIGHT * sizeof(Pixel));
-    unsigned int samplesCount = 1 << 7;
+  Pixel *img = (Pixel*)gpuManagedMalloc(WIDTH * HEIGHT * sizeof(Pixel));
+  unsigned int samplesCount = 1 << 7;
 
-    if (argc > 1 )
-      samplesCount = atoi(argv[1]);
+  if (argc > 1 )
+    samplesCount = atoi(argv[1]);
 
-    kitsune::timer t;
-    Kokkos::parallel_for(WIDTH * HEIGHT, KOKKOS_LAMBDA(const unsigned int i) {
-	int x = i % WIDTH;
-	int y = i / WIDTH;
-	unsigned int v = i;
-	const Vec position(-12.0f, 5.0f, 25.0f);
-	const Vec goal = !(Vec(-3.0f, 4.0f, 0.0f) + position * -1.0f);
-	const Vec left = !Vec(goal.z, 0, -goal.x) * (1.0f / WIDTH);
-	// Cross-product to get the up vector
-	const Vec up(goal.y *left.z - goal.z * left.y,
-		     goal.z *left.x - goal.x * left.z,
-		     goal.x *left.y - goal.y * left.x);
-	Vec color;
-	for (unsigned int p = samplesCount; p--;) {
-	  Vec rand_left = Vec(randomVal(v), randomVal(v), randomVal(v))*.001;
-	  color = color + Trace(position,
-				!((goal+rand_left) + left *
-				  ((x+randomVal(v)) - WIDTH / 2.0f + randomVal(v)) + up *
-				  ((y+randomVal(v)) - HEIGHT / 2.0f + randomVal(v))), v);
-	}
-	// Reinhard tone mapping
-	color = color * (1.0f / samplesCount) + 14.0f / 241.0f;
-	Vec o = color + 1.0f;
-	color = Vec(color.x / o.x, color.y / o.y, color.z / o.z) * 255.0f;
-	img[i].r = (unsigned char)color.x;
-	img[i].g = (unsigned char)color.y;
-	img[i].b = (unsigned char)color.z;
-      });
-    double loop_secs = t.seconds(); 
-    std::cout << "Avg. parallel_for execution time: " << loop_secs << std::endl;
-
-    std::ofstream myfile;
-    myfile.open ("raytrace-kitsune.ppm");
-    myfile << "P6 " << WIDTH << " " << HEIGHT << " 255 ";
-    for(int i = (WIDTH*HEIGHT)-1; i >= 0; i--) {
-      myfile << img[i].r << img[i].g << img[i].b;
+  kitsune::timer t;
+  forall(size_t i = 0; i < (WIDTH * HEIGHT); ++i) { 
+    int x = i % WIDTH;
+    int y = i / WIDTH;
+    unsigned int v = i;
+    const Vec position(-12.0f, 5.0f, 25.0f);
+    const Vec goal = !(Vec(-3.0f, 4.0f, 0.0f) + position * -1.0f);
+    const Vec left = !Vec(goal.z, 0, -goal.x) * (1.0f / WIDTH);
+    // Cross-product to get the up vector
+    const Vec up(goal.y *left.z - goal.z * left.y,
+		 goal.z *left.x - goal.x * left.z,
+		 goal.x *left.y - goal.y * left.x);
+    Vec color;
+    for (unsigned int p = samplesCount; p--;) {
+      Vec rand_left = Vec(randomVal(v), randomVal(v), randomVal(v))*.001;
+      color = color + Trace(position,
+			    !((goal+rand_left) + left *
+			      ((x+randomVal(v)) - WIDTH / 2.0f + randomVal(v)) + up *
+			      ((y+randomVal(v)) - HEIGHT / 2.0f + randomVal(v))), v);
     }
+    // Reinhard tone mapping
+    color = color * (1.0f / samplesCount) + 14.0f / 241.0f;
+    Vec o = color + 1.0f;
+    color = Vec(color.x / o.x, color.y / o.y, color.z / o.z) * 255.0f;
+    img[i].r = (unsigned char)color.x;
+    img[i].g = (unsigned char)color.y;
+    img[i].b = (unsigned char)color.z;
   }
-  Kokkos::finalize();
+  double loop_secs = t.seconds();
+  std::cout << "Avg. parallel_for execution time: " << loop_secs << std::endl;
+
+  std::ofstream myfile;
+  myfile.open ("raytrace-forall.ppm");
+  myfile << "P6 " << WIDTH << " " << HEIGHT << " 255 ";
+  for(int i = (WIDTH*HEIGHT)-1; i >= 0; i--) {
+    myfile << img[i].r << img[i].g << img[i].b;
+  }
+
   return EXIT_SUCCESS;
 }

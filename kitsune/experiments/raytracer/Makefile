@@ -10,6 +10,7 @@ opt=${kitsune_prefix}/bin/opt
 cxx_flags=-std=c++17 -fno-exceptions -I${kitsune_prefix}/include
 opt_flags=-O3
 
+kitsune_forall_flags=${cxx_flags} -ftapir=gpu ${opt_flags}
 kitsune_tapir_flags=${cxx_flags} -fkokkos -fkokkos-no-init -ftapir=gpu ${opt_flags}
 kokkos_cxx_flags=${cxx_flags} -I${kokkos_prefix}/include 
 kokkos_ld_flags=-L${kokkos_prefix}/lib64 -lkokkoscore
@@ -22,7 +23,7 @@ cuda_flags=${cxx_flags} ${opt_flags} -m64 -arch=sm_80
 clang_cxx_flags=${cxx_flags} ${clang_cuda_flags} -I${kokkos_prefix}/include ${opt_flags} 
 clang_ld_flags=-L${kokkos_prefix}/lib64 -L$(CUDA_HOME)/lib64 -lkokkoscore -lcudart -ldl
 
-all: raytrace-kitsune raytrace-kokkos raytrace-clang raytrace-cuda
+all: raytrace-kitsune raytrace-forall raytrace-kokkos raytrace-clang raytrace-cuda
 
 
 
@@ -30,6 +31,9 @@ all: raytrace-kitsune raytrace-kokkos raytrace-clang raytrace-cuda
 # 
 raytrace-kitsune: raytrace-kitsune.cpp
 	${clang} ${kitsune_tapir_flags} -o raytrace-kitsune raytrace-kitsune.cpp -Xlinker -rpath=${kitsune_prefix}/lib
+
+raytrace-forall: raytrace-forall.cpp
+	${clang} ${kitsune_forall_flags} -o raytrace-forall raytrace-forall.cpp -Xlinker -rpath=${kitsune_prefix}/lib
 
 raytrace-kitsune-print-all.txt: raytrace-kitsune.cpp
 	${clang} ${kitsune_tapir_flags} -o raytrace-kitsune raytrace-kitsune.cpp -Xlinker -rpath=${kitsune_prefix}/lib -mllvm -print-after-all 2>&1 | tee raytrace-kitsune-print-all.txt 

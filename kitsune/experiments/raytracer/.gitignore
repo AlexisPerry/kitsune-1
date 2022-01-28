@@ -2,4 +2,6 @@
 raytrace-kitsune
 raytrace-kokkos 
 raytrace-clang
+raytrace-forall 
+raytrace-cuda 
 *.ppm 
