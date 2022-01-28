@@ -9,8 +9,8 @@ if (NOT KITSUNE_EXPERIMENTS)
   set(EXCLUDE_FROM_ALL ON)
 endif()
 
-message(STATUS "Enabling kitsune experiments directory.")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/kitsune.mk.cmake
-      ${CMAKE_CURRENT_SOURCE_DIR}/kitsune.mk)
+#message(STATUS "Enabling kitsune experiments directory.")
+#configure_file(${CMAKE_CURRENT_SOURCE_DIR}/kitsune.mk.cmake
+#      ${CMAKE_CURRENT_SOURCE_DIR}/kitsune.mk)
 
 #add_subdirectory(raytracer)

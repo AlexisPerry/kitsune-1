@@ -1,4 +1,4 @@
-Thu Jan 27 14:21:04 2022       
+Fri Jan 28 10:24:40 2022       
 +-----------------------------------------------------------------------------+
 | NVIDIA-SMI 470.57.02    Driver Version: 470.57.02    CUDA Version: 11.5     |
 |-------------------------------+----------------------+----------------------+
@@ -7,19 +7,19 @@ Thu Jan 27 14:21:04 2022
 |                               |                      |               MIG M. |
 |===============================+======================+======================|
 |   0  NVIDIA A100-SXM...  On   | 00000000:01:00.0 Off |                    0 |
-| N/A   31C    P0    52W / 400W |      0MiB / 40536MiB |      0%      Default |
+| N/A   28C    P0    54W / 400W |      0MiB / 40536MiB |      0%      Default |
 |                               |                      |             Disabled |
 +-------------------------------+----------------------+----------------------+
 |   1  NVIDIA A100-SXM...  On   | 00000000:41:00.0 Off |                    0 |
-| N/A   29C    P0    52W / 400W |      0MiB / 40536MiB |      0%      Default |
+| N/A   27C    P0    52W / 400W |      0MiB / 40536MiB |      0%      Default |
 |                               |                      |             Disabled |
 +-------------------------------+----------------------+----------------------+
 |   2  NVIDIA A100-SXM...  On   | 00000000:81:00.0 Off |                    0 |
-| N/A   27C    P0    54W / 400W |      0MiB / 40536MiB |      0%      Default |
+| N/A   24C    P0    53W / 400W |      0MiB / 40536MiB |      0%      Default |
 |                               |                      |             Disabled |
 +-------------------------------+----------------------+----------------------+
 |   3  NVIDIA A100-SXM...  On   | 00000000:C1:00.0 Off |                    0 |
-| N/A   25C    P0    50W / 400W |      0MiB / 40536MiB |      0%      Default |
+| N/A   24C    P0    55W / 400W |      0MiB / 40536MiB |      0%      Default |
 |                               |                      |             Disabled |
 +-------------------------------+----------------------+----------------------+
                                                                                
@@ -31,67 +31,67 @@ Thu Jan 27 14:21:04 2022
 |  No running processes found                                                 |
 +-----------------------------------------------------------------------------+
 Executable: raytrace-cuda
-   samples: 1, parallel_for execution time: 0.18786
-   samples: 2, parallel_for execution time: 0.291184
-   samples: 4, parallel_for execution time: 0.580341
-   samples: 8, parallel_for execution time: 1.15922
-   samples: 16, parallel_for execution time: 2.31008
-   samples: 32, parallel_for execution time: 4.61521
-   samples: 64, parallel_for execution time: 9.22737
-   samples: 128, parallel_for execution time: 18.4548
-   samples: 256, parallel_for execution time: 36.8647
-   samples: 512, parallel_for execution time: 73.7277
+   samples: 1, parallel_for execution time: 0.220902
+   samples: 2, parallel_for execution time: 0.344305
+   samples: 4, parallel_for execution time: 0.685006
+   samples: 8, parallel_for execution time: 1.37221
+   samples: 16, parallel_for execution time: 2.75017
+   samples: 32, parallel_for execution time: 5.48568
+   samples: 64, parallel_for execution time: 10.9785
+   samples: 128, parallel_for execution time: 21.9437
+   samples: 256, parallel_for execution time: 44.0046
+   samples: 512, parallel_for execution time: 88.008
 ---------------------------
   
 Executable: raytrace-kitsune
-   samples: 1, Avg. parallel_for execution time: 1.76394
-   samples: 2, Avg. parallel_for execution time: 1.8453
-   samples: 4, Avg. parallel_for execution time: 1.9899
-   samples: 8, Avg. parallel_for execution time: 2.28006
-   samples: 16, Avg. parallel_for execution time: 2.81749
-   samples: 32, Avg. parallel_for execution time: 3.86915
-   samples: 64, Avg. parallel_for execution time: 6.01255
-   samples: 128, Avg. parallel_for execution time: 10.2678
-   samples: 256, Avg. parallel_for execution time: 18.8725
-   samples: 512, Avg. parallel_for execution time: 35.9952
+   samples: 1, Avg. parallel_for execution time: 1.77837
+   samples: 2, Avg. parallel_for execution time: 1.87932
+   samples: 4, Avg. parallel_for execution time: 2.0253
+   samples: 8, Avg. parallel_for execution time: 2.30164
+   samples: 16, Avg. parallel_for execution time: 2.80183
+   samples: 32, Avg. parallel_for execution time: 3.89588
+   samples: 64, Avg. parallel_for execution time: 6.04731
+   samples: 128, Avg. parallel_for execution time: 10.3115
+   samples: 256, Avg. parallel_for execution time: 18.8823
+   samples: 512, Avg. parallel_for execution time: 36.0179
 ---------------------------
   
 Executable: raytrace-forall
-   samples: 1, Avg. parallel_for execution time: 1.77283
-   samples: 2, Avg. parallel_for execution time: 1.85126
-   samples: 4, Avg. parallel_for execution time: 2.00231
-   samples: 8, Avg. parallel_for execution time: 2.29317
-   samples: 16, Avg. parallel_for execution time: 2.81007
-   samples: 32, Avg. parallel_for execution time: 3.8755
-   samples: 64, Avg. parallel_for execution time: 6.00687
-   samples: 128, Avg. parallel_for execution time: 10.2799
-   samples: 256, Avg. parallel_for execution time: 18.8615
-   samples: 512, Avg. parallel_for execution time: 35.9973
+   samples: 1, Avg. parallel_for execution time: 1.79001
+   samples: 2, Avg. parallel_for execution time: 1.8748
+   samples: 4, Avg. parallel_for execution time: 2.00682
+   samples: 8, Avg. parallel_for execution time: 2.29068
+   samples: 16, Avg. parallel_for execution time: 2.83974
+   samples: 32, Avg. parallel_for execution time: 3.87302
+   samples: 64, Avg. parallel_for execution time: 6.03386
+   samples: 128, Avg. parallel_for execution time: 10.3425
+   samples: 256, Avg. parallel_for execution time: 18.9167
+   samples: 512, Avg. parallel_for execution time: 36.0458
 ---------------------------
   
 Executable: raytrace-kokkos
-   samples: 1, running time: 0.160087
-   samples: 2, running time: 0.317676
-   samples: 4, running time: 0.632761
-   samples: 8, running time: 1.26455
-   samples: 16, running time: 2.52148
-   samples: 32, running time: 5.04521
-   samples: 64, running time: 10.0712
-   samples: 128, running time: 20.1059
-   samples: 256, running time: 40.274
-   samples: 512, running time: 80.3573
+   samples: 1, running time: 0.16374
+   samples: 2, running time: 0.318179
+   samples: 4, running time: 0.632874
+   samples: 8, running time: 1.2621
+   samples: 16, running time: 2.51944
+   samples: 32, running time: 5.0362
+   samples: 64, running time: 10.0633
+   samples: 128, running time: 20.1119
+   samples: 256, running time: 40.2329
+   samples: 512, running time: 80.5064
 ---------------------------
   
 Executable: raytrace-clang
-   samples: 1, running time: 0.1285
-   samples: 2, running time: 0.257471
-   samples: 4, running time: 0.515722
-   samples: 8, running time: 1.02967
-   samples: 16, running time: 2.05721
-   samples: 32, running time: 4.11443
-   samples: 64, running time: 8.22732
-   samples: 128, running time: 16.4414
-   samples: 256, running time: 32.8617
-   samples: 512, running time: 65.7116
+   samples: 1, running time: 0.128818
+   samples: 2, running time: 0.257853
+   samples: 4, running time: 0.515376
+   samples: 8, running time: 1.02879
+   samples: 16, running time: 2.05763
+   samples: 32, running time: 4.10797
+   samples: 64, running time: 8.22247
+   samples: 128, running time: 16.4388
+   samples: 256, running time: 32.8636
+   samples: 512, running time: 65.7612
 ---------------------------
   

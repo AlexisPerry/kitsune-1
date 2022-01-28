@@ -8,16 +8,17 @@ nvcc_wrapper=${kokkos_prefix}/bin/nvcc_wrapper
 clang=${kitsune_prefix}/bin/clang++ 
 opt=${kitsune_prefix}/bin/opt
 cxx_flags=-std=c++17 -fno-exceptions -I${kitsune_prefix}/include
-opt_flags=-O3 -Rpass=vector
+opt_flags=-O3 
+clang_flags=-Rpass=vector 
 
 kitsune_forall_flags=${cxx_flags} -ftapir=gpu ${opt_flags}
-kitsune_tapir_flags=${cxx_flags} -fkokkos -fkokkos-no-init -ftapir=gpu ${opt_flags}
+kitsune_tapir_flags=${cxx_flags} ${clang_flags} -fkokkos -fkokkos-no-init -ftapir=gpu ${opt_flags}
 kokkos_cxx_flags=${cxx_flags} -I${kokkos_prefix}/include 
 kokkos_ld_flags=-L${kokkos_prefix}/lib64 -lkokkoscore
 
 nvcc_flags=--expt-extended-lambda -arch=sm_80 -m64 
 
-clang_cuda_flags=-xcuda --cuda-gpu-arch=sm_80 # --cuda-path=$(CUDA_HOME)
+clang_cuda_flags=${clang_flags} -xcuda --cuda-gpu-arch=sm_80 # --cuda-path=$(CUDA_HOME)
 cuda_flags=${cxx_flags} ${opt_flags} -m64 -arch=sm_80
 
 clang_cxx_flags=${cxx_flags} ${clang_cuda_flags} -I${kokkos_prefix}/include ${opt_flags} 
@@ -25,12 +26,11 @@ clang_ld_flags=-L${kokkos_prefix}/lib64 -L$(CUDA_HOME)/lib64 -lkokkoscore -lcuda
 
 
 all: raytrace-kitsune raytrace-forall raytrace-kokkos raytrace-clang raytrace-cuda
+
 nvcc_wrapper=${kokkos_prefix}/bin/nvcc_wrapper
-nvcc_args=--expt-extended-lambda -arch=sm_70 -m64 
+nvcc_args=--expt-extended-lambda -arch=sm_80 -m64 
 
-clang=clang++ 
-
-clang_cuda_flags=-xcuda --cuda-gpu-arch=sm_70 --cuda-path=$(CUDA_HOME)
+clang_cuda_flags=-xcuda --cuda-gpu-arch=sm_80 --cuda-path=$(CUDA_HOME) ${clang_flags}
 clang_cxx_flags=${kokkos_cxx_flags} ${clang_cuda_flags} ${opt_flags}
 clang_ld_flags=-L${kokkos_prefix}/lib64 -L$(CUDA_HOME)/lib64 -lkokkoscore -lcudart -ldl
 
