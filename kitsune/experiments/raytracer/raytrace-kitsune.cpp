@@ -15,6 +15,38 @@
 #define HEIGHT 1024
 #define BPP 3
 
+namespace kitsune {
+  template <typename T>
+  class View {
+    public:
+    View () {
+      xDim = 0;
+      yDim = 0;
+      data = nullptr;
+    }
+    
+    View(unsigned x, unsigned y){
+      xDim = x;
+      yDim = y;
+      data = (T*)gpuManagedMalloc(xDim * yDim * sizeof(T));
+    }
+
+    T& operator()(unsigned x, unsigned y) const{
+      unsigned offset = x +(y*xDim);
+      return this->data[offset];
+    }
+
+    T* get_data() {
+      return data;
+    }
+    
+  private:
+    unsigned xDim;
+    unsigned yDim;
+    T* data;
+  };
+} //namespace kitsune
+
 struct Pixel {
   unsigned char r, g, b;
 };
@@ -173,7 +205,7 @@ int main(int argc, char **argv)
 {
   Kokkos::initialize(argc, argv);
   {
-    Pixel *img = (Pixel*)gpuManagedMalloc(WIDTH * HEIGHT * sizeof(Pixel));
+    kitsune::View<Pixel> img(WIDTH,HEIGHT);
     unsigned int samplesCount = 1 << 7;
 
     if (argc > 1 )
@@ -203,9 +235,9 @@ int main(int argc, char **argv)
 	color = color * (1.0f / samplesCount) + 14.0f / 241.0f;
 	Vec o = color + 1.0f;
 	color = Vec(color.x / o.x, color.y / o.y, color.z / o.z) * 255.0f;
-	img[i].r = (unsigned char)color.x;
-	img[i].g = (unsigned char)color.y;
-	img[i].b = (unsigned char)color.z;
+	img(x,y).r = (unsigned char)color.x;
+	img(x,y).g = (unsigned char)color.y;
+	img(x,y).b = (unsigned char)color.z;
       });
     double loop_secs = t.seconds(); 
     std::cout << "Avg. parallel_for execution time: " << loop_secs << std::endl;
@@ -213,8 +245,10 @@ int main(int argc, char **argv)
     std::ofstream myfile;
     myfile.open ("raytrace-kitsune.ppm");
     myfile << "P6 " << WIDTH << " " << HEIGHT << " 255 ";
-    for(int i = (WIDTH*HEIGHT)-1; i >= 0; i--) {
-      myfile << img[i].r << img[i].g << img[i].b;
+    for (int y = HEIGHT; y--;) {
+      for (int x = WIDTH; x--;) {
+	myfile << img(x,y).r << img(x,y).g << img(x,y).b;
+      }
     }
   }
   Kokkos::finalize();
