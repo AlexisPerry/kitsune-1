@@ -6,6 +6,8 @@ add_flang_library(FIRTransforms
   CharacterConversion.cpp
   ArrayValueCopy.cpp
   ExternalNameConversion.cpp
+  FirLoopResultOpt.cpp
+  FirToSCF.cpp
   MemoryAllocation.cpp
   MemRefDataFlowOpt.cpp
   RewriteLoop.cpp
