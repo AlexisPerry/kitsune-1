@@ -7,7 +7,6 @@ add_flang_library(FIRTransforms
   ArrayValueCopy.cpp
   ExternalNameConversion.cpp
   FirLoopResultOpt.cpp
-  FirToSCF.cpp
   MemoryAllocation.cpp
   MemRefDataFlowOpt.cpp
   RewriteLoop.cpp
@@ -23,11 +22,14 @@ add_flang_library(FIRTransforms
   LINK_LIBS
   FIRBuilder
   FIRDialect
+
   MLIRAffineUtils
   MLIRFuncDialect
   MLIRLLVMDialect
   MLIRMathTransforms
   MLIROpenACCDialect
   MLIROpenMPDialect
+  MLIRSCF
+
   FIRSupport
 )
