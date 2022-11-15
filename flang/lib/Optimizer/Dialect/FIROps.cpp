@@ -1980,17 +1980,17 @@ void fir::DoConcurrentLoopOp::build(mlir::OpBuilder &builder,
   for (auto v : iterArgs)
     result.addTypes(v.getType());
   mlir::Region *bodyRegion = result.addRegion();
-  bodyRegion->push_back(new Block{});
+  bodyRegion->push_back(new mlir::Block{});
   if (iterArgs.empty() && !finalCountValue)
-    DoConcurrentLoopOp::ensureTerminator(*bodyRegion, builder, result.location);
-  bodyRegion->front().addArgument(builder.getIndexType());
-  bodyRegion->front().addArguments(iterArgs.getTypes());
+    fir::DoConcurrentLoopOp::ensureTerminator(*bodyRegion, builder, result.location);
+  bodyRegion->front().addArgument(builder.getIndexType(), result.location);
+  bodyRegion->front().addArguments(iterArgs.getTypes(), result.location);
   if (unordered)
     result.addAttribute(getUnorderedAttrNameStr(), builder.getUnitAttr());
   result.addAttributes(attributes);
 }
 
-static mlir::ParseResult parseDoLoopOp(mlir::OpAsmParser &parser,
+mlir::ParseResult fir::DoLoopOp::parse(mlir::OpAsmParser &parser,
                                        mlir::OperationState &result) {
   auto &builder = parser.getBuilder();
   mlir::OpAsmParser::Argument inductionVariable;
@@ -2045,7 +2045,7 @@ static mlir::ParseResult parseDoLoopOp(mlir::OpAsmParser &parser,
 
   // Induction variable.
   if (prependCount)
-    result.addAttribute(DoLoopOp::getFinalValueAttrName(result.name),
+    result.addAttribute(fir::DoLoopOp::getFinalValueAttrName(result.name),
                         builder.getUnitAttr());
   else
     argTypes.push_back(indexType);
@@ -2063,17 +2063,18 @@ static mlir::ParseResult parseDoLoopOp(mlir::OpAsmParser &parser,
   if (parser.parseRegion(*body, regionArgs))
     return mlir::failure();
 
-  DoLoopOp::ensureTerminator(*body, builder, result.location);
+  fir::DoLoopOp::ensureTerminator(*body, builder, result.location);
 
   return mlir::success();
 }
 
-static mlir::ParseResult parseDoConcurrentLoopOp(mlir::OpAsmParser &parser,
-                                       mlir::OperationState &result) {
+mlir::ParseResult fir::DoConcurrentLoopOp::parse(mlir::OpAsmParser &parser,
+                                                 mlir::OperationState &result) {
   auto &builder = parser.getBuilder();
-  mlir::OpAsmParser::OperandType inductionVariable, lb, ub, step;
+  mlir::OpAsmParser::Argument inductionVariable;
+  mlir::OpAsmParser::UnresolvedOperand lb, ub, step;
   // Parse the induction variable followed by '='.
-  if (parser.parseRegionArgument(inductionVariable) || parser.parseEqual())
+  if (parser.parseArgument(inductionVariable) || parser.parseEqual())
     return mlir::failure();
 
   // Parse loop bounds.
@@ -2084,14 +2085,15 @@ static mlir::ParseResult parseDoConcurrentLoopOp(mlir::OpAsmParser &parser,
       parser.resolveOperand(ub, indexType, result.operands) ||
       parser.parseKeyword("step") || parser.parseOperand(step) ||
       parser.resolveOperand(step, indexType, result.operands))
-    return failure();
+    return mlir::failure();
 
   if (mlir::succeeded(parser.parseOptionalKeyword("unordered")))
     result.addAttribute(fir::DoConcurrentLoopOp::getUnorderedAttrNameStr(),
                         builder.getUnitAttr());
 
   // Parse the optional initial iteration arguments.
-  llvm::SmallVector<mlir::OpAsmParser::OperandType> regionArgs, operands;
+  llvm::SmallVector<mlir::OpAsmParser::Argument> regionArgs;
+  llvm::SmallVector<mlir::OpAsmParser::UnresolvedOperand> operands;
   llvm::SmallVector<mlir::Type> argTypes;
   auto prependCount = false;
   regionArgs.push_back(inductionVariable);
@@ -2100,7 +2102,7 @@ static mlir::ParseResult parseDoConcurrentLoopOp(mlir::OpAsmParser &parser,
     // Parse assignment list and results type list.
     if (parser.parseAssignmentList(regionArgs, operands) ||
         parser.parseArrowTypeList(result.types))
-      return failure();
+      return mlir::failure();
     if (result.types.size() == operands.size() + 1)
       prependCount = true;
     // Resolve input operands.
@@ -2109,10 +2111,10 @@ static mlir::ParseResult parseDoConcurrentLoopOp(mlir::OpAsmParser &parser,
          llvm::zip(operands, prependCount ? resTypes.drop_front() : resTypes))
       if (parser.resolveOperand(std::get<0>(operandType),
                                 std::get<1>(operandType), result.operands))
-        return failure();
+        return mlir::failure();
   } else if (succeeded(parser.parseOptionalArrow())) {
     if (parser.parseKeyword("index"))
-      return failure();
+      return mlir::failure();
     result.types.push_back(indexType);
     prependCount = true;
   }
@@ -2122,7 +2124,7 @@ static mlir::ParseResult parseDoConcurrentLoopOp(mlir::OpAsmParser &parser,
 
   // Induction variable.
   if (prependCount)
-    result.addAttribute(DoConcurrentLoopOp::getFinalValueAttrNameStr(),
+    result.addAttribute(fir::DoConcurrentLoopOp::getFinalValueAttrNameStr(),
                         builder.getUnitAttr());
   else
     argTypes.push_back(indexType);
@@ -2134,11 +2136,13 @@ static mlir::ParseResult parseDoConcurrentLoopOp(mlir::OpAsmParser &parser,
     return parser.emitError(
         parser.getNameLoc(),
         "mismatch in number of loop-carried values and defined values");
+  for (size_t i = 0, e = regionArgs.size(); i != e; ++i)
+    regionArgs[i].type = argTypes[i];
 
-  if (parser.parseRegion(*body, regionArgs, argTypes))
-    return failure();
+  if (parser.parseRegion(*body, regionArgs))
+    return mlir::failure();
 
-  DoConcurrentLoopOp::ensureTerminator(*body, builder, result.location);
+  fir::DoConcurrentLoopOp::ensureTerminator(*body, builder, result.location);
 
   return mlir::success();
 }
@@ -2158,7 +2162,7 @@ fir::DoConcurrentLoopOp fir::getForConcurrentInductionVarOwner(mlir::Value val) 
     return {};
   assert(ivArg.getOwner() && "unlinked block argument");
   auto *containingInst = ivArg.getOwner()->getParentOp();
-  return dyn_cast_or_null<fir::DoConcurrentLoopOp>(containingInst);
+  return mlir::dyn_cast_or_null<fir::DoConcurrentLoopOp>(containingInst);
 }
 
 // Lifted from loop.loop
@@ -2207,43 +2211,43 @@ mlir::LogicalResult fir::DoLoopOp::verify() {
 mlir::LogicalResult fir::DoConcurrentLoopOp::verify() {
   // Check that the body defines as single block argument for the induction
   // variable.
-  auto *body = op.getBody();
+  auto *body = getBody();
   if (!body->getArgument(0).getType().isIndex())
-    return op.emitOpError(
+    return emitOpError(
         "expected body first argument to be an index argument for "
         "the induction variable");
 
-  auto opNumResults = op.getNumResults();
+  auto opNumResults = getNumResults();
   if (opNumResults == 0)
-    return success();
+    return mlir::success();
 
-  if (op.finalValue()) {
-    if (op.unordered())
-      return op.emitOpError("unordered loop has no final value");
+  if (getFinalValue()) {
+    if (getUnordered())
+      return emitOpError("unordered loop has no final value");
     opNumResults--;
   }
-  if (op.getNumIterOperands() != opNumResults)
-    return op.emitOpError(
+  if (getNumIterOperands() != opNumResults)
+    return emitOpError(
         "mismatch in number of loop-carried values and defined values");
-  if (op.getNumRegionIterArgs() != opNumResults)
-    return op.emitOpError(
+  if (getNumRegionIterArgs() != opNumResults)
+    return emitOpError(
         "mismatch in number of basic block args and defined values");
-  auto iterOperands = op.getIterOperands();
-  auto iterArgs = op.getRegionIterArgs();
+  auto iterOperands = getIterOperands();
+  auto iterArgs = getRegionIterArgs();
   auto opResults =
-      op.finalValue() ? op.getResults().drop_front() : op.getResults();
+      getFinalValue() ? getResults().drop_front() : getResults();
   unsigned i = 0;
   for (auto e : llvm::zip(iterOperands, iterArgs, opResults)) {
     if (std::get<0>(e).getType() != std::get<2>(e).getType())
-      return op.emitOpError() << "types mismatch between " << i
-                              << "th iter operand and defined value";
+      return emitOpError() << "types mismatch between " << i
+                           << "th iter operand and defined value";
     if (std::get<1>(e).getType() != std::get<2>(e).getType())
-      return op.emitOpError() << "types mismatch between " << i
-                              << "th iter region arg and defined value";
+      return emitOpError() << "types mismatch between " << i
+                           << "th iter region arg and defined value";
 
     i++;
   }
-  return success();
+  return mlir::success();
 }
 
 void fir::DoLoopOp::print(mlir::OpAsmPrinter &p) {
@@ -2272,58 +2276,34 @@ void fir::DoLoopOp::print(mlir::OpAsmPrinter &p) {
                 printBlockTerminators);
 }
 
-static void print(mlir::OpAsmPrinter &p, fir::DoConcurrentLoopOp op) {
+void fir::DoConcurrentLoopOp::print(mlir::OpAsmPrinter &p) {
   bool printBlockTerminators = false;
-  p << ' ' << op.getInductionVar() << " = " << op.lowerBound() << " to "
-    << op.upperBound() << " step " << op.step();
-  if (op.unordered())
+  p << ' ' << getInductionVar() << " = " << getLowerBound() << " to "
+    << getUpperBound() << " step " << getStep();
+  if (getUnordered())
     p << " unordered";
-  if (op.hasIterOperands()) {
+  if (hasIterOperands()) {
     p << " iter_args(";
-    auto regionArgs = op.getRegionIterArgs();
-    auto operands = op.getIterOperands();
+    auto regionArgs = getRegionIterArgs();
+    auto operands = getIterOperands();
     llvm::interleaveComma(llvm::zip(regionArgs, operands), p, [&](auto it) {
       p << std::get<0>(it) << " = " << std::get<1>(it);
     });
-    p << ") -> (" << op.getResultTypes() << ')';
+    p << ") -> (" << getResultTypes() << ')';
     printBlockTerminators = true;
-  } else if (op.finalValue()) {
-    p << " -> " << op.getResultTypes();
+  } else if (getFinalValue()) {
+    p << " -> " << getResultTypes();
     printBlockTerminators = true;
   }
-  p.printOptionalAttrDictWithKeyword(op->getAttrs(),
+  p.printOptionalAttrDictWithKeyword((*this)->getAttrs(),
                                      {fir::DoConcurrentLoopOp::getUnorderedAttrNameStr(),
                                       fir::DoConcurrentLoopOp::getFinalValueAttrNameStr()});
-  p.printRegion(op.region(), /*printEntryBlockArgs=*/false,
+  p.printRegion(getRegion(), /*printEntryBlockArgs=*/false,
                 printBlockTerminators);
 }
 
 mlir::Region &fir::DoLoopOp::getLoopBody() { return getRegion(); }
 mlir::Region &fir::DoConcurrentLoopOp::getLoopBody() { return getRegion(); }
-
-//The following four functions may be unnecessary
-bool fir::DoLoopOp::isDefinedOutsideOfLoop(mlir::Value value) {
-  return !getRegion().isAncestor(value.getParentRegion());
-}
-
-bool fir::DoConcurrentLoopOp::isDefinedOutsideOfLoop(mlir::Value value) {
-  return !region().isAncestor(value.getParentRegion());
-}
-
-mlir::LogicalResult
-fir::DoLoopOp::moveOutOfLoop(llvm::ArrayRef<mlir::Operation *> ops) {
-  for (auto *op : ops)
-    op->moveBefore(*this);
-  return success();
-}
-
-mlir::LogicalResult
-fir::DoConcurrentLoopOp::moveOutOfLoop(llvm::ArrayRef<mlir::Operation *> ops) {
-  for (auto *op : ops)
-    op->moveBefore(*this);
-  return success();
-}
-// END possilby unnecessary functions
 
 /// Translate a value passed as an iter_arg to the corresponding block
 /// argument in the body of the loop.
@@ -2337,9 +2317,9 @@ mlir::BlockArgument fir::DoLoopOp::iterArgToBlockArg(mlir::Value iterArg) {
 /// Translate a value passed as an iter_arg to the corresponding block
 /// argument in the body of the loop.
 mlir::BlockArgument fir::DoConcurrentLoopOp::iterArgToBlockArg(mlir::Value iterArg) {
-  for (auto i : llvm::enumerate(initArgs()))
+  for (auto i : llvm::enumerate(getInitArgs()))
     if (iterArg == i.value())
-      return region().front().getArgument(i.index() + 1);
+      return getRegion().front().getArgument(i.index() + 1);
   return {};
 }
 
@@ -2357,8 +2337,8 @@ void fir::DoLoopOp::resultToSourceOps(
 /// to the `fir.result` Op.
 void fir::DoConcurrentLoopOp::resultToSourceOps(
     llvm::SmallVectorImpl<mlir::Value> &results, unsigned resultNum) {
-  auto oper = finalValue() ? resultNum + 1 : resultNum;
-  auto *term = region().front().getTerminator();
+  auto oper = getFinalValue() ? resultNum + 1 : resultNum;
+  auto *term = getRegion().front().getTerminator();
   if (oper < term->getNumOperands())
     results.push_back(term->getOperand(oper));
 }
@@ -2374,8 +2354,8 @@ mlir::Value fir::DoLoopOp::blockArgToSourceOp(unsigned blockArgNum) {
 /// Translate the block argument (by index number) to the corresponding value
 /// passed as an iter_arg to the parent DoConcurrentLoopOp.
 mlir::Value fir::DoConcurrentLoopOp::blockArgToSourceOp(unsigned blockArgNum) {
-  if (blockArgNum > 0 && blockArgNum <= initArgs().size())
-    return initArgs()[blockArgNum - 1];
+  if (blockArgNum > 0 && blockArgNum <= getInitArgs().size())
+    return getInitArgs()[blockArgNum - 1];
   return {};
 }
 

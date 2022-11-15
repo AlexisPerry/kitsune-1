@@ -174,7 +174,7 @@ public:
       }); 
 
     
-    rewriter.replaceOp(loop, par.results());
+    rewriter.replaceOp(loop, par.getResults());
 
     return success(); 
   }

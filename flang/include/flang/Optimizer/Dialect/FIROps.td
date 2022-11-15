@@ -2166,7 +2166,7 @@ def fir_DoConcurrentLoopOp : region_Op<"do_concurrent_loop",
 
     mlir::Value getInductionVar() { return getBody()->getArgument(0); }
     mlir::OpBuilder getBodyBuilder() {
-      return OpBuilder(getBody(), std::prev(getBody()->end()));
+      return mlir::OpBuilder(getBody(), std::prev(getBody()->end()));
     }
     mlir::Block::BlockArgListType getRegionIterArgs() {
       return getBody()->getArguments().drop_front();
@@ -2175,9 +2175,9 @@ def fir_DoConcurrentLoopOp : region_Op<"do_concurrent_loop",
       return getOperands().drop_front(getNumControlOperands());
     }
 
-    void setLowerBound(Value bound) { (*this)->setOperand(0, bound); }
-    void setUpperBound(Value bound) { (*this)->setOperand(1, bound); }
-    void setStep(Value step) { (*this)->setOperand(2, step); }
+    void setLowerBound(mlir::Value bound) { (*this)->setOperand(0, bound); }
+    void setUpperBound(mlir::Value bound) { (*this)->setOperand(1, bound); }
+    void setStep(mlir::Value step) { (*this)->setOperand(2, step); }
 
     /// Number of region arguments for loop-carried values
     unsigned getNumRegionIterArgs() {
@@ -2195,7 +2195,7 @@ def fir_DoConcurrentLoopOp : region_Op<"do_concurrent_loop",
     }
 
     /// Get the body of the loop
-    mlir::Block *getBody() { return &region().front(); }
+    mlir::Block *getBody() { return &getRegion().front(); }
 
     void setUnordered() {
       (*this)->setAttr(getUnorderedAttrName(),

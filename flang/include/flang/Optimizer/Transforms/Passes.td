@@ -90,11 +90,11 @@ def AnnotateConstantOperands : Pass<"annotate-constant"> {
   let constructor = "::fir::createAnnotateConstantOperandsPass()";
 
   let dependentDialects = [
-    "fir::FIROpsDialect", "mlir::StandardOpsDialect"
+    "fir::FIROpsDialect", "mlir::func::FuncDialect"
   ];
 }
-
-def FirLoopResultOpt : FunctionPass<"fir-loop-result-opt"> {
+/*
+def FirLoopResultOpt : Pass<"fir-loop-result-opt", "::mlir::func::FuncOp"> {
   let summary =
     "Optimizes `fir.do_loop` by removing unused final iteration values.";
   let description = [{
@@ -108,51 +108,23 @@ def FirLoopResultOpt : FunctionPass<"fir-loop-result-opt"> {
   }];
   let constructor = "::fir::createFirLoopResultOptPass()";
   let dependentDialects = [
-    "fir::FIROpsDialect", "mlir::StandardOpsDialect", "mlir::AffineDialect"
+    "fir::FIROpsDialect", "mlir::func::FuncDialect", "mlir::AffineDialect"
   ];
-}
+  }*/
 
-def MemRefDataFlowOpt : FunctionPass<"fir-memref-dataflow-opt"> {
-  let summary =
-    "Perform store/load forwarding and potentially removing dead stores.";
-  let description = [{
-    This pass performs store to load forwarding to eliminate memory accesses and
-    potentially the entire allocation if all the accesses are forwarded.
-  }];
-  let constructor = "::fir::createMemDataFlowOptPass()";
-  let dependentDialects = [
-    "fir::FIROpsDialect", "mlir::StandardOpsDialect"
-  ];
-}
-
-def BasicCSE : FunctionPass<"basic-cse"> {
+def BasicCSE : Pass<"basic-cse", "::mlir::func::FuncOp"> {
   let summary = "Basic common sub-expression elimination.";
   let description = [{
      Perform common subexpression elimination on FIR operations. This pass
      differs from the MLIR CSE pass in that it is FIR/Fortran semantics aware.
   }];
-  let constructor = "::fir::createCSEPass()";
+  let constructor = "::mlir::createCSEPass()";
   let dependentDialects = [
-    "fir::FIROpsDialect", "mlir::StandardOpsDialect"
+    "fir::FIROpsDialect", "mlir::func::FuncDialect"
   ];
 }
 
-def ControlFlowLowering : FunctionPass<"lower-control-flow"> {
-  let summary = "Convert affine dialect, fir.select_type to standard dialect.";
-  let description = [{
-    This converts the affine dialect back to standard dialect. It also converts
-    `fir.select_type` to more primitive operations. This pass is required before
-    code gen to the LLVM IR dialect.
-
-    TODO: Should the affine rewriting by moved to AffineDialectDemotion?
-  }];
-  let constructor = "::fir::createControlFlowLoweringPass()";
-  let dependentDialects = [
-    "fir::FIROpsDialect", "mlir::StandardOpsDialect"
-  ];
-}
-
-def CFGConversion : FunctionPass<"cfg-conversion"> {
+def CFGConversion : Pass<"cfg-conversion", "::mlir::func::FuncOp"> {
   let summary = "Convert FIR structured control flow ops to CFG ops.";
   let description = [{
     Transform the `fir.do_loop`, `fir.if`, and `fir.iterate_while` ops into
@@ -163,7 +135,7 @@ def CFGConversion : FunctionPass<"cfg-conversion"> {
   }];
   let constructor = "::fir::createFirToCfgPass()";
   let dependentDialects = [
-    "fir::FIROpsDialect", "mlir::StandardOpsDialect", "mlir::scf::SCFDialect"
+    "fir::FIROpsDialect", "mlir::func::FuncDialect", "mlir::scf::SCFDialect"
   ];
   let options = [
     Option<"forceLoopToExecuteOnce", "always-execute-loop-body", "bool",
@@ -219,26 +191,6 @@ def CharacterConversion : Pass<"character-conversion"> {
            "std::string", /*default=*/"std::string{}",
            "Generate runtime calls to a named set of conversion routines. "
            "By default, the conversions may produce unexpected results.">
-  ];
-}
-
-def CFGConversion : Pass<"cfg-conversion", "::mlir::func::FuncOp"> {
-  let summary = "Convert FIR structured control flow ops to CFG ops.";
-  let description = [{
-    Transform the `fir.do_loop`, `fir.if`, and `fir.iterate_while` ops into
-    plain old test and branch operations. Removing the high-level control
-    structures can enable other optimizations.
-
-    This pass is required before code gen to the LLVM IR dialect.
-  }];
-  let constructor = "::fir::createFirToCfgPass()";
-  let dependentDialects = [
-    "fir::FIROpsDialect", "mlir::func::FuncDialect"
-  ];
-  let options = [
-    Option<"forceLoopToExecuteOnce", "always-execute-loop-body", "bool",
-           /*default=*/"false",
-           "force the body of a loop to execute at least once">
   ];
 }
 
