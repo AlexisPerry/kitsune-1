@@ -23,6 +23,7 @@
 // CHECK-NEXT: memref
 // CHECK-NEXT: ml_program
 // CHECK-NEXT: nvgpu
+// CHECK-NEXT: llvm_tapir
 // CHECK-NEXT: nvvm
 // CHECK-NEXT: omp
 // CHECK-NEXT: pdl
