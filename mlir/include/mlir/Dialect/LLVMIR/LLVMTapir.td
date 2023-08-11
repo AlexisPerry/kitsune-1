@@ -68,6 +68,7 @@ def LLVM_Tapir_detach : LLVMTapir_TerminatorOp<"detach",
     attr-dict
   }];
 
+  let builders = [LLVM_TerminatorPassthroughOpBuilder];
 }
 
 def LLVM_Tapir_reattach : LLVMTapir_TerminatorOp<"reattach",
@@ -82,6 +83,7 @@ def LLVM_Tapir_reattach : LLVMTapir_TerminatorOp<"reattach",
     attr-dict
   }];
 
+  let builders = [LLVM_TerminatorPassthroughOpBuilder];
 }
 
 def LLVM_Tapir_sync : LLVMTapir_TerminatorOp<"sync",
@@ -96,6 +98,7 @@ def LLVM_Tapir_sync : LLVMTapir_TerminatorOp<"sync",
     attr-dict
   }];
 
+  let builders = [LLVM_TerminatorPassthroughOpBuilder];
 }
 
 def LLVM_Tapir_createsyncregion : LLVMTapir_IntrOp<"createsyncregion", [], [], [], 1>;

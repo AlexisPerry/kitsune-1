@@ -34,6 +34,7 @@
 #include "mlir/Dialect/GPU/IR/GPUDialect.h"
 #include "mlir/Dialect/GPU/TransformOps/GPUTransformOps.h"
 #include "mlir/Dialect/Index/IR/IndexDialect.h"
+#include "mlir/Dialect/LLVMIR/LLVMTapirDialect.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
 #include "mlir/Dialect/LLVMIR/NVVMDialect.h"
 #include "mlir/Dialect/LLVMIR/ROCDLDialect.h"
@@ -93,6 +94,7 @@ inline void registerAllDialects(DialectRegistry &registry) {
                   gpu::GPUDialect,
                   index::IndexDialect,
                   LLVM::LLVMDialect,
+		  LLVM::LLVMTapirDialect,
                   linalg::LinalgDialect,
                   math::MathDialect,
                   memref::MemRefDialect,
