@@ -63,7 +63,7 @@ mlir_tablegen(ROCDLConversions.inc -gen-llvmir-conversions)
 add_public_tablegen_target(MLIRROCDLConversionsIncGen)
 
 add_mlir_dialect(LLVMTapir llvm_tapir)
-add_mlir_doc(LLVMTapir LLVMTapirDialect Dialects/ -gen-dialect-doc -dialect=llvmtapir)
+add_mlir_doc(LLVMTapir LLVMTapirDialect Dialects/ -gen-dialect-doc -dialect=llvm_tapir)
 set(LLVM_TARGET_DEFINITIONS LLVMTapir.td)
 mlir_tablegen(LLVMTapirConversions.inc -gen-llvmir-conversions)
 add_public_tablegen_target(MLIRLLVMTapirConversionsIncGen)

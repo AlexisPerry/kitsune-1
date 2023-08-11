@@ -21,22 +21,24 @@
 using namespace mlir;
 using namespace mlir::LLVM;
 
-Optional<MutableOperandRange>
-LLVM::Tapir_sync::getMutableSuccessorOperands(unsigned index) {
+#include "mlir/Dialect/LLVMIR/LLVMTapirDialect.cpp.inc"
+
+SuccessorOperands
+LLVM::Tapir_sync::getSuccessorOperands(unsigned index) {
   assert(index == 0 && "invalid successor index");
-  return continueDestOperandsMutable();
+  return SuccessorOperands(getContinueDestOperandsMutable());
 }
 
-Optional<MutableOperandRange>
-LLVM::Tapir_reattach::getMutableSuccessorOperands(unsigned index) {
+SuccessorOperands
+LLVM::Tapir_reattach::getSuccessorOperands(unsigned index) {
   assert(index == 0 && "invalid successor index");
-  return continueDestOperandsMutable();
+  return SuccessorOperands(getContinueDestOperandsMutable());
 }
 
-Optional<MutableOperandRange>
-LLVM::Tapir_detach::getMutableSuccessorOperands(unsigned index) {
+SuccessorOperands
+LLVM::Tapir_detach::getSuccessorOperands(unsigned index) {
   assert(index < getNumSuccessors() && "invalid successor index");
-  return index == 0 ? detachDestOperandsMutable() : continueDestOperandsMutable();
+  return SuccessorOperands(index == 0 ? getDetachDestOperandsMutable() : getContinueDestOperandsMutable());
 }
 
 void LLVM::LLVMTapirDialect::initialize() {
