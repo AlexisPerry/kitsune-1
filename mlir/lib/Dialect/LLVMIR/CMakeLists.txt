@@ -103,6 +103,6 @@ add_mlir_dialect_library(MLIRLLVMTapir
 
   LINK_LIBS PUBLIC
   MLIRIR
-  MLIRLLVMIR
+  MLIRLLVMDialect
   MLIRSideEffectInterfaces
   )
