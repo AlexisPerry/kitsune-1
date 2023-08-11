@@ -1,5 +1,6 @@
 // RUN: echo "" | mlir-opt --show-dialects | FileCheck %s
 // CHECK: Available Dialects:
+
 // CHECK-SAME: acc
 // CHECK-SAME: affine
 // CHECK-SAME: amdgpu
@@ -21,6 +22,7 @@
 // CHECK-SAME: irdl
 // CHECK-SAME: linalg
 // CHECK-SAME: llvm
+// CHECK-SAME: llvm-tapir
 // CHECK-SAME: math
 // CHECK-SAME: memref
 // CHECK-SAME: ml_program

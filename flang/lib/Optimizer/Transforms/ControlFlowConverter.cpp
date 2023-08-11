@@ -18,6 +18,8 @@
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/Dialect/LLVMIR/LLVMTapirDialect.h"
+#include "mlir/IR/Dominance.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "llvm/ADT/SmallSet.h"
@@ -50,6 +52,7 @@ public:
   llvm::LogicalResult
   matchAndRewrite(DoLoopOp loop,
                   mlir::PatternRewriter &rewriter) const override {
+
     auto loc = loop.getLoc();
     mlir::arith::IntegerOverflowFlags flags{};
     if (setNSW)
@@ -61,6 +64,7 @@ public:
     // initalizer and an end point
     auto *initBlock = rewriter.getInsertionBlock();
     auto initPos = rewriter.getInsertionPoint();
+
     auto *endBlock = rewriter.splitBlock(initBlock, initPos);
 
     // Split the first DoLoopOp block in two parts. The part before will be the
@@ -68,6 +72,7 @@ public:
     // loop-carried values as arguments.
     auto *conditionalBlock = &loop.getRegion().front();
     conditionalBlock->addArgument(rewriter.getIndexType(), loc);
+
     auto *firstBlock =
         rewriter.splitBlock(conditionalBlock, conditionalBlock->begin());
     auto *lastBlock = &loop.getRegion().back();
@@ -81,60 +86,202 @@ public:
     assert(low && high && "must be a Value");
     auto step = loop.getStep();
 
-    // Initalization block
-    rewriter.setInsertionPointToEnd(initBlock);
-    auto diff = rewriter.create<mlir::arith::SubIOp>(loc, high, low);
-    auto distance = rewriter.create<mlir::arith::AddIOp>(loc, diff, step);
-    mlir::Value iters =
-        rewriter.create<mlir::arith::DivSIOp>(loc, distance, step);
+    //Tapir
+    if (loop.getUnordered()) { //DO CONCURRENT
+      
+      // Initalization block
+      rewriter.setInsertionPointToEnd(initBlock);
 
-    if (forceLoopToExecuteOnce) {
-      auto zero = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 0);
-      auto cond = rewriter.create<mlir::arith::CmpIOp>(
-          loc, arith::CmpIPredicate::sle, iters, zero);
+      //syncregion.start
+      rewriter.getContext()->loadDialect<mlir::LLVM::LLVMTapirDialect>();
+      auto syncreg = rewriter.create<mlir::LLVM::Tapir_syncregion_start>(loc, mlir::LLVM::LLVMTokenType::get(rewriter.getContext()));
+            
+      auto diff = rewriter.create<mlir::arith::SubIOp>(loc, high, low);
+      auto distance = rewriter.create<mlir::arith::AddIOp>(loc, diff, step);
+      mlir::Value iters =
+	rewriter.create<mlir::arith::DivSIOp>(loc, distance, step);
+      
+      if (forceLoopToExecuteOnce) {
+	auto zero = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 0);
+	auto cond = rewriter.create<mlir::arith::CmpIOp>(
+	  loc, arith::CmpIPredicate::sle, iters, zero);
+	auto one = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 1);
+	iters = rewriter.create<mlir::arith::SelectOp>(loc, cond, one, iters);
+      }
+      
+      llvm::SmallVector<mlir::Value> loopOperands;
+      loopOperands.push_back(low);
+      auto operands = loop.getIterOperands();
+      loopOperands.append(operands.begin(), operands.end());
+      loopOperands.push_back(iters);
+      
+      rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopOperands);
+            
+      //detach and reattach 
+      auto *detachedBlock = rewriter.splitBlock(firstBlock, firstBlock->begin());
+      
+      mlir::Operation *terminator = nullptr;
+      if(firstBlock == lastBlock) {
+	terminator = detachedBlock->getTerminator();
+      }
+      else{
+	terminator = lastBlock->getTerminator(); //Tapir need to change this to be not lastBlock?
+      }
+      
+      //set split point for the reattach block
+      mlir::Block *reattachBlock = nullptr;
+      //if the terminator is a fir.result, must split block before the
+      //earliest operation being returned by the fir.result to ensure
+      //that all the passed along values are contained in the block that
+      //will be passing them along to the conditional block
+      if (fir::ResultOp resOp = dyn_cast<fir::ResultOp>(terminator)) {
+	auto results = resOp.getResults();
+	mlir::Operation *firstOp = nullptr;
+	mlir::DominanceInfo domInfo;
+	for (mlir::Value i : results) {
+	  mlir::Operation *iOp = i.getDefiningOp();
+	  if (iOp && firstOp){
+	    if (domInfo.dominates(iOp, firstOp))
+	      firstOp = iOp;
+	  }
+	  else if (iOp) {
+	    firstOp = iOp;
+	}
+	}
+	if (firstOp)
+	  reattachBlock = firstOp->getBlock()->splitBlock(firstOp);
+	else if(firstBlock == lastBlock){
+	  reattachBlock = rewriter.splitBlock(detachedBlock, detachedBlock->end());
+	}
+	else {
+	  reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir TODO: need to change to not be lastBlock?
+	} 
+      }
+      else if(firstBlock == lastBlock){
+	reattachBlock = rewriter.splitBlock(detachedBlock, detachedBlock->end());
+      }
+      else {
+	reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir TODO: need to change to not be lastBlock?
+      }
+      
+      //insert tapir_detach
+      rewriter.setInsertionPointToEnd(firstBlock);
+      rewriter.create<LLVM::Tapir_detach>(loc, syncreg, ArrayRef<Value>(), ArrayRef<Value>(), detachedBlock, reattachBlock);
+      
+      //populate reattachBlock
+      rewriter.setInsertionPointToEnd(reattachBlock);
+      auto iv = conditionalBlock->getArgument(0);
+      mlir::Value steppedIndex =
+        rewriter.create<mlir::arith::AddIOp>(loc, iv, step);
+      assert(steppedIndex && "must be a Value");
+      auto lastArg = conditionalBlock->getNumArguments() - 1;
+      auto itersLeft = conditionalBlock->getArgument(lastArg);
       auto one = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 1);
-      iters = rewriter.create<mlir::arith::SelectOp>(loc, cond, one, iters);
-    }
-
-    llvm::SmallVector<mlir::Value> loopOperands;
-    loopOperands.push_back(low);
-    auto operands = loop.getIterOperands();
-    loopOperands.append(operands.begin(), operands.end());
-    loopOperands.push_back(iters);
-
-    rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopOperands);
-
-    // Last loop block
-    auto *terminator = lastBlock->getTerminator();
-    rewriter.setInsertionPointToEnd(lastBlock);
-    auto iv = conditionalBlock->getArgument(0);
-    mlir::Value steppedIndex =
-        rewriter.create<mlir::arith::AddIOp>(loc, iv, step, iofAttr);
-    assert(steppedIndex && "must be a Value");
-    auto lastArg = conditionalBlock->getNumArguments() - 1;
-    auto itersLeft = conditionalBlock->getArgument(lastArg);
-    auto one = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 1);
-    mlir::Value itersMinusOne =
+      mlir::Value itersMinusOne =
+>>>>>>> 3baba5e93340 (Initial LLVMTapir Dialect and Flang DO CONCURRENT lowering to Tapir work)
         rewriter.create<mlir::arith::SubIOp>(loc, itersLeft, one);
-
-    llvm::SmallVector<mlir::Value> loopCarried;
-    loopCarried.push_back(steppedIndex);
-    auto begin = loop.getFinalValue() ? std::next(terminator->operand_begin())
-                                      : terminator->operand_begin();
-    loopCarried.append(begin, terminator->operand_end());
-    loopCarried.push_back(itersMinusOne);
-    rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopCarried);
-    rewriter.eraseOp(terminator);
-
-    // Conditional block
-    rewriter.setInsertionPointToEnd(conditionalBlock);
-    auto zero = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 0);
-    auto comparison = rewriter.create<mlir::arith::CmpIOp>(
+      
+      llvm::SmallVector<mlir::Value> loopCarried;
+      loopCarried.push_back(steppedIndex);
+      auto begin = loop.getFinalValue() ? std::next(terminator->operand_begin())
+	: terminator->operand_begin();
+      loopCarried.append(begin, terminator->operand_end());
+      loopCarried.push_back(itersMinusOne);
+      auto branchOp = rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopCarried); //Tapir TODO: add tapir loop metadata to this?
+      branchOp.addAttribute(getTapirLoopTargetAttrName(loop.getAttr(getTapirLoopTargetAttrName()).getValue()));
+      rewriter.eraseOp(terminator); //ensures there is only one terminator in the reattachBlock
+      
+      //insert tapir_reattach
+      rewriter.setInsertionPointToEnd(detachedBlock);
+      rewriter.create<LLVM::Tapir_reattach>(loc, syncreg, ArrayRef<Value>(), reattachBlock); 
+      
+      // Conditional block
+      rewriter.setInsertionPointToEnd(conditionalBlock);
+      auto zero = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 0);
+      auto comparison = rewriter.create<mlir::arith::CmpIOp>(
+          loc, arith::CmpIPredicate::sgt, itersLeft, zero);
+      
+      rewriter.create<mlir::cf::CondBranchOp>(
+          loc, comparison, firstBlock, llvm::ArrayRef<mlir::Value>(), endBlock,
+          llvm::ArrayRef<mlir::Value>());
+      
+      //sync
+      auto syncBlock = rewriter.splitBlock(endBlock, endBlock->begin());
+      rewriter.setInsertionPointToEnd(endBlock); 
+      rewriter.create<mlir::LLVM::Tapir_sync>(loc, syncreg, ArrayRef<Value>(), syncBlock);
+      
+      // The result of the loop operation is the values of the condition block
+      // arguments except the induction variable on the last iteration.
+      auto args = loop.getFinalValue()
+	? conditionalBlock->getArguments()
+	: conditionalBlock->getArguments().drop_front();
+      
+      rewriter.replaceOp(loop, args.drop_back());
+      
+    } //end DO CONCURRENT
+    else { //regular DO loop
+      // Initalization block
+      rewriter.setInsertionPointToEnd(initBlock);
+      auto diff = rewriter.create<mlir::arith::SubIOp>(loc, high, low);
+      auto distance = rewriter.create<mlir::arith::AddIOp>(loc, diff, step);
+      mlir::Value iters =
+        rewriter.create<mlir::arith::DivSIOp>(loc, distance, step);
+      
+      if (forceLoopToExecuteOnce) {
+	auto zero = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 0);
+	auto cond = rewriter.create<mlir::arith::CmpIOp>(
+          loc, arith::CmpIPredicate::sle, iters, zero);
+	auto one = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 1);
+	iters = rewriter.create<mlir::arith::SelectOp>(loc, cond, one, iters);
+      }
+      
+      llvm::SmallVector<mlir::Value> loopOperands;
+      loopOperands.push_back(low);
+      auto operands = loop.getIterOperands();
+      loopOperands.append(operands.begin(), operands.end());
+      loopOperands.push_back(iters);
+      
+      rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopOperands);
+      
+      // Last loop block
+      auto *terminator = lastBlock->getTerminator();
+      rewriter.setInsertionPointToEnd(lastBlock);
+      auto iv = conditionalBlock->getArgument(0);
+      mlir::Value steppedIndex =
+        rewriter.create<mlir::arith::AddIOp>(loc, iv, step);
+      assert(steppedIndex && "must be a Value");
+      auto lastArg = conditionalBlock->getNumArguments() - 1;
+      auto itersLeft = conditionalBlock->getArgument(lastArg);
+      auto one = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 1);
+      mlir::Value itersMinusOne =
+        rewriter.create<mlir::arith::SubIOp>(loc, itersLeft, one);
+      
+      llvm::SmallVector<mlir::Value> loopCarried;
+      loopCarried.push_back(steppedIndex);
+      auto begin = loop.getFinalValue() ? std::next(terminator->operand_begin())
+	: terminator->operand_begin();
+      loopCarried.append(begin, terminator->operand_end());
+      loopCarried.push_back(itersMinusOne);
+      rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopCarried);
+      rewriter.eraseOp(terminator);
+      
+      // Conditional block
+      rewriter.setInsertionPointToEnd(conditionalBlock);
+      auto zero = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 0);
+      auto comparison = rewriter.create<mlir::arith::CmpIOp>(
         loc, arith::CmpIPredicate::sgt, itersLeft, zero);
 
-    auto cond = rewriter.create<mlir::cf::CondBranchOp>(
+      auto cond = rewriter.create<mlir::cf::CondBranchOp>(
         loc, comparison, firstBlock, llvm::ArrayRef<mlir::Value>(), endBlock,
         llvm::ArrayRef<mlir::Value>());
+      
+      // The result of the loop operation is the values of the condition block
+      // arguments except the induction variable on the last iteration.
+      auto args = loop.getFinalValue()
+	? conditionalBlock->getArguments()
+	: conditionalBlock->getArguments().drop_front();
+      rewriter.replaceOp(loop, args.drop_back());
+    } //end regular DO loop
 
     // Copy loop annotations from the do loop to the loop entry condition.
     if (auto ann = loop.getLoopAnnotation())
@@ -146,6 +293,7 @@ public:
                     ? conditionalBlock->getArguments()
                     : conditionalBlock->getArguments().drop_front();
     rewriter.replaceOp(loop, args.drop_back());
+
     return success();
   }
 
@@ -342,7 +490,7 @@ public:
     mlir::ConversionTarget target(*context);
     target.addLegalDialect<mlir::affine::AffineDialect,
                            mlir::cf::ControlFlowDialect, FIROpsDialect,
-                           mlir::func::FuncDialect>();
+                           mlir::func::FuncDialect, mlir::LLVM::LLVMTapirDialect>();
 
     // apply the patterns
     target.addIllegalOp<ResultOp, DoLoopOp, IfOp, IterWhileOp>();

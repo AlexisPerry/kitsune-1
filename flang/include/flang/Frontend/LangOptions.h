@@ -15,6 +15,7 @@
 #ifndef FORTRAN_FRONTEND_LANGOPTIONS_H
 #define FORTRAN_FRONTEND_LANGOPTIONS_H
 
+#include "clang/Basic/KitsuneOptions.h"
 #include <string>
 
 namespace Fortran::frontend {

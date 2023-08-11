@@ -15,12 +15,15 @@
 #ifndef FORTRAN_FRONTEND_CODEGENOPTIONS_H
 #define FORTRAN_FRONTEND_CODEGENOPTIONS_H
 
+#include "clang/Basic/KitsuneOptions.h"
+#include "clang/Driver/Tapir.h"
 #include "llvm/Frontend/Debug/Options.h"
 #include "llvm/Frontend/Driver/CodeGenOptions.h"
 #include "llvm/Support/CodeGen.h"
 #include "llvm/Support/Regex.h"
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/Transforms/Instrumentation/AddressSanitizerOptions.h"
+#include "llvm/Transforms/Tapir/TapirTargetIDs.h"
 #include <map>
 #include <memory>
 #include <optional>
@@ -77,6 +80,15 @@ public:
   /// Options to add to the linker for the object file
   std::vector<std::string> DependentLibs;
 
+  /// Kitsune-specific options. This is a separate object because some of these
+  /// affect both LangOptions and CodeGenOptions. This is not really a good
+  /// place to keep this because it really ought to be its own object. But that
+  /// changes too many API's which we would like to avoid. Plus, keeping all
+  /// the Kitsune-specific options bundled together reduces the footprint in
+  /// the code base which makes it marginally less painful when we have to
+  /// merge with upstream.                                                                                                                                    
+  clang::KitsuneOptions KitsuneOpts;
+  
   // The RemarkKind enum class and OptRemark struct are identical to what Clang
   // has
   // TODO: Share with clang instead of re-implementing here
