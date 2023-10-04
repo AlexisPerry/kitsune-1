@@ -502,6 +502,14 @@ static Value getPHISourceValue(Block *current, Block *pred,
     return success(); 
   }
 
+  if (auto syncOp = dyn_cast<LLVM::Tapir_createsyncregion>(opInst)) {
+    auto *sr = builder.CreateCall(llvm::Intrinsic::getDeclaration(llvmModule.get(),
+      llvm::Intrinsic::syncregion_start), {}); 
+    valueMapping[opInst.getResult(0)] = sr;
+    return success(); 
+  }
+  //end Tapir
+
   if (auto switchOp = dyn_cast<LLVM::SwitchOp>(terminator)) {
     // For switches, we take the operands from either the default case, or from
     // the case branch that was taken.
