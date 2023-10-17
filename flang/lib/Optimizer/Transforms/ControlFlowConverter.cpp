@@ -18,6 +18,7 @@
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/Dialect/LLVMIR/LLVMTapirDialect.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "llvm/ADT/SmallSet.h"
@@ -79,6 +80,12 @@ public:
 
     // Initalization block
     rewriter.setInsertionPointToEnd(initBlock);
+    //Tapir
+    //if (loop.getUnordered())
+    //llvm::errs() << "Entering Flang Tapir mode\n";
+    rewriter.getContext()->loadDialect<mlir::LLVM::LLVMTapirDialect>();
+      auto syncreg = rewriter.create<mlir::LLVM::Tapir_createsyncregion>(loc, mlir::LLVM::LLVMTokenType::get(rewriter.getContext()));
+      
     auto diff = rewriter.create<mlir::arith::SubIOp>(loc, high, low);
     auto distance = rewriter.create<mlir::arith::AddIOp>(loc, diff, step);
     mlir::Value iters =
@@ -132,6 +139,24 @@ public:
         loc, comparison, firstBlock, llvm::ArrayRef<mlir::Value>(), endBlock,
         llvm::ArrayRef<mlir::Value>());
 
+    //Tapir
+    //if (loop.getUnordered()) {
+
+    //detach and reattach 
+    auto *detachedBlock = rewriter.splitBlock(firstBlock, firstBlock->begin());
+    auto *reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end());
+    rewriter.setInsertionPointToEnd(firstBlock);
+    rewriter.create<LLVM::Tapir_detach>(loc, syncreg, ArrayRef<Value>(), ArrayRef<Value>(), detachedBlock, reattachBlock);
+    rewriter.setInsertionPointToEnd(detachedBlock);
+    rewriter.create<LLVM::Tapir_reattach>(loc, syncreg, ArrayRef<Value>(), reattachBlock); //START HERE
+    rewriter.setInsertionPointToStart(reattachBlock);
+      
+    //sync
+    auto syncBlock = rewriter.splitBlock(endBlock, endBlock->begin());
+    rewriter.setInsertionPointToEnd(endBlock); 
+    auto sync = rewriter.create<mlir::LLVM::Tapir_sync>(loc, syncreg, ArrayRef<Value>(), syncBlock);
+      //} if unordered
+    
     // The result of the loop operation is the values of the condition block
     // arguments except the induction variable on the last iteration.
     auto args = loop.getFinalValue()

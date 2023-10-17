@@ -12,10 +12,12 @@
 
 #include "mlir/Target/LLVMIR/Dialect/LLVMIR/LLVMToLLVMIRTranslation.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
+#include "mlir/Dialect/LLVMIR/LLVMTapirDialect.h"
 #include "mlir/IR/Operation.h"
 #include "mlir/Support/LLVM.h"
 #include "mlir/Target/LLVMIR/ModuleTranslation.h"
 
+#include "llvm/ADT/TypeSwitch.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/InlineAsm.h"
 #include "llvm/IR/MDBuilder.h"
@@ -347,7 +349,8 @@ convertOperationImpl(Operation &opInst, llvm::IRBuilderBase &builder,
 
 #include "mlir/Dialect/LLVMIR/LLVMConversions.inc"
 #include "mlir/Dialect/LLVMIR/LLVMIntrinsicConversions.inc"
-
+  //#include "mlir/Dialect/LLVMIR/LLVMTapirConversions.inc"
+  
   // Emit function calls.  If the "callee" attribute is present, this is a
   // direct function call and we also need to look up the remapped function
   // itself.  Otherwise, this is an indirect call and the callee is the first
@@ -509,6 +512,43 @@ convertOperationImpl(Operation &opInst, llvm::IRBuilderBase &builder,
     setLoopMetadata(opInst, *branch, builder, moduleTranslation);
     return success();
   }
+
+  //Tapir  
+  //#include "mlir/Dialect/LLVMIR/LLVMConversions.inc"
+  if (auto detachOp = dyn_cast<LLVM::Tapir_detach>(opInst)) {
+    llvm::DetachInst *detach = builder.CreateDetach(
+        moduleTranslation.lookupBlock(detachOp.getSuccessor(0)),
+        moduleTranslation.lookupBlock(detachOp.getSuccessor(1)),
+        moduleTranslation.lookupValue(detachOp.getOperand(0)));
+    moduleTranslation.mapBranch(&opInst, detach);
+    return success(); 
+  }
+
+  if (auto reattachOp = dyn_cast<LLVM::Tapir_reattach>(opInst)) {
+    llvm::ReattachInst *reattach = builder.CreateReattach(
+	moduleTranslation.lookupBlock(reattachOp.getSuccessor()),
+	moduleTranslation.lookupValue(reattachOp.getOperand(0)));
+    moduleTranslation.mapBranch(&opInst, reattach);
+    return success(); 
+  }
+
+  if (auto syncOp = dyn_cast<LLVM::Tapir_sync>(opInst)) {
+    llvm::SyncInst *sync = builder.CreateSync(
+	moduleTranslation.lookupBlock(syncOp.getSuccessor()),
+	moduleTranslation.lookupValue(syncOp.getOperand(0)));
+    moduleTranslation.mapBranch(&opInst, sync);
+    return success(); 
+  }
+
+  if (auto syncregOp = dyn_cast<LLVM::Tapir_createsyncregion>(opInst)) {
+    llvm::Module *module = builder.GetInsertBlock()->getModule();
+    auto *sr = builder.CreateCall(llvm::Intrinsic::getDeclaration(module,
+        llvm::Intrinsic::syncregion_start, {}));
+    moduleTranslation.mapValue(opInst.getResult(0), sr);
+    return success(); 
+  }
+  //end Tapir
+
   if (auto switchOp = dyn_cast<LLVM::SwitchOp>(opInst)) {
     llvm::MDNode *branchWeights =
         convertBranchWeights(switchOp.getBranchWeights(), moduleTranslation);
@@ -581,5 +621,18 @@ void mlir::registerLLVMDialectTranslation(DialectRegistry &registry) {
 void mlir::registerLLVMDialectTranslation(MLIRContext &context) {
   DialectRegistry registry;
   registerLLVMDialectTranslation(registry);
+  context.appendDialectRegistry(registry);
+}
+
+void mlir::registerLLVMTapirDialectTranslation(DialectRegistry &registry) {
+  registry.insert<LLVM::LLVMTapirDialect>();
+  registry.addExtension(+[](MLIRContext *ctx, LLVM::LLVMTapirDialect *dialect) {
+    dialect->addInterfaces<LLVMDialectLLVMIRTranslationInterface>();
+  });
+}
+
+void mlir::registerLLVMTapirDialectTranslation(MLIRContext &context) {
+  DialectRegistry registry;
+  registerLLVMTapirDialectTranslation(registry);
   context.appendDialectRegistry(registry);
 }
