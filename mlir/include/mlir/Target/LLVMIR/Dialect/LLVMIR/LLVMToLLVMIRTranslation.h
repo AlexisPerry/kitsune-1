@@ -26,6 +26,14 @@ void registerLLVMDialectTranslation(DialectRegistry &registry);
 /// associated with the given context.
 void registerLLVMDialectTranslation(MLIRContext &context);
 
+/// Register the Tapir dialect and the translation from it to the LLVM IR in the
+/// given registry;
+void registerLLVMTapirDialectTranslation(DialectRegistry &registry);
+
+/// Register the Tapir dialect and the translation from it in the registry
+/// associated with the given context.
+void registerLLVMTapirDialectTranslation(MLIRContext &context);
+
 } // namespace mlir
 
 #endif // MLIR_TARGET_LLVMIR_DIALECT_LLVMIR_LLVMTOLLVMIRTRANSLATION_H
