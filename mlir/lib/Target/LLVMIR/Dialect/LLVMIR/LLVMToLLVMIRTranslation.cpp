@@ -513,42 +513,6 @@ convertOperationImpl(Operation &opInst, llvm::IRBuilderBase &builder,
     return success();
   }
 
-  //Tapir  
-  //#include "mlir/Dialect/LLVMIR/LLVMConversions.inc"
-  if (auto detachOp = dyn_cast<LLVM::Tapir_detach>(opInst)) {
-    llvm::DetachInst *detach = builder.CreateDetach(
-        moduleTranslation.lookupBlock(detachOp.getSuccessor(0)),
-        moduleTranslation.lookupBlock(detachOp.getSuccessor(1)),
-        moduleTranslation.lookupValue(detachOp.getOperand(0)));
-    moduleTranslation.mapBranch(&opInst, detach);
-    return success(); 
-  }
-
-  if (auto reattachOp = dyn_cast<LLVM::Tapir_reattach>(opInst)) {
-    llvm::ReattachInst *reattach = builder.CreateReattach(
-	moduleTranslation.lookupBlock(reattachOp.getSuccessor()),
-	moduleTranslation.lookupValue(reattachOp.getOperand(0)));
-    moduleTranslation.mapBranch(&opInst, reattach);
-    return success(); 
-  }
-
-  if (auto syncOp = dyn_cast<LLVM::Tapir_sync>(opInst)) {
-    llvm::SyncInst *sync = builder.CreateSync(
-	moduleTranslation.lookupBlock(syncOp.getSuccessor()),
-	moduleTranslation.lookupValue(syncOp.getOperand(0)));
-    moduleTranslation.mapBranch(&opInst, sync);
-    return success(); 
-  }
-
-  if (auto syncregOp = dyn_cast<LLVM::Tapir_createsyncregion>(opInst)) {
-    llvm::Module *module = builder.GetInsertBlock()->getModule();
-    auto *sr = builder.CreateCall(llvm::Intrinsic::getDeclaration(module,
-        llvm::Intrinsic::syncregion_start, {}));
-    moduleTranslation.mapValue(opInst.getResult(0), sr);
-    return success(); 
-  }
-  //end Tapir
-
   if (auto switchOp = dyn_cast<LLVM::SwitchOp>(opInst)) {
     llvm::MDNode *branchWeights =
         convertBranchWeights(switchOp.getBranchWeights(), moduleTranslation);
@@ -609,30 +573,78 @@ public:
     return convertOperationImpl(*op, builder, moduleTranslation);
   }
 };
+
+  /// Implementation of the dialect interface that converts operations belonging
+/// to the Tapir dialect to LLVM IR.
+class LLVMTapirDialectLLVMIRTranslationInterface
+    : public LLVMTranslationDialectInterface {
+public:
+  using LLVMTranslationDialectInterface::LLVMTranslationDialectInterface;
+
+  /// Translates the given operation to LLVM IR using the provided IR builder
+  /// and saving the state in `moduleTranslation`.
+  LogicalResult
+  convertOperation(Operation *op, llvm::IRBuilderBase &builder,
+                   LLVM::ModuleTranslation &moduleTranslation) const final {
+    Operation &opInst = *op;
+#include "mlir/Dialect/LLVMIR/LLVMTapirConversions.inc"
+
+  if (auto detachOp = dyn_cast<LLVM::Tapir_detach>(opInst)) {
+    llvm::DetachInst *detach = builder.CreateDetach(
+        moduleTranslation.lookupBlock(detachOp.getSuccessor(0)),
+        moduleTranslation.lookupBlock(detachOp.getSuccessor(1)),
+        moduleTranslation.lookupValue(detachOp.getOperand(0)));
+    moduleTranslation.mapBranch(&opInst, detach);
+    return success(); 
+  }
+
+  if (auto reattachOp = dyn_cast<LLVM::Tapir_reattach>(opInst)) {
+    llvm::ReattachInst *reattach = builder.CreateReattach(
+	moduleTranslation.lookupBlock(reattachOp.getSuccessor()),
+	moduleTranslation.lookupValue(reattachOp.getOperand(0)));
+    moduleTranslation.mapBranch(&opInst, reattach);
+    return success(); 
+  }
+
+  if (auto syncOp = dyn_cast<LLVM::Tapir_sync>(opInst)) {
+    llvm::SyncInst *sync = builder.CreateSync(
+	moduleTranslation.lookupBlock(syncOp.getSuccessor()),
+	moduleTranslation.lookupValue(syncOp.getOperand(0)));
+    moduleTranslation.mapBranch(&opInst, sync);
+    return success(); 
+  }
+
+  //if (auto syncregOp = dyn_cast<LLVM::Tapir_syncregion_start>(opInst)) {
+  //llvm::Module *module = builder.GetInsertBlock()->getModule();
+  // auto *sr = builder.CreateCall(llvm::Intrinsic::getDeclaration(module,
+  //llvm::Intrinsic::syncregion_start, {}));
+  //moduleTranslation.mapValue(opInst.getResult(0), sr);
+  //return success(); 
+  //}
+  //end Tapir
+
+    return failure();
+  }
+};
+
 } // namespace
 
 void mlir::registerLLVMDialectTranslation(DialectRegistry &registry) {
   registry.insert<LLVM::LLVMDialect>();
   registry.addExtension(+[](MLIRContext *ctx, LLVM::LLVMDialect *dialect) {
     dialect->addInterfaces<LLVMDialectLLVMIRTranslationInterface>();
-  });
+    llvm::errs() << "Interface added to the LLVM Dialect\n";
+			 });
+
+  registry.insert<LLVM::LLVMTapirDialect>();
+  registry.addExtension(+[](MLIRContext *ctx, LLVM::LLVMTapirDialect *dialect) {
+    dialect->addInterfaces<LLVMTapirDialectLLVMIRTranslationInterface>();
+    llvm::errs() << "Interface added to the LLVMTapir Dialect\n";
+    });
 }
 
 void mlir::registerLLVMDialectTranslation(MLIRContext &context) {
   DialectRegistry registry;
   registerLLVMDialectTranslation(registry);
-  context.appendDialectRegistry(registry);
-}
-
-void mlir::registerLLVMTapirDialectTranslation(DialectRegistry &registry) {
-  registry.insert<LLVM::LLVMTapirDialect>();
-  registry.addExtension(+[](MLIRContext *ctx, LLVM::LLVMTapirDialect *dialect) {
-    dialect->addInterfaces<LLVMDialectLLVMIRTranslationInterface>();
-  });
-}
-
-void mlir::registerLLVMTapirDialectTranslation(MLIRContext &context) {
-  DialectRegistry registry;
-  registerLLVMTapirDialectTranslation(registry);
   context.appendDialectRegistry(registry);
 }

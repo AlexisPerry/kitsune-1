@@ -82,9 +82,9 @@ public:
     rewriter.setInsertionPointToEnd(initBlock);
     //Tapir
     //if (loop.getUnordered())
-    //llvm::errs() << "Entering Flang Tapir mode\n";
+    llvm::errs() << "Entering Flang Tapir mode\n";
     rewriter.getContext()->loadDialect<mlir::LLVM::LLVMTapirDialect>();
-      auto syncreg = rewriter.create<mlir::LLVM::Tapir_createsyncregion>(loc, mlir::LLVM::LLVMTokenType::get(rewriter.getContext()));
+    auto syncreg = rewriter.create<mlir::LLVM::Tapir_syncregion_start>(loc, mlir::LLVM::LLVMTokenType::get(rewriter.getContext()));
       
     auto diff = rewriter.create<mlir::arith::SubIOp>(loc, high, low);
     auto distance = rewriter.create<mlir::arith::AddIOp>(loc, diff, step);
@@ -143,19 +143,19 @@ public:
     //if (loop.getUnordered()) {
 
     //detach and reattach 
-    auto *detachedBlock = rewriter.splitBlock(firstBlock, firstBlock->begin());
-    auto *reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end());
-    rewriter.setInsertionPointToEnd(firstBlock);
-    rewriter.create<LLVM::Tapir_detach>(loc, syncreg, ArrayRef<Value>(), ArrayRef<Value>(), detachedBlock, reattachBlock);
-    rewriter.setInsertionPointToEnd(detachedBlock);
-    rewriter.create<LLVM::Tapir_reattach>(loc, syncreg, ArrayRef<Value>(), reattachBlock); //START HERE
-    rewriter.setInsertionPointToStart(reattachBlock);
+    //auto *detachedBlock = rewriter.splitBlock(firstBlock, firstBlock->begin());
+    //auto *reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end());
+    //rewriter.setInsertionPointToEnd(firstBlock);
+    //rewriter.create<LLVM::Tapir_detach>(loc, syncreg, ArrayRef<Value>(), ArrayRef<Value>(), detachedBlock, reattachBlock);
+    //rewriter.setInsertionPointToEnd(detachedBlock);
+    //rewriter.create<LLVM::Tapir_reattach>(loc, syncreg, ArrayRef<Value>(), reattachBlock); //START HERE
+    //rewriter.setInsertionPointToStart(reattachBlock);
       
     //sync
     auto syncBlock = rewriter.splitBlock(endBlock, endBlock->begin());
     rewriter.setInsertionPointToEnd(endBlock); 
     auto sync = rewriter.create<mlir::LLVM::Tapir_sync>(loc, syncreg, ArrayRef<Value>(), syncBlock);
-      //} if unordered
+    //} if unordered
     
     // The result of the loop operation is the values of the condition block
     // arguments except the induction variable on the last iteration.
@@ -601,7 +601,7 @@ public:
     patterns.insert<CfgSelectTypeConv>(context, moduleMutex);
     mlir::ConversionTarget target(*context);
     target.addLegalDialect<mlir::AffineDialect, mlir::cf::ControlFlowDialect,
-                           FIROpsDialect, mlir::func::FuncDialect>();
+                           FIROpsDialect, mlir::func::FuncDialect, mlir::LLVM::LLVMTapirDialect>();
 
     // apply the patterns
     target.addIllegalOp<ResultOp, DoLoopOp, IfOp, IterWhileOp, SelectTypeOp>();

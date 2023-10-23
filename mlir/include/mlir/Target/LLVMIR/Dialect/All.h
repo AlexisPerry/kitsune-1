@@ -35,7 +35,6 @@ static inline void registerAllToLLVMIRTranslations(DialectRegistry &registry) {
   registerAMXDialectTranslation(registry);
   registerArmSVEDialectTranslation(registry);
   registerLLVMDialectTranslation(registry);
-  registerLLVMTapirDialectTranslation(registry);
   registerNVVMDialectTranslation(registry);
   registerOpenACCDialectTranslation(registry);
   registerOpenMPDialectTranslation(registry);
