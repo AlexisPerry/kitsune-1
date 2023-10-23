@@ -105,6 +105,6 @@ def LLVM_Tapir_sync : LLVMTapir_TerminatorOp<"sync",
   let builders = [LLVM_TerminatorPassthroughOpBuilder];
 }
 
-def LLVM_Tapir_createsyncregion : LLVMTapir_IntrOp<"createsyncregion", [], [], [], 1>;
+def LLVM_Tapir_syncregion_start : LLVMTapir_IntrOp<"syncregion_start", [], [], [], 1>;
 
 #endif // LLVM_TAPIR_OPS
