@@ -53,6 +53,7 @@ add_mlir_translation_library(MLIRToLLVMIRTranslationRegistration
   MLIRBuiltinToLLVMIRTranslation
   MLIRGPUToLLVMIRTranslation
   MLIRX86VectorToLLVMIRTranslation
+  #MLIRLLVMTapirToLLVMIRTranslation
   MLIRLLVMToLLVMIRTranslation
   MLIRNVVMToLLVMIRTranslation
   MLIROpenACCToLLVMIRTranslation
