@@ -413,6 +413,7 @@ ModuleTranslation::ModuleTranslation(Operation *module,
       iface(module->getContext()) {
   assert(satisfiesLLVMModule(mlirModule) &&
          "mlirModule should honor LLVM's module semantics.");
+  //module->getContext()->getOrLoadDialect<LLVM::LLVMTapirDialect>();
 }
 ModuleTranslation::~ModuleTranslation() {
   if (ompBuilder)

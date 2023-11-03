@@ -349,7 +349,6 @@ convertOperationImpl(Operation &opInst, llvm::IRBuilderBase &builder,
 
 #include "mlir/Dialect/LLVMIR/LLVMConversions.inc"
 #include "mlir/Dialect/LLVMIR/LLVMIntrinsicConversions.inc"
-  //#include "mlir/Dialect/LLVMIR/LLVMTapirConversions.inc"
   
   // Emit function calls.  If the "callee" attribute is present, this is a
   // direct function call and we also need to look up the remapped function
@@ -614,13 +613,6 @@ public:
     return success(); 
   }
 
-  //if (auto syncregOp = dyn_cast<LLVM::Tapir_syncregion_start>(opInst)) {
-  //llvm::Module *module = builder.GetInsertBlock()->getModule();
-  // auto *sr = builder.CreateCall(llvm::Intrinsic::getDeclaration(module,
-  //llvm::Intrinsic::syncregion_start, {}));
-  //moduleTranslation.mapValue(opInst.getResult(0), sr);
-  //return success(); 
-  //}
   //end Tapir
 
     return failure();
@@ -633,13 +625,11 @@ void mlir::registerLLVMDialectTranslation(DialectRegistry &registry) {
   registry.insert<LLVM::LLVMDialect>();
   registry.addExtension(+[](MLIRContext *ctx, LLVM::LLVMDialect *dialect) {
     dialect->addInterfaces<LLVMDialectLLVMIRTranslationInterface>();
-    llvm::errs() << "Interface added to the LLVM Dialect\n";
-			 });
+    });
 
   registry.insert<LLVM::LLVMTapirDialect>();
   registry.addExtension(+[](MLIRContext *ctx, LLVM::LLVMTapirDialect *dialect) {
     dialect->addInterfaces<LLVMTapirDialectLLVMIRTranslationInterface>();
-    llvm::errs() << "Interface added to the LLVMTapir Dialect\n";
     });
 }
 

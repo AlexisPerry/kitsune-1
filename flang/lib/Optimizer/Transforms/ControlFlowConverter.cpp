@@ -19,6 +19,7 @@
 #include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/LLVMIR/LLVMTapirDialect.h"
+#include "mlir/IR/Dominance.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "llvm/ADT/SmallSet.h"
@@ -52,19 +53,30 @@ public:
   mlir::LogicalResult
   matchAndRewrite(DoLoopOp loop,
                   mlir::PatternRewriter &rewriter) const override {
+
+    llvm::errs() << "DoLoopOp: ";
+    loop.dump();
     auto loc = loop.getLoc();
 
     // Create the start and end blocks that will wrap the DoLoopOp with an
     // initalizer and an end point
     auto *initBlock = rewriter.getInsertionBlock();
     auto initPos = rewriter.getInsertionPoint();
+    llvm::errs() << "initBlock (at start): ";
+    initBlock->dump();
+
     auto *endBlock = rewriter.splitBlock(initBlock, initPos);
+    llvm::errs() << "endBlock (at start): ";
+    endBlock->dump();
 
     // Split the first DoLoopOp block in two parts. The part before will be the
     // conditional block since it already has the induction variable and
     // loop-carried values as arguments.
     auto *conditionalBlock = &loop.getRegion().front();
     conditionalBlock->addArgument(rewriter.getIndexType(), loc);
+    llvm::errs() << "conditionalBlock (at start): ";
+    conditionalBlock->dump();
+
     auto *firstBlock =
         rewriter.splitBlock(conditionalBlock, conditionalBlock->begin());
     auto *lastBlock = &loop.getRegion().back();
@@ -80,6 +92,14 @@ public:
 
     // Initalization block
     rewriter.setInsertionPointToEnd(initBlock);
+
+    llvm::errs() << "firstBlock (at start): ";
+    firstBlock->dump();
+    llvm::errs() << "lastBlock (at start): ";
+    lastBlock->dump();
+    llvm::errs() << "endBlock (at end): ";
+    endBlock->dump();
+
     //Tapir
     //if (loop.getUnordered())
     llvm::errs() << "Entering Flang Tapir mode\n";
@@ -107,9 +127,58 @@ public:
 
     rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopOperands);
 
-    // Last loop block
-    auto *terminator = lastBlock->getTerminator();
-    rewriter.setInsertionPointToEnd(lastBlock);
+    //Tapir
+    //if (loop.getUnordered()) {
+
+    //detach and reattach 
+    auto *detachedBlock = rewriter.splitBlock(firstBlock, firstBlock->begin());
+
+    mlir::Operation *terminator = nullptr;
+    if(firstBlock == lastBlock) {
+      terminator = detachedBlock->getTerminator();
+    }
+    else{
+      terminator = lastBlock->getTerminator(); //Tapir need to change this to be not lastBlock
+    }
+
+    //set split point for the reattach block
+    mlir::Block *reattachBlock = nullptr;
+    if (fir::ResultOp resOp = dyn_cast<fir::ResultOp>(terminator)) {
+      auto results = resOp.getResults();
+      mlir::Operation *firstOp = nullptr;
+      mlir::DominanceInfo domInfo;
+      for (mlir::Value i : results) {
+	mlir::Operation *iOp = i.getDefiningOp();
+	if (iOp && firstOp){
+	  if (domInfo.dominates(iOp, firstOp))
+	    firstOp = iOp;
+	}
+	else if (iOp) {
+	  firstOp = iOp;
+	}
+      }
+      if (firstOp)
+	reattachBlock = firstOp->getBlock()->splitBlock(firstOp);
+      else if(firstBlock == lastBlock){
+	reattachBlock = rewriter.splitBlock(detachedBlock, detachedBlock->end());
+      }
+      else {
+	reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir need to change to not be lastBlock
+      } 
+    }
+    else if(firstBlock == lastBlock){
+      reattachBlock = rewriter.splitBlock(detachedBlock, detachedBlock->end());
+    }
+    else {
+      reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir need to change to not be lastBlock
+    }
+
+    //insert tapir_detach
+    rewriter.setInsertionPointToEnd(firstBlock);
+    rewriter.create<LLVM::Tapir_detach>(loc, syncreg, ArrayRef<Value>(), ArrayRef<Value>(), detachedBlock, reattachBlock);
+
+    //populate reattachBlock
+    rewriter.setInsertionPointToEnd(reattachBlock);
     auto iv = conditionalBlock->getArgument(0);
     mlir::Value steppedIndex =
         rewriter.create<mlir::arith::AddIOp>(loc, iv, step);
@@ -129,6 +198,10 @@ public:
     rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopCarried);
     rewriter.eraseOp(terminator);
 
+    //insert tapir_reattach
+    rewriter.setInsertionPointToEnd(detachedBlock);
+    rewriter.create<LLVM::Tapir_reattach>(loc, syncreg, ArrayRef<Value>(), reattachBlock); 
+
     // Conditional block
     rewriter.setInsertionPointToEnd(conditionalBlock);
     auto zero = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 0);
@@ -138,31 +211,60 @@ public:
     rewriter.create<mlir::cf::CondBranchOp>(
         loc, comparison, firstBlock, llvm::ArrayRef<mlir::Value>(), endBlock,
         llvm::ArrayRef<mlir::Value>());
-
-    //Tapir
-    //if (loop.getUnordered()) {
-
-    //detach and reattach 
-    //auto *detachedBlock = rewriter.splitBlock(firstBlock, firstBlock->begin());
-    //auto *reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end());
-    //rewriter.setInsertionPointToEnd(firstBlock);
-    //rewriter.create<LLVM::Tapir_detach>(loc, syncreg, ArrayRef<Value>(), ArrayRef<Value>(), detachedBlock, reattachBlock);
-    //rewriter.setInsertionPointToEnd(detachedBlock);
-    //rewriter.create<LLVM::Tapir_reattach>(loc, syncreg, ArrayRef<Value>(), reattachBlock); //START HERE
-    //rewriter.setInsertionPointToStart(reattachBlock);
       
     //sync
     auto syncBlock = rewriter.splitBlock(endBlock, endBlock->begin());
     rewriter.setInsertionPointToEnd(endBlock); 
     auto sync = rewriter.create<mlir::LLVM::Tapir_sync>(loc, syncreg, ArrayRef<Value>(), syncBlock);
+    llvm::errs() << "conditionalBlock (at end): ";
+    conditionalBlock->dump();
+    llvm::errs() << "firstBlock (at end): ";
+    firstBlock->dump();
+    llvm::errs() << "detachedBlock (at end): ";
+    detachedBlock->dump();
+    llvm::errs() << "reattachBlock (at end): ";
+    reattachBlock->dump();
+    llvm::errs() << "lastBlock (at end): ";
+    lastBlock->dump();
+
+    llvm::errs() << "endBlock (at end): ";
+    endBlock->dump();
+    llvm::errs() << "syncBlock (at end): ";
+    syncBlock->dump();
+
     //} if unordered
     
     // The result of the loop operation is the values of the condition block
     // arguments except the induction variable on the last iteration.
+    llvm::errs() << "loop.getFinalValue(): " << loop.getFinalValue() << "\n";
+    llvm::errs() << "conditionalBlock->getArguments().size(): " << conditionalBlock->getArguments().size() << "\n";
+    
     auto args = loop.getFinalValue()
                     ? conditionalBlock->getArguments()
                     : conditionalBlock->getArguments().drop_front();
+    llvm::errs() << "args.size(): " << args.size() << "\n";
+    
     rewriter.replaceOp(loop, args.drop_back());
+
+    llvm::errs() << "initBlock (at ultimate end): ";
+    initBlock->dump();
+    llvm::errs() << "conditionalBlock (at ultimate end): ";
+    conditionalBlock->dump();
+    llvm::errs() << "firstBlock (at ultimate end): ";
+    firstBlock->dump();
+    llvm::errs() << "detachedBlock (at ultimate end): ";
+    detachedBlock->dump();
+    llvm::errs() << "reattachBlock (at ultimate end): ";
+    reattachBlock->dump();
+    llvm::errs() << "lastBlock (at ultimate end): ";
+    lastBlock->dump();
+
+    llvm::errs() << "endBlock (at ultimate end): ";
+    endBlock->dump();
+    llvm::errs() << "syncBlock (at ultimate end): ";
+    syncBlock->dump();
+
+
     return success();
   }
 
