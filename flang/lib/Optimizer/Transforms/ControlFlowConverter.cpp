@@ -54,28 +54,28 @@ public:
   matchAndRewrite(DoLoopOp loop,
                   mlir::PatternRewriter &rewriter) const override {
 
-    //llvm::errs() << "DoLoopOp: ";
-    //loop.dump();
+    llvm::errs() << "DoLoopOp: ";
+    loop.dump();
     auto loc = loop.getLoc();
 
     // Create the start and end blocks that will wrap the DoLoopOp with an
     // initalizer and an end point
     auto *initBlock = rewriter.getInsertionBlock();
     auto initPos = rewriter.getInsertionPoint();
-    //llvm::errs() << "initBlock (at start): ";
-    //initBlock->dump();
+    llvm::errs() << "initBlock (at start): ";
+    initBlock->dump();
 
     auto *endBlock = rewriter.splitBlock(initBlock, initPos);
-    //llvm::errs() << "endBlock (at start): ";
-    //endBlock->dump();
+    llvm::errs() << "endBlock (at start): ";
+    endBlock->dump();
 
     // Split the first DoLoopOp block in two parts. The part before will be the
     // conditional block since it already has the induction variable and
     // loop-carried values as arguments.
     auto *conditionalBlock = &loop.getRegion().front();
     conditionalBlock->addArgument(rewriter.getIndexType(), loc);
-    //llvm::errs() << "conditionalBlock (at start): ";
-    //conditionalBlock->dump();
+    llvm::errs() << "conditionalBlock (at start): ";
+    conditionalBlock->dump();
 
     auto *firstBlock =
         rewriter.splitBlock(conditionalBlock, conditionalBlock->begin());
@@ -91,12 +91,12 @@ public:
     auto step = loop.getStep();
 
     //Tapir
-    //llvm::errs() << "firstBlock (at start): ";
-    //firstBlock->dump();
-    //llvm::errs() << "lastBlock (at start): ";
-    //lastBlock->dump();
-    //llvm::errs() << "endBlock (at start): ";
-    //endBlock->dump();
+    llvm::errs() << "firstBlock (at start): ";
+    firstBlock->dump();
+    llvm::errs() << "lastBlock (at start): ";
+    lastBlock->dump();
+    llvm::errs() << "endBlock (at start): ";
+    endBlock->dump();
 
     //Tapir
     if (loop.getUnordered()) { //DO CONCURRENT
@@ -105,10 +105,10 @@ public:
       // Initalization block
       rewriter.setInsertionPointToEnd(initBlock);
 
+      //syncregion.start
       rewriter.getContext()->loadDialect<mlir::LLVM::LLVMTapirDialect>();
       auto syncreg = rewriter.create<mlir::LLVM::Tapir_syncregion_start>(loc, mlir::LLVM::LLVMTokenType::get(rewriter.getContext()));
-      
-      
+            
       auto diff = rewriter.create<mlir::arith::SubIOp>(loc, high, low);
       auto distance = rewriter.create<mlir::arith::AddIOp>(loc, diff, step);
       mlir::Value iters =
@@ -138,11 +138,15 @@ public:
 	terminator = detachedBlock->getTerminator();
       }
       else{
-	terminator = lastBlock->getTerminator(); //Tapir need to change this to be not lastBlock
+	terminator = lastBlock->getTerminator(); //Tapir need to change this to be not lastBlock?
       }
       
       //set split point for the reattach block
       mlir::Block *reattachBlock = nullptr;
+      //if the terminator is a fir.result, must split block before the
+      //earliest operation being returned by the fir.result to ensure
+      //that all the passed along values are contained in the block that
+      //will be passing them along to the conditional block
       if (fir::ResultOp resOp = dyn_cast<fir::ResultOp>(terminator)) {
 	auto results = resOp.getResults();
 	mlir::Operation *firstOp = nullptr;
@@ -163,14 +167,14 @@ public:
 	  reattachBlock = rewriter.splitBlock(detachedBlock, detachedBlock->end());
 	}
 	else {
-	  reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir need to change to not be lastBlock
+	  reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir need to change to not be lastBlock?
 	} 
       }
       else if(firstBlock == lastBlock){
 	reattachBlock = rewriter.splitBlock(detachedBlock, detachedBlock->end());
       }
       else {
-	reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir need to change to not be lastBlock
+	reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir need to change to not be lastBlock?
       }
       
       //insert tapir_detach
@@ -196,7 +200,7 @@ public:
       loopCarried.append(begin, terminator->operand_end());
       loopCarried.push_back(itersMinusOne);
       rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopCarried);
-      rewriter.eraseOp(terminator);
+      rewriter.eraseOp(terminator); //ensures there is only one terminator in the reattachBlock
       
       //insert tapir_reattach
       rewriter.setInsertionPointToEnd(detachedBlock);
@@ -216,23 +220,6 @@ public:
       auto syncBlock = rewriter.splitBlock(endBlock, endBlock->begin());
       rewriter.setInsertionPointToEnd(endBlock); 
       auto sync = rewriter.create<mlir::LLVM::Tapir_sync>(loc, syncreg, ArrayRef<Value>(), syncBlock);
-      llvm::errs() << "conditionalBlock (at end): ";
-      conditionalBlock->dump();
-      llvm::errs() << "firstBlock (at end): ";
-      firstBlock->dump();
-      llvm::errs() << "detachedBlock (at end): ";
-      detachedBlock->dump();
-      llvm::errs() << "reattachBlock (at end): ";
-      reattachBlock->dump();
-      llvm::errs() << "lastBlock (at end): ";
-      lastBlock->dump();
-      
-      llvm::errs() << "endBlock (at end): ";
-      endBlock->dump();
-      llvm::errs() << "syncBlock (at end): ";
-      syncBlock->dump();
-      
-      //} if unordered
       
       // The result of the loop operation is the values of the condition block
       // arguments except the induction variable on the last iteration.
@@ -263,6 +250,7 @@ public:
       endBlock->dump();
       llvm::errs() << "syncBlock (at ultimate end): ";
       syncBlock->dump();
+      llvm::errs() << "firstBlock ?= lastBlock: " << (firstBlock == lastBlock) << "\n";
     } //end DO CONCURRENT
     else { //regular DO loop
       llvm::errs() << "not a DO CONCURRENT \n";
