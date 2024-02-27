@@ -158,6 +158,7 @@ DECLARE_DLSYM(cuModuleGetFunction);
 DECLARE_DLSYM(cuModuleUnload);
 
 DECLARE_DLSYM(cuMemAllocManaged);
+DECLARE_DLSYM(cuMemsetD8Async);
 DECLARE_DLSYM(cuMemFree_v2);
 DECLARE_DLSYM(cuMemPrefetchAsync);
 DECLARE_DLSYM(cuMemAdvise);
@@ -219,6 +220,7 @@ static bool __kitrt_cuLoadDLSyms() {
     DLSYM_LOAD(cuCtxGetCurrent);
 
     DLSYM_LOAD(cuMemAllocManaged);
+    DLSYM_LOAD(cuMemsetD8Async);
     DLSYM_LOAD(cuMemFree_v2);
     DLSYM_LOAD(cuMemPrefetchAsync);
     DLSYM_LOAD(cuMemAdvise);
@@ -278,10 +280,15 @@ extern "C" {
 
 bool __kitrt_cuInit() {
 
-  if (_kitrt_cuIsInitialized)
+  if (_kitrt_cuIsInitialized) {
+    fprintf(stderr, "kitrt: warning, multiple cuda initialization paths!\n");
     return true;
+  }
 
-  if (!__kitrt_cuLoadDLSyms()) {
+  if (__kitrt_verboseMode())
+    fprintf(stderr, "kitrt: initializing cuda.\n");
+
+  if (not __kitrt_cuLoadDLSyms()) {
     fprintf(stderr, "kitrt: unable to resolve dynamic symbols for CUDA.\n");
     fprintf(stderr, "       check enviornment settings and installation.\n");
     fprintf(stderr, "kitrt: aborting...\n");
@@ -296,6 +303,10 @@ bool __kitrt_cuInit() {
     fprintf(stderr, "kitrt: warning -- no CUDA devices found!\n");
     abort();
   }
+
+  if (__kitrt_verboseMode())
+    fprintf(stderr, "\tdevice count: %d\n", deviceCount);
+
   CU_SAFE_CALL(cuDeviceGet_p(&_kitrtCUdevice, 0));
   CU_SAFE_CALL(cuDevicePrimaryCtxRetain_p(&_kitrtCUcontext, _kitrtCUdevice));
   // NOTE: It seems we have to explicitly set the context but that seems
@@ -340,7 +351,8 @@ void __kitrt_cuCheckCtxState() {
 
 // ---- Managed memory allocation, tracking, etc.
 
-__attribute__((malloc)) void *__kitrt_cuMemAllocManaged(size_t size) {
+__attribute__((malloc)) 
+void *__kitrt_cuMemAllocManaged(size_t size) {
   if (not _kitrt_cuIsInitialized)
     __kitrt_cuInit();
 
@@ -352,12 +364,11 @@ __attribute__((malloc)) void *__kitrt_cuMemAllocManaged(size_t size) {
   // stream.  Recall that the current practice is for the actual allocation
   // to occur on first touch -- thus our 'prefetch' status here is a bit
   // misleading (technically we are not prefetched to either host nor device).
-  // 
-  CU_SAFE_CALL(cuMemAdvise_p(devp, size, CU_MEM_ADVISE_SET_ACCESSED_BY, 
-                             _kitrtCUdevice));
+  //
+  CU_SAFE_CALL(
+      cuMemAdvise_p(devp, size, CU_MEM_ADVISE_SET_ACCESSED_BY, _kitrtCUdevice));
   CU_SAFE_CALL(cuMemAdvise_p(devp, size, CU_MEM_ADVISE_SET_PREFERRED_LOCATION,
                              _kitrtCUdevice));
-
 
   int enable = 1;
   CU_SAFE_CALL(
@@ -369,6 +380,59 @@ __attribute__((malloc)) void *__kitrt_cuMemAllocManaged(size_t size) {
   return (void *)devp;
 }
 
+__attribute__((malloc)) 
+void *__kitrt_cuMemCallocManaged(size_t count, size_t element_size) {
+  assert(count != 0 && "zero-valued item count!");
+  assert(element_size != 0 && "zero-valued element size!");
+  size_t nbytes = count * element_size;
+  CUdeviceptr memp = (CUdeviceptr)__kitrt_cuMemAllocManaged(nbytes);
+
+  // TODO: Is there a risk of a race here?  From the driver API docs:
+  //
+  //   The cudaMemset functions are asynchronous with respect to the host 
+  //   except when the target memory is pinned host memory. The Async 
+  //   versions are always asynchronous with respect to the host.
+  // 
+  // Given our use of UVM we might also be able to use a straight memset() 
+  // call... which would, of course, place all pages on the host... 
+  //
+  // TODO: We're not set to run on anything but the default stream... 
+  CU_SAFE_CALL(cuMemsetD8Async_p(memp, 0, nbytes, NULL));
+  return (void*)memp;
+}
+
+__attribute__((malloc))
+void *__kitrt_cuMemRealloc(void *ptr, size_t size) {
+  assert(size != 0 && "zero-valued size!");
+  void *memptr = nullptr;
+  if (ptr == nullptr) 
+    memptr = __kitrt_cuMemAllocManaged(size);
+  else {
+    // Check to make sure this is a pointer we're actually managing.
+    bool read_only, write_only;
+    size_t nbytes = __kitrt_getMemAllocSize(ptr, &read_only, &write_only);
+    if (nbytes == 0) {
+      fprintf(stderr, "kitrt: warning, realloc() request on untracked allocation!\n");
+      return nullptr;
+    }
+    
+    if (size > nbytes) {
+      // requested size is larger than currently tracked allocation.  Replace it.
+      memptr = __kitrt_cuMemAllocManaged(size);
+      cuMemcpy_p(/* dest */(CUdeviceptr)memptr, /* source */(CUdeviceptr)ptr, nbytes);
+      // note: realloc does not guarantee initialized memory outside of existing data... 
+      __kitrt_cuMemFree(ptr);
+    } else if (size < nbytes) {
+      memptr = __kitrt_cuMemAllocManaged(size);
+      cuMemcpy_p(/* dest */(CUdeviceptr)memptr, /* source */(CUdeviceptr)ptr, size);
+      __kitrt_cuMemFree(ptr);
+    } else
+      // same size, just return it. 
+      memptr = ptr;
+  }
+  return memptr;
+}
+
 void __kitrt_cuMemFree(void *vp) {
   assert(vp && "unexpected null pointer!");
   // We first remove the allocation from the runtime's
@@ -376,16 +440,22 @@ void __kitrt_cuMemFree(void *vp) {
   // Note that the versioned free calls are important
   // here -- a non-v2 version will actually result in
   // crashes...
+  if (not _kitrt_cuIsInitialized)
+    __kitrt_cuInit();
   __kitrt_unregisterMemAlloc(vp);
   CU_SAFE_CALL(cuMemFree_v2_p((CUdeviceptr)vp));
 }
 
 void __kitrt_cuFreeManagedMem(void *vp) {
+  if (not _kitrt_cuIsInitialized)
+    __kitrt_cuInit();
   CU_SAFE_CALL(cuMemFree_v2_p((CUdeviceptr)vp));
 }
 
 bool __kitrt_cuIsMemManaged(void *vp) {
   assert(vp && "unexpected null pointer!");
+  if (not _kitrt_cuIsInitialized)
+    __kitrt_cuInit();
   CUdeviceptr devp = (CUdeviceptr)vp;
   unsigned int is_managed;
   CUresult r = cuPointerGetAttribute_p(&is_managed,
@@ -401,14 +471,45 @@ void __kitrt_cuDisablePrefetch() { _kitrt_cuEnablePrefetch = false; }
 
 void __kitrt_cuMemPrefetchOnStream(void *vp, void *stream) {
   assert(vp && "unexpected null pointer!");
-#ifdef _KITRT_VERBOSE_
-  fprintf(stderr, "kitrt: prefetch request for pointer %p on stream %p.\n", vp,
-          stream);
-#endif
   if (not __kitrt_isMemPrefetched(vp)) {
-  //if (__kitrt_cuIsMemManaged(vp) && not __kitrt_isMemPrefetched(vp)) {
-    size_t size = __kitrt_getMemAllocSize(vp);
+    bool is_read_only, is_write_only;
+    size_t size = __kitrt_getMemAllocSize(vp, &is_read_only, &is_write_only);
     if (size > 0) {
+      if (is_read_only) {
+        CU_SAFE_CALL(cuMemAdvise_p((CUdeviceptr)vp, size,
+                                   CU_MEM_ADVISE_SET_READ_MOSTLY,
+                                   _kitrtCUdevice));
+      } else {
+        CU_SAFE_CALL(cuMemAdvise_p((CUdeviceptr)vp, size,
+                                   CU_MEM_ADVISE_UNSET_READ_MOSTLY,
+                                   _kitrtCUdevice));
+      }
+      // Our semantics assume that a prefetch request suggests an inbound
+      // kernel launch.   Setting the preferred location does not cause
+      // data to migrate to that location immediately. Instead, it guides
+      // the migration policy when a fault occurs on that memory region. If
+      // the data is already in its preferred location and the faulting
+      // processor can establish a mapping without requiring the data to be
+      // migrated, then data migration will be avoided. On the other hand, if
+      // the data is not in its preferred location or if a direct mapping cannot
+      // be established, then it will be migrated to the processor accessing it.
+      // It is important to note that setting the preferred location does not
+      // prevent data prefetching done using cuMemPrefetchAsync(). Having a
+      // preferred location can override the page thrash detection and
+      // resolution logic in the Unified Memory driver. Normally, if a page is
+      // detected to be constantly thrashing between host and device
+      // memory, the page may eventually be pinned to host memory. But if the
+      // preferred location is set as device memory, then the page will continue
+      // to thrash indefinitely. If CU_MEM_ADVISE_SET_READ_MOSTLY is also set on
+      // this memory region or any subset of it, then the policies associated
+      // with that advice will override the policies of this advice, unless read
+      // accesses from device will not result in a read-only copy being created
+      // on that device as outlined in description for the advice
+      // CU_MEM_ADVISE_SET_READ_MOSTLY.
+      CU_SAFE_CALL(cuMemAdvise_p((CUdeviceptr)vp, size,
+                                 CU_MEM_ADVISE_SET_PREFERRED_LOCATION,
+                                 _kitrtCUdevice));
+
       CU_SAFE_CALL(cuMemPrefetchAsync_p((CUdeviceptr)vp, size, _kitrtCUdevice,
                                         (CUstream)stream));
       __kitrt_markMemPrefetched(vp);
@@ -427,6 +528,66 @@ void *__kitrt_cuStreamMemPrefetch(void *vp) {
   __kitrt_cuMemPrefetchOnStream(vp, stream);
   _kitrtActiveStreams.push_back(stream);
   return (void *)stream;
+}
+
+void __kitrt_cuMemHostPrefetch(void *vp) {
+  assert(vp && "unexpected null pointer!");
+  // Prefetch to the host if we previously issued a device prefetch.
+  if (__kitrt_isMemPrefetched(vp)) {
+    bool is_read_only, is_write_only;
+    size_t size = __kitrt_getMemAllocSize(vp, &is_read_only, &is_write_only);
+    if (size > 0) {
+      // If the data is mostly going to be read from and only occasionally
+      // written to we want the unified memory driver to create a read-only copy
+      // of at least the accessed pages in the target processor's memory. We
+      // then call cuMemPrefetchAsync() to create that read-only copy.  Any
+      // writes to this region will force all copies of the corresponding page
+      // to be invalidated except for the one where the write occurred. (Note:
+      // the device argument is ignored and that for a page to be
+      // read-duplicated, the accessing processor must either be the CPU or a
+      // GPU that has a non-zero value for the device attribute
+      // CU_DEVICE_ATTRIBUTE_CONCURRENT_MANAGED_ACCESS.)
+      if (is_read_only) {
+        CU_SAFE_CALL(cuMemAdvise_p((CUdeviceptr)vp, size,
+                                   CU_MEM_ADVISE_SET_READ_MOSTLY,
+                                   CU_DEVICE_CPU));
+      } else {
+        // for now we treat "write only" as disabling the read only advice...
+        CU_SAFE_CALL(cuMemAdvise_p((CUdeviceptr)vp, size,
+                                   CU_MEM_ADVISE_UNSET_READ_MOSTLY,
+                                   CU_DEVICE_CPU));
+      }
+      // Our semantics assume that a prefetch request suggests an inbound
+      // kernel launch.   Setting the preferred location does not cause
+      // data to migrate to that location immediately. Instead, it guides
+      // the migration policy when a fault occurs on that memory region. If
+      // the data is already in its preferred location and the faulting
+      // processor can establish a mapping without requiring the data to be
+      // migrated, then data migration will be avoided. On the other hand, if
+      // the data is not in its preferred location or if a direct mapping cannot
+      // be established, then it will be migrated to the processor accessing it.
+      // It is important to note that setting the preferred location does not
+      // prevent data prefetching done using cuMemPrefetchAsync(). Having a
+      // preferred location can override the page thrash detection and
+      // resolution logic in the Unified Memory driver. Normally, if a page is
+      // detected to be constantly thrashing between host and device
+      // memory, the page may eventually be pinned to host memory. But if the
+      // preferred location is set as device memory, then the page will continue
+      // to thrash indefinitely. If CU_MEM_ADVISE_SET_READ_MOSTLY is also set on
+      // this memory region or any subset of it, then the policies associated
+      // with that advice will override the policies of this advice, unless read
+      // accesses from device will not result in a read-only copy being created
+      // on that device as outlined in description for the advice
+      // CU_MEM_ADVISE_SET_READ_MOSTLY.
+      CU_SAFE_CALL(cuMemAdvise_p((CUdeviceptr)vp, size,
+                                 CU_MEM_ADVISE_SET_PREFERRED_LOCATION,
+                                 CU_DEVICE_CPU));
+
+      CU_SAFE_CALL(cuMemPrefetchAsync_p((CUdeviceptr)vp, size, CU_DEVICE_CPU,
+                                        (CUstream) nullptr));
+      __kitrt_setMemPrefetch(vp, false);
+    }
+  }
 }
 
 void __kitrt_cuMemcpySymbolToDevice(void *hostPtr, uint64_t devPtr,
@@ -467,6 +628,8 @@ static void __kitrt_cuMaxPotentialBlockSize(int &blocksPerGrid,
 
 void *__kitrt_cuCreateFBModule(const void *fatBin) {
   assert(fatBin && "unexpected null fatbinary image!");
+  if (not _kitrt_cuIsInitialized)
+    __kitrt_cuInit();
   CUmodule module;
   CU_SAFE_CALL(cuModuleLoadData_p(&module, fatBin));
   // CU_SAFE_CALL(cuModuleLoadFatBinary_p(&module, fatBin));
@@ -802,7 +965,7 @@ void __kitrt_cuStreamSynchronize(void *vs) {
   if (_kitrtEnableTiming)
     return; // TODO: Is this really safe?  We sync with events for timing.
   CU_SAFE_CALL(cuCtxSynchronize());
-  //CU_SAFE_CALL(cuStreamSynchronize_p((CUstream)vs));
+  // CU_SAFE_CALL(cuStreamSynchronize_p((CUstream)vs));
 }
 
 void __kitrt_cuSynchronizeStreams() {

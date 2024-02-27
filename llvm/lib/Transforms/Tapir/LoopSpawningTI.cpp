@@ -1689,14 +1689,18 @@ PreservedAnalyses LoopSpawningPass::run(Module &M, ModuleAnalysisManager &AM) {
   TapirTargetID TargetID = GetTLI(*SavedF).getTapirTarget();
   std::unique_ptr<TapirTarget> Target(getTapirTargetFromID(M, TargetID));
   // Now process each loop.
+  bool HasParallelism = false;
   for (Function *F : WorkList) {
-    Changed |= LoopSpawningImpl(*F, GetDT(*F), GetLI(*F), GetTI(*F), GetSE(*F),
+    HasParallelism |= LoopSpawningImpl(*F, GetDT(*F), GetLI(*F), GetTI(*F), GetSE(*F),
                                 GetAC(*F), GetTTI(*F), Target.get(), GetORE(*F))
                    .run();
   }
+  Changed |= HasParallelism;
 
-  Target->postProcessModule();
-
+  // Only post-process if parallelism was discovered during loop spawning.
+  if (HasParallelism) 
+    Target->postProcessModule();
+  
   if (Changed)
     return PreservedAnalyses::none();
   return PreservedAnalyses::all();

@@ -1205,6 +1205,15 @@ CudaABI::CudaABI(Module &M)
       KernelModule(Twine(CUABI_PREFIX + sys::path::filename(M.getName())).str(),
                    M.getContext()) {
 
+  // A helping hand for invocation of the transform from a JIT-driven 
+  // environment where it can be a bit painful to get to 
+  std::optional<std::string> envTarget = sys::Process::GetEnv("CUDAABI_TARGET");
+  if (envTarget) {
+    LLVM_DEBUG(dbgs() << "cuabi: target set via environment '" 
+                      << envTarget.value() << "'.\n");
+    GPUArch.setInitialValue(envTarget.value());
+  }
+
   LLVM_DEBUG(dbgs() << "cuabi: creating tapir target for module '"
                     << M.getName() << "' (w/ kernel module: '"
                     << KernelModule.getName() << "')\n");
@@ -1414,7 +1423,7 @@ CudaABIOutputFile CudaABI::assemblePTXFile(CudaABIOutputFile &PTXFile) {
       break;
     case 3:
       PTXASArgList.push_back("3");
-      PTXASArgList.push_back("-v");
+      PTXASArgList.push_back("--extensible-whole-program");
       break;
     default:
       llvm_unreachable_internal("unhandled/unexpected optimization level",
@@ -1576,8 +1585,12 @@ void CudaABI::finalizeLaunchCalls(Module &M, GlobalVariable *Fatbin) {
     LLVM_DEBUG(dbgs() << "\tcleaning up dummy fatbin global.\n");
     ProxyFB->replaceAllUsesWith(CFB);
     ProxyFB->eraseFromParent();
-  } else
+  } else {
+    // FIXME: If we haven't found the proxy for a fat binary the odds are we have not
+    // found any parallel loops in the code...  Technically, this should not be 
+    // seen as a compiler error... 
     report_fatal_error("internal error! unable to find proxy fatbin pointer!");
+  }
 }
 
 CudaABIOutputFile CudaABI::createFatbinaryFile(CudaABIOutputFile &AsmFile) {
@@ -1792,7 +1805,7 @@ Function *CudaABI::createCtor(GlobalVariable *Fatbinary,
   CtorBuilder.CreateAlignedStore(RegFatbin, Handle,
                                  DL.getPointerABIAlignment(0));
   Handle->setUnnamedAddr(GlobalValue::UnnamedAddr::None);
-
+  
   Value *HandlePtr = CtorBuilder.CreateLoad(VoidPtrPtrTy, Handle,
                                             CUABI_PREFIX + ".fbhand.ptr");
 
@@ -2005,7 +2018,9 @@ CudaABIOutputFile CudaABI::generatePTX() {
 void CudaABI::postProcessModule() {
   // At this point, all tapir constructs in the input module (M) have been
   // transformed (i.e., outlined) into the kernel module. We can now wrap up
-  // module-wide changes for both modules and generate the GPU binary...
+  // module-wide changes for both modules and generate a GPU binary.
+  // NOTE: postProcessModule() will not be called in cases where parallelism 
+  // was not discovered during loop spawning.
   LLVM_DEBUG(dbgs() << "\n\n"
                     << "cuabi: postprocessing the kernel '"
                     << KernelModule.getName() << "' and input '" << M.getName()
