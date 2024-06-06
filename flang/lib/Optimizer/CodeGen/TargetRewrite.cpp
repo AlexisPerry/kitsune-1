@@ -93,6 +93,9 @@ public:
     if (!forcedTargetCPU.empty())
       fir::setTargetCPU(mod, forcedTargetCPU);
 
+    if (!forcedTuneCPU.empty())
+      fir::setTuneCPU(mod, forcedTuneCPU);
+
     if (!forcedTargetFeatures.empty())
       fir::setTargetFeatures(mod, forcedTargetFeatures);
 
@@ -110,7 +113,8 @@ public:
 
     auto specifics = fir::CodeGenSpecifics::get(
         mod.getContext(), fir::getTargetTriple(mod), fir::getKindMapping(mod),
-        fir::getTargetCPU(mod), fir::getTargetFeatures(mod), *dl);
+        fir::getTargetCPU(mod), fir::getTargetFeatures(mod), *dl,
+        fir::getTuneCPU(mod));
 
     setMembers(specifics.get(), &rewriter, &*dl);
 
@@ -676,11 +680,17 @@ public:
     auto targetCPU = specifics->getTargetCPU();
     mlir::StringAttr targetCPUAttr =
         targetCPU.empty() ? nullptr : mlir::StringAttr::get(ctx, targetCPU);
+    auto tuneCPU = specifics->getTuneCPU();
+    mlir::StringAttr tuneCPUAttr =
+        tuneCPU.empty() ? nullptr : mlir::StringAttr::get(ctx, tuneCPU);
     auto targetFeaturesAttr = specifics->getTargetFeatures();
 
     for (auto fn : mod.getOps<mlir::func::FuncOp>()) {
       if (targetCPUAttr)
         fn->setAttr("target_cpu", targetCPUAttr);
+
+      if (tuneCPUAttr)
+        fn->setAttr("tune_cpu", tuneCPUAttr);
 
       if (targetFeaturesAttr)
         fn->setAttr("target_features", targetFeaturesAttr);

@@ -34,7 +34,8 @@ LLVMTypeConverter::LLVMTypeConverter(mlir::ModuleOp module, bool applyTBAA,
       kindMapping(getKindMapping(module)),
       specifics(CodeGenSpecifics::get(
           module.getContext(), getTargetTriple(module), getKindMapping(module),
-          getTargetCPU(module), getTargetFeatures(module), dl)),
+          getTargetCPU(module), getTargetFeatures(module), dl,
+          getTuneCPU(module))),
       tbaaBuilder(std::make_unique<TBAABuilder>(module->getContext(), applyTBAA,
                                                 forceUnifiedTBAATree)) {
   LLVM_DEBUG(llvm::dbgs() << "FIR type converter\n");
