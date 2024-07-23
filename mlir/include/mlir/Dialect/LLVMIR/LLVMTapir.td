@@ -26,8 +26,6 @@ include "mlir/Interfaces/SideEffectInterfaces.td"
 def LLVMTapir_Dialect : Dialect {
   let name = "llvm_tapir";
   let cppNamespace = "::mlir::LLVM";
-
-  let useFoldAPI = kEmitFoldAdaptorFolder;
 }
 
 // Base class for LLVM operations. All operations get an "llvm." prefix in

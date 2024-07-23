@@ -218,7 +218,7 @@ public:
       //sync
       auto syncBlock = rewriter.splitBlock(endBlock, endBlock->begin());
       rewriter.setInsertionPointToEnd(endBlock); 
-      auto sync = rewriter.create<mlir::LLVM::Tapir_sync>(loc, syncreg, ArrayRef<Value>(), syncBlock);
+      rewriter.create<mlir::LLVM::Tapir_sync>(loc, syncreg, ArrayRef<Value>(), syncBlock);
       
       // The result of the loop operation is the values of the condition block
       // arguments except the induction variable on the last iteration.
@@ -497,7 +497,7 @@ public:
     mlir::ConversionTarget target(*context);
     target.addLegalDialect<mlir::affine::AffineDialect,
                            mlir::cf::ControlFlowDialect, FIROpsDialect,
-                           mlir::func::FuncDialect>(), mlir::LLVM::LLVMTapirDialect>();
+                           mlir::func::FuncDialect, mlir::LLVM::LLVMTapirDialect>();
 
     // apply the patterns
     target.addIllegalOp<ResultOp, DoLoopOp, IfOp, IterWhileOp>();
