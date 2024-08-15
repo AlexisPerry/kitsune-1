@@ -53,28 +53,20 @@ public:
   matchAndRewrite(DoLoopOp loop,
                   mlir::PatternRewriter &rewriter) const override {
 
-    llvm::errs() << "DoLoopOp: ";
-    loop.dump();
     auto loc = loop.getLoc();
 
     // Create the start and end blocks that will wrap the DoLoopOp with an
     // initalizer and an end point
     auto *initBlock = rewriter.getInsertionBlock();
     auto initPos = rewriter.getInsertionPoint();
-    llvm::errs() << "initBlock (at start): ";
-    initBlock->dump();
 
     auto *endBlock = rewriter.splitBlock(initBlock, initPos);
-    llvm::errs() << "endBlock (at start): ";
-    endBlock->dump();
 
     // Split the first DoLoopOp block in two parts. The part before will be the
     // conditional block since it already has the induction variable and
     // loop-carried values as arguments.
     auto *conditionalBlock = &loop.getRegion().front();
     conditionalBlock->addArgument(rewriter.getIndexType(), loc);
-    llvm::errs() << "conditionalBlock (at start): ";
-    conditionalBlock->dump();
 
     auto *firstBlock =
         rewriter.splitBlock(conditionalBlock, conditionalBlock->begin());
@@ -90,16 +82,7 @@ public:
     auto step = loop.getStep();
 
     //Tapir
-    llvm::errs() << "firstBlock (at start): ";
-    firstBlock->dump();
-    llvm::errs() << "lastBlock (at start): ";
-    lastBlock->dump();
-    llvm::errs() << "endBlock (at start): ";
-    endBlock->dump();
-
-    //Tapir
     if (loop.getUnordered()) { //DO CONCURRENT
-      llvm::errs() << "Entering Flang Tapir mode\n";
       
       // Initalization block
       rewriter.setInsertionPointToEnd(initBlock);
@@ -222,37 +205,14 @@ public:
       
       // The result of the loop operation is the values of the condition block
       // arguments except the induction variable on the last iteration.
-      llvm::errs() << "loop.getFinalValue(): " << loop.getFinalValue() << "\n";
-      llvm::errs() << "conditionalBlock->getArguments().size(): " << conditionalBlock->getArguments().size() << "\n";
-      
       auto args = loop.getFinalValue()
 	? conditionalBlock->getArguments()
 	: conditionalBlock->getArguments().drop_front();
-      llvm::errs() << "args.size(): " << args.size() << "\n";
       
       rewriter.replaceOp(loop, args.drop_back());
       
-      llvm::errs() << "initBlock (at ultimate end): ";
-      initBlock->dump();
-      llvm::errs() << "conditionalBlock (at ultimate end): ";
-      conditionalBlock->dump();
-      llvm::errs() << "firstBlock (at ultimate end): ";
-      firstBlock->dump();
-      llvm::errs() << "detachedBlock (at ultimate end): ";
-      detachedBlock->dump();
-      llvm::errs() << "reattachBlock (at ultimate end): ";
-      reattachBlock->dump();
-      llvm::errs() << "lastBlock (at ultimate end): ";
-      lastBlock->dump();
-      
-      llvm::errs() << "endBlock (at ultimate end): ";
-      endBlock->dump();
-      llvm::errs() << "syncBlock (at ultimate end): ";
-      syncBlock->dump();
-      llvm::errs() << "firstBlock ?= lastBlock: " << (firstBlock == lastBlock) << "\n";
     } //end DO CONCURRENT
     else { //regular DO loop
-      llvm::errs() << "not a DO CONCURRENT \n";
       // Initalization block
       rewriter.setInsertionPointToEnd(initBlock);
       auto diff = rewriter.create<mlir::arith::SubIOp>(loc, high, low);
