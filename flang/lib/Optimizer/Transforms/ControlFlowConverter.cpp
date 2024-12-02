@@ -149,14 +149,14 @@ public:
 	  reattachBlock = rewriter.splitBlock(detachedBlock, detachedBlock->end());
 	}
 	else {
-	  reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir need to change to not be lastBlock?
+	  reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir TODO: need to change to not be lastBlock?
 	} 
       }
       else if(firstBlock == lastBlock){
 	reattachBlock = rewriter.splitBlock(detachedBlock, detachedBlock->end());
       }
       else {
-	reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir need to change to not be lastBlock?
+	reattachBlock = rewriter.splitBlock(lastBlock, lastBlock->end()); //Tapir TODO: need to change to not be lastBlock?
       }
       
       //insert tapir_detach
@@ -181,7 +181,8 @@ public:
 	: terminator->operand_begin();
       loopCarried.append(begin, terminator->operand_end());
       loopCarried.push_back(itersMinusOne);
-      rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopCarried);
+      auto branchOp = rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopCarried); //Tapir TODO: add tapir loop metadata to this?
+      branchOp.addAttribute(getTapirLoopTargetAttrName(loop.getAttr(getTapirLoopTargetAttrName()).getValue()));
       rewriter.eraseOp(terminator); //ensures there is only one terminator in the reattachBlock
       
       //insert tapir_reattach

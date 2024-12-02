@@ -4333,6 +4333,10 @@ private:
                                              isUnordered(),
                                              /*finalCount=*/false);
       }
+
+      mlir::ModuleOp mlirModule = builder.getModule();
+      loop.addAttribute(getTapirLoopTargetAttrName(mlirModule.getAttr(getTapirLoopTargetAttrName()).getValue()));
+      
       ivars.push_back(loop.getInductionVar());
       loops.push_back(loop);
     }

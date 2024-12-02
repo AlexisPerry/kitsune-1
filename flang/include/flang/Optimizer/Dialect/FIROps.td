@@ -2095,7 +2095,10 @@ def fir_DoLoopOp : region_Op<"do_loop",
     Index:$step,
     Variadic<AnyType>:$initArgs,
     OptionalAttr<UnitAttr>:$unordered,
-    OptionalAttr<UnitAttr>:$finalValue
+    OptionalAttr<UnitAttr>:$finalValue,
+    OptionalAttr<I32Attr>:$tapirLoopGrainsize,
+    //OptionalAttr<tapir_LoopSpawningStrategyAttr>:$tapirLoopSpawnStrategy, 
+    OptionalAttr<I32Attr>:$tapirLoopTarget
   );
   let results = (outs Variadic<AnyType>:$results);
   let regions = (region SizedRegion<1>:$region);

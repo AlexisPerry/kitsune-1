@@ -132,6 +132,50 @@ void Flang::addOtherOptions(const ArgList &Args, ArgStringList &CmdArgs) const {
     DebugInfoKind = llvm::codegenoptions::NoDebugInfo;
   }
   addDebugInfoKind(CmdArgs, DebugInfoKind);
+
+    // Forward flags for Kitsune.
+  Args.AddLastArg(CmdArgs, options::OPT_fkokkos);
+  Args.AddLastArg(CmdArgs, options::OPT_fkokkos_no_init);
+  Args.AddLastArg(CmdArgs, options::OPT_ftapir_EQ);
+  if (Args.hasArg(options::OPT_ftapir_EQ)) {
+    auto const &Triple = getToolChain().getTriple();
+    const Driver &D = getToolChain().getDriver();
+    
+    // At least one runtime has been implemented for these operating systems.
+    if (!Triple.isOSLinux() && !Triple.isOSFreeBSD() && !Triple.isMacOSX())
+      D.Diag(diag::err_drv_kitsune_unsupported);
+
+    /* JFC: Is it possible to confuse with with -fno-opencilk? */
+    bool OpenCilk = false;
+    bool CustomTarget = false;
+
+    if (Arg *TapirRuntime = Args.getLastArgNoClaim(options::OPT_ftapir_EQ)) {
+      if (TapirRuntime->getValue() == StringRef("opencilk")) {
+        OpenCilk = true;
+      } else {
+        CustomTarget = true;
+      }
+    }
+
+    if (OpenCilk) {
+      switch (Triple.getArch()) {
+      case llvm::Triple::x86:
+      case llvm::Triple::x86_64:
+      case llvm::Triple::arm:
+      case llvm::Triple::armeb:
+      case llvm::Triple::aarch64:
+      case llvm::Triple::aarch64_be:
+        break;
+      default:
+        D.Diag(diag::err_drv_kitsune_unsupported);
+        break;
+      }
+
+      if (!CustomTarget)
+        // Add the OpenCilk ABI bitcode file.
+        getToolChain().AddOpenCilkABIBitcode(Args, CmdArgs);
+    }
+  }
 }
 
 void Flang::addCodegenOptions(const ArgList &Args,

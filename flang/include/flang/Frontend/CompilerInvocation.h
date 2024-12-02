@@ -219,7 +219,13 @@ public:
                              llvm::ArrayRef<const char *> commandLineArgs,
                              clang::DiagnosticsEngine &diags,
                              const char *argv0 = nullptr);
-
+  
+  // Parse command line options that are specific to Kitsune.
+  static bool ParseKitsuneArgs(clang::KitsuneOptions &Opts,
+			       llvm::ArrayRef<const char *> commandLineArgs, //used to be  llvm::opt::ArgList &Args,
+                               clang::DiagnosticsEngine &Diags,
+                               const LangOptions &LangOpts);
+  
   // Enables the std=f2018 conformance check
   void setEnableConformanceChecks() { enableConformanceChecks = true; }
 

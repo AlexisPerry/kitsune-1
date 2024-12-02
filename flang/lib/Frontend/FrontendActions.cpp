@@ -264,6 +264,10 @@ bool CodeGenAction::beginSourceFileAction() {
     mlirModule = std::make_unique<mlir::ModuleOp>(module.release());
     const llvm::DataLayout &dl = targetMachine.createDataLayout();
     fir::support::setMLIRDataLayout(*mlirModule, dl);
+
+    //TapirTarget
+    mlirModule->addAttribute(getTapirLoopTargetAttrName(ci.getInvocation().getCodeGenOpts().KitsuneOpts.getTapirTargetOrInvalid()));
+
     return true;
   }
 
@@ -903,6 +907,9 @@ static void generateMachineCodeOrAssemblyImpl(clang::DiagnosticsEngine &diags,
   llvm::Triple triple(llvmModule.getTargetTriple());
   llvm::TargetLibraryInfoImpl *tlii =
       llvm::driver::createTLII(triple, codeGenOpts.getVecLib());
+  tlii->setTapirTarget(codeGenOpts.KitsuneOpts.getTapirTargetOrInvalid());
+  llvm::dbgs() << "generateMachineCodeOrAssemblyImpl: \n";
+  llvm::dbgs() << "codeGenOpts.KitsuneOpts.getTapirTargetOrInvalid() = " << codeGenOpts.KitsuneOpts.getTapirTargetOrInvalid() << "\n";
   codeGenPasses.add(new llvm::TargetLibraryInfoWrapperPass(*tlii));
 
   llvm::CodeGenFileType cgft = (act == BackendActionTy::Backend_EmitAssembly)
@@ -961,6 +968,9 @@ void CodeGenAction::runOptimizationPipeline(llvm::raw_pwrite_stream &os) {
   llvm::Triple triple(llvmModule->getTargetTriple());
   llvm::TargetLibraryInfoImpl *tlii =
       llvm::driver::createTLII(triple, opts.getVecLib());
+  tlii->setTapirTarget(opts.KitsuneOpts.getTapirTargetOrInvalid());
+  llvm::dbgs() << "runOptimizationPipeline:\n";
+  llvm::dbgs() << "opts.KitsuneOpts.getTapirTargetOrInvalid() = " << opts.KitsuneOpts.getTapirTargetOrInvalid() << "\n";
   fam.registerPass([&] { return llvm::TargetLibraryAnalysis(*tlii); });
 
   // Register all the basic analyses with the managers.

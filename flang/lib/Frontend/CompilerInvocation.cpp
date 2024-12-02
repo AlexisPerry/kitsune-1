@@ -23,6 +23,7 @@
 #include "clang/Basic/AllDiagnostics.h"
 #include "clang/Basic/DiagnosticDriver.h"
 #include "clang/Basic/DiagnosticOptions.h"
+#include "clang/Basic/KitsuneOptions.h"
 #include "clang/Driver/DriverDiagnostic.h"
 #include "clang/Driver/OptionUtils.h"
 #include "clang/Driver/Options.h"
@@ -245,6 +246,28 @@ static void parseCodeGenArgs(Fortran::frontend::CodeGenOptions &opts,
 
   opts.AliasAnalysis = opts.OptimizationLevel > 0;
 
+  // TapirTarget
+  clang::KitsuneOptions& KitsuneOpts = opts.KitsuneOpts;
+
+  for (llvm::opt::Arg *a : args) {
+    if (a->getOption().matches(clang::driver::options::OPT_ftapir_EQ)) {
+      std::optional<llvm::TapirTargetID> TapirTarget =
+	llvm::StringSwitch<std::optional<llvm::TapirTargetID>>(a->getValue())
+	.Case("none", llvm::TapirTargetID::None)
+	.Case("serial", llvm::TapirTargetID::Serial)
+	.Case("cuda", llvm::TapirTargetID::Cuda)
+	.Case("hip", llvm::TapirTargetID::Hip)
+	.Case("lambda", llvm::TapirTargetID::Lambda)
+	.Case("omptask", llvm::TapirTargetID::OMPTask)
+	.Case("opencilk", llvm::TapirTargetID::OpenCilk)
+	.Case("openmp", llvm::TapirTargetID::OpenMP)
+	.Case("qthreads", llvm::TapirTargetID::Qthreads)
+	.Case("realm", llvm::TapirTargetID::Realm)
+	.Default(std::nullopt);
+      KitsuneOpts.setTapirTarget(*TapirTarget);
+    }
+  }  
+  
   // -mframe-pointer=none/non-leaf/all option.
   if (const llvm::opt::Arg *a =
           args.getLastArg(clang::driver::options::OPT_mframe_pointer_EQ)) {

@@ -84,7 +84,9 @@ def BranchOp : CF_Op<"br", [
     ```
   }];
 
-  let arguments = (ins Variadic<AnyType>:$destOperands);
+  let arguments = (ins
+      Variadic<AnyType>:$destOperands,
+      OptionalAttr<I32Attr>:$tapirLoopTarget);
   let successors = (successor AnySuccessor:$dest);
 
   let builders = [

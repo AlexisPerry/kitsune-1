@@ -58,6 +58,31 @@ def fir_FortranVariableFlagsAttr : fir_Attr<"FortranVariableFlags"> {
           "::fir::FortranVariableFlagsAttr::get($_builder.getContext(), $0)";
 }
 
+def TapirSEQ  : I32BitEnumAttrCaseBit<"seq", 0>;
+def TapirDAC  : I32BitEnumAttrCaseBit<"dac", 1>;
+def TapirGPU  : I32BitEnumAttrCaseBit<"gpu", 2>;
+
+def tapir_LoopSpawningStrategyEnum : I32BitEnumAttr<
+    "TapirLoopSpawningStrategyEnum",
+    "Tapir loop spawning strategy",
+    [TapirSEQ, TapirDAC, TapirGPU]> {
+  let separator = ", ";
+  let cppNamespace = "::fir";
+  let printBitEnumPrimaryGroups = 1;
+}
+
+//def tapir_LoopSpawningStrategyAttr : fir_Attr<"TapirLoopSpawningStrategy"> {
+//  let mnemonic = "tapir_loop_spawn_strategy_attr";
+//  let parameters = (ins
+//    "TapirLoopSpawningStrategyEnum":$LSStrategy
+//  );
+//  let hasCustomAssemblyFormat = 1;
+//  let returnType = "::fir::TapirLoopSpawningStrategyEnum";
+//  let convertFromStorage = "$_self.getLSStrategy()";
+//  let constBuilderCall =
+//          "::fir::TapirLoopSpawningStrategyAttr::get($_builder.getContext(), $0)";
+//}
+
 def fir_BoxFieldAttr : I32EnumAttr<
     "BoxFieldAttr", "",
     [

@@ -54,7 +54,8 @@ def ModuleOp : Builtin_Op<"module", [
   }];
 
   let arguments = (ins OptionalAttr<SymbolNameAttr>:$sym_name,
-                       OptionalAttr<StrAttr>:$sym_visibility);
+                       OptionalAttr<StrAttr>:$sym_visibility,
+		       OptionalAttr<I32Attr>:$tapirLoopTarget);
   let regions = (region SizedRegion<1>:$bodyRegion);
 
   let assemblyFormat = "($sym_name^)? attr-dict-with-keyword $bodyRegion";

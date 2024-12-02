@@ -60,6 +60,7 @@
 #include "mlir/Transforms/RegionUtils.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/Transforms/Tapir/TapirTargetIDs.h"
 
 #include <algorithm>
 
@@ -283,9 +284,15 @@ void LoopVersioningPass::runOnOperation() {
 
   auto &domInfo = getAnalysis<mlir::DominanceInfo>();
 
+  //Tapir -- TODO fix this to actually work, this is pseudocode for now
+  llvm::TapirTargetID tapirTarget = llvm::TapirTargetID::None;
+  if (module.hasAttr(getTapirLoopTargetAttrName()))
+    tapirTarget = module.getAttr(getTapirLoopTargetAttrName()).getValue();
+
   // Traverse the loops in post-order and see
   // if those arguments are used inside any loop.
   func.walk([&](fir::DoLoopOp loop) {
+    loop.addAttribute(getTapirLoopTargetAttrName(tapirTarget));
     mlir::Block &body = *loop.getBody();
     auto &argsInLoop = argsInLoops[loop];
     originalLoops.push_back(loop);
