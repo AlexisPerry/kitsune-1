@@ -35,6 +35,7 @@
 #include "flang/Semantics/unparse-with-symbols.h"
 #include "flang/Tools/CrossToolHelpers.h"
 
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/Parser/Parser.h"
 #include "mlir/Pass/PassManager.h"
@@ -271,7 +272,11 @@ bool CodeGenAction::beginSourceFileAction() {
     fir::support::setMLIRDataLayout(*mlirModule, dl);
 
     //TapirTarget
-    mlirModule->addAttribute(getTapirLoopTargetAttrName(ci.getInvocation().getCodeGenOpts().KitsuneOpts.getTapirTargetOrInvalid()));
+    mlir::IRRewriter builder(mlirModule->getContext());
+    auto int32Type = builder.getI32Type();
+    int64_t tapirID = static_cast<int64_t>(ci.getInvocation().getCodeGenOpts().KitsuneOpts.getTapirTargetOrInvalid());
+    mlir::Attribute tapirTarget = builder.getIntegerAttr(int32Type, tapirID);
+    (*mlirModule)->setAttr(mlirModule->getTapirLoopTargetAttrName(), tapirTarget);
 
     return true;
   }

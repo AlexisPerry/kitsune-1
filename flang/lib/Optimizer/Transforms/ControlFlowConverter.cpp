@@ -19,6 +19,7 @@
 #include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/LLVMIR/LLVMTapirDialect.h"
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Dominance.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/DialectConversion.h"
@@ -86,6 +87,10 @@ public:
     assert(low && high && "must be a Value");
     auto step = loop.getStep();
 
+    //the conditional branch operation used for copying loop annotations
+    //from the do loop to the loop entry condition
+    mlir::cf::CondBranchOp cond;
+    
     //Tapir
     if (loop.getUnordered()) { //DO CONCURRENT
       
@@ -178,7 +183,6 @@ public:
       auto itersLeft = conditionalBlock->getArgument(lastArg);
       auto one = rewriter.create<mlir::arith::ConstantIndexOp>(loc, 1);
       mlir::Value itersMinusOne =
->>>>>>> 3baba5e93340 (Initial LLVMTapir Dialect and Flang DO CONCURRENT lowering to Tapir work)
         rewriter.create<mlir::arith::SubIOp>(loc, itersLeft, one);
       
       llvm::SmallVector<mlir::Value> loopCarried;
@@ -188,7 +192,7 @@ public:
       loopCarried.append(begin, terminator->operand_end());
       loopCarried.push_back(itersMinusOne);
       auto branchOp = rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopCarried); //Tapir TODO: add tapir loop metadata to this?
-      branchOp.addAttribute(getTapirLoopTargetAttrName(loop.getAttr(getTapirLoopTargetAttrName()).getValue()));
+      branchOp->setAttr(loop.getTapirLoopTargetAttrName(), loop->getAttr(loop.getTapirLoopTargetAttrName()));
       rewriter.eraseOp(terminator); //ensures there is only one terminator in the reattachBlock
       
       //insert tapir_reattach
@@ -201,7 +205,7 @@ public:
       auto comparison = rewriter.create<mlir::arith::CmpIOp>(
           loc, arith::CmpIPredicate::sgt, itersLeft, zero);
       
-      rewriter.create<mlir::cf::CondBranchOp>(
+      cond = rewriter.create<mlir::cf::CondBranchOp>(
           loc, comparison, firstBlock, llvm::ArrayRef<mlir::Value>(), endBlock,
           llvm::ArrayRef<mlir::Value>());
       
@@ -271,7 +275,7 @@ public:
       auto comparison = rewriter.create<mlir::arith::CmpIOp>(
         loc, arith::CmpIPredicate::sgt, itersLeft, zero);
 
-      auto cond = rewriter.create<mlir::cf::CondBranchOp>(
+      cond = rewriter.create<mlir::cf::CondBranchOp>(
         loc, comparison, firstBlock, llvm::ArrayRef<mlir::Value>(), endBlock,
         llvm::ArrayRef<mlir::Value>());
       

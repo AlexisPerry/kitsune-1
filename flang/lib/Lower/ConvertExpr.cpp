@@ -53,6 +53,7 @@
 #include "flang/Semantics/tools.h"
 #include "flang/Semantics/type.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/IR/BuiltinOps.h"
 #include "llvm/ADT/TypeSwitch.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/Debug.h"
@@ -4350,7 +4351,7 @@ private:
       }
 
       mlir::ModuleOp mlirModule = builder.getModule();
-      loop.addAttribute(getTapirLoopTargetAttrName(mlirModule.getAttr(getTapirLoopTargetAttrName()).getValue()));
+      loop->setAttr(mlirModule.getTapirLoopTargetAttrName(), mlirModule->getAttr(mlirModule.getTapirLoopTargetAttrName()));
       
       ivars.push_back(loop.getInductionVar());
       loops.push_back(loop);

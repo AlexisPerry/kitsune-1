@@ -52,6 +52,7 @@
 #include "flang/Optimizer/Support/DataLayout.h"
 #include "flang/Optimizer/Transforms/Passes.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Dominance.h"
 #include "mlir/IR/Matchers.h"
 #include "mlir/IR/TypeUtilities.h"
@@ -293,15 +294,18 @@ void LoopVersioningPass::runOnOperation() {
 
   auto &domInfo = getAnalysis<mlir::DominanceInfo>();
 
-  //Tapir -- TODO fix this to actually work, this is pseudocode for now
-  llvm::TapirTargetID tapirTarget = llvm::TapirTargetID::None;
-  if (module.hasAttr(getTapirLoopTargetAttrName()))
-    tapirTarget = module.getAttr(getTapirLoopTargetAttrName()).getValue();
+  //TapirTarget
+  mlir::IRRewriter rewriter(module.getContext());
+  auto int32Type = rewriter.getI32Type();
+  int64_t tapirID = static_cast<int64_t>(llvm::TapirTargetID::None);
+  mlir::Attribute tapirTarget = rewriter.getIntegerAttr(int32Type, tapirID);
+  if (module->hasAttr(module.getTapirLoopTargetAttrName()))
+    tapirTarget = module->getAttr(module.getTapirLoopTargetAttrName());
 
   // Traverse the loops in post-order and see
   // if those arguments are used inside any loop.
   func.walk([&](fir::DoLoopOp loop) {
-    loop.addAttribute(getTapirLoopTargetAttrName(tapirTarget));
+    loop->setAttr(module.getTapirLoopTargetAttrName(), tapirTarget);
     mlir::Block &body = *loop.getBody();
     auto &argsInLoop = argsInLoops[loop];
     originalLoops.push_back(loop);

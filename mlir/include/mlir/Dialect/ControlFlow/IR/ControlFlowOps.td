@@ -90,9 +90,11 @@ def BranchOp : CF_Op<"br", [
       OptionalAttr<I32Attr>:$tapirLoopTarget);
   let successors = (successor AnySuccessor:$dest);
 
+  let skipDefaultBuilders = 1;
   let builders = [
     OpBuilder<(ins "Block *":$dest,
-                   CArg<"ValueRange", "{}">:$destOperands), [{
+                   CArg<"ValueRange", "{}">:$destOperands,
+		   CArg<"uint32_t", "0">:$tapirLoopTarget), [{
       $_state.addSuccessors(dest);
       $_state.addOperands(destOperands);
     }]>];
