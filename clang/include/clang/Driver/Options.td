@@ -3337,7 +3337,7 @@ def fstripmine : Flag<["-"], "fstripmine">, Group<f_Group>,
   HelpText<"Enable the Tapir loop stripmining passes">;
 def fno_stripmine : Flag<["-"], "fno-stripmine">, Group<f_Group>;
 def opencilk_abi_bitcode_EQ : Joined<["--"], "opencilk-abi-bitcode=">,
-  Visibility<[CC1Option]>, HelpText<"Path to OpenCilk ABI bitcode file">,
+  Visibility<[CC1Option, FC1Option]>, HelpText<"Path to OpenCilk ABI bitcode file">,
   MarshallingInfoString<CodeGenOpts<"OpenCilkABIBitcodeFile">>;
 
 def fmudflapth : Flag<["-"], "fmudflapth">, Group<f_Group>;

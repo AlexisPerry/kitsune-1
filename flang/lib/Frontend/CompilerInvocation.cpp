@@ -23,9 +23,11 @@
 #include "clang/Basic/AllDiagnostics.h"
 #include "clang/Basic/DiagnosticDriver.h"
 #include "clang/Basic/DiagnosticOptions.h"
+#include "clang/Basic/KitsuneOptions.h"
 #include "clang/Driver/DriverDiagnostic.h"
 #include "clang/Driver/OptionUtils.h"
 #include "clang/Driver/Options.h"
+#include "clang/Driver/Tapir.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/StringSwitch.h"
 #include "llvm/Frontend/Debug/Options.h"
@@ -246,6 +248,11 @@ static void parseCodeGenArgs(Fortran::frontend::CodeGenOptions &opts,
     opts.LoopVersioning = 1;
 
   opts.AliasAnalysis = opts.OptimizationLevel > 0;
+
+  // TapirTarget
+  if (std::optional<llvm::TapirTargetID> tapirTarget =
+          clang::parseTapirTarget(args))
+    opts.kitsuneOpts.setTapirTarget(*tapirTarget);
 
   // -mframe-pointer=none/non-leaf/all option.
   if (const llvm::opt::Arg *a =
