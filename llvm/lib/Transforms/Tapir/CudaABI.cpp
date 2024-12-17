@@ -318,8 +318,12 @@ std::string PTXVersionFromCudaVersion() {
           .Case("12.1", "+ptx83")
           .Case("12.2", "+ptx83")
           .Case("12.3", "+ptx83")
-          .Case("12.4", "+ptx83")
-          .Case("12.5", "+ptx83")
+          .Case("12.4", "+ptx84")
+          .Case("12.5", "+ptx85")
+          .Case("12.6", "+ptx85")
+          .Case("12.7", "+ptx85")
+          .Case("12.8", "+ptx85")
+          .Case("12.9", "+ptx85")
           .Default("");
 
   if (PTXVersionStr == "") {
@@ -2058,6 +2062,7 @@ void CudaABI::postProcessModule() {
   }
 
   CudaABIOutputFile PTXFile = generatePTX();
+  llvm::sys::fs::copy_file(PTXFile->getFilename(), "foo.ptx");
   CudaABIOutputFile AsmFile = assemblePTXFile(PTXFile);
   CudaABIOutputFile FatbinFile = createFatbinaryFile(AsmFile);
   GlobalVariable *Fatbinary = embedFatbinary(FatbinFile);
@@ -2105,9 +2110,9 @@ void CudaABI::postProcessModule() {
   }
 
   if (not KeepIntermediateFiles) {
-    sys::fs::remove(PTXFile->getFilename());
-    sys::fs::remove(AsmFile->getFilename());
-    sys::fs::remove(FatbinFile->getFilename());
+    //sys::fs::remove(PTXFile->getFilename());
+    //sys::fs::remove(AsmFile->getFilename());
+    //sys::fs::remove(FatbinFile->getFilename());
   }
 }
 

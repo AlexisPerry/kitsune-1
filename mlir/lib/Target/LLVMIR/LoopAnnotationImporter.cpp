@@ -447,7 +447,11 @@ LoopAnnotationAttr LoopMetadataConversion::convert() {
       lookupIntNodeAsBoolAttr("llvm.loop.isvectorized");
   FailureOr<SmallVector<AccessGroupAttr>> parallelAccesses =
       convertParallelAccesses();
-
+  FailureOr<IntegerAttr> tapirLoopTarget = lookupIntNode("tapir.loop.target");
+  FailureOr<IntegerAttr> tapirLoopSpawnStrategy = lookupIntNode("tapir.loop.spawn.strategy");
+  llvm::dbgs() << "LoopAnnotationImporter.cpp: tapirLoopTarget = " << tapirLoopTarget << "\n";
+  llvm::dbgs() << "LoopAnnotationImporter.cpp: tapirLoopSpawnStrategy = " << tapirLoopSpawnStrategy << "\n";
+  
   // Drop the metadata if there are parts that cannot be imported.
   if (!propertyMap.empty()) {
     for (auto name : propertyMap.keys())
@@ -462,7 +466,7 @@ LoopAnnotationAttr LoopMetadataConversion::convert() {
       ctx, disableNonForced, vecAttr, interleaveAttr, unrollAttr,
       unrollAndJamAttr, licmAttr, distributeAttr, pipelineAttr, peeledAttr,
       unswitchAttr, mustProgress, isVectorized, startLoc, endLoc,
-      parallelAccesses);
+      parallelAccesses, tapirLoopTarget, tapirLoopSpawnStrategy);
 }
 
 LoopAnnotationAttr

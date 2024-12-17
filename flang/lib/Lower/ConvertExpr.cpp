@@ -53,6 +53,7 @@
 #include "flang/Semantics/tools.h"
 #include "flang/Semantics/type.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/IR/BuiltinOps.h"
 #include "llvm/ADT/TypeSwitch.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/Debug.h"
@@ -4348,6 +4349,7 @@ private:
                                              isUnordered(),
                                              /*finalCount=*/false);
       }
+
       ivars.push_back(loop.getInductionVar());
       loops.push_back(loop);
     }
@@ -4868,24 +4870,24 @@ private:
       fir::emitFatalError(loc, "cannot be indirect call");
 
     // The lambda is mutable so that `caller` copy can be modified inside it.
-    return [=,
-            caller = std::move(caller)](IterSpace iters) mutable -> ExtValue {
-      for (const auto &[cc, argIface] :
-           llvm::zip(operands, caller.getPassedArguments())) {
-        auto exv = cc(iters);
-        auto arg = exv.match(
-            [&](const fir::CharBoxValue &cb) -> mlir::Value {
-              return fir::factory::CharacterExprHelper{builder, loc}
-                  .createEmbox(cb);
-            },
-            [&](const auto &) { return fir::getBase(exv); });
-        caller.placeInput(argIface, arg);
-      }
-      return Fortran::lower::genCallOpAndResult(loc, converter, symMap,
-                                                getElementCtx(), caller,
-                                                callSiteType, retTy)
-          .first;
-    };
+    return
+        [=, caller = std::move(caller)](IterSpace iters) mutable -> ExtValue {
+          for (const auto &[cc, argIface] :
+               llvm::zip(operands, caller.getPassedArguments())) {
+            auto exv = cc(iters);
+            auto arg = exv.match(
+                [&](const fir::CharBoxValue &cb) -> mlir::Value {
+                  return fir::factory::CharacterExprHelper{builder, loc}
+                      .createEmbox(cb);
+                },
+                [&](const auto &) { return fir::getBase(exv); });
+            caller.placeInput(argIface, arg);
+          }
+          return Fortran::lower::genCallOpAndResult(loc, converter, symMap,
+                                                    getElementCtx(), caller,
+                                                    callSiteType, retTy)
+              .first;
+        };
   }
 
   /// Lower TRANSPOSE call without using runtime TRANSPOSE.

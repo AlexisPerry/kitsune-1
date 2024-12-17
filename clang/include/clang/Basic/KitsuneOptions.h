@@ -74,6 +74,9 @@ private:
   ////
   std::optional<llvm::TapirTargetID> TapirTarget = std::nullopt;
 
+  // Path to OpenCilk runtime bitcode file.
+  std::string OpenCilkABIBitcodeFile;
+
   /// Is "Kokkos mode" enabled.
   bool Kokkos = false;
 
@@ -108,6 +111,10 @@ public:
       return *TapirTarget;
     else
       return llvm::TapirTargetID::Last_TapirTargetID;
+  }
+  
+  std::unique_ptr<llvm::OpenCilkABIOptions> getOpenCilkABIOptions() const {
+    return std::make_unique<llvm::OpenCilkABIOptions>(OpenCilkABIBitcodeFile);
   }
 };
 

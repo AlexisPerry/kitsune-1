@@ -9,6 +9,8 @@ import tempfile
 import lit.formats
 
 from lit.llvm import llvm_config
+from lit.llvm.subst import ToolSubst
+from lit.llvm.subst import FindTool
 
 # Configuration file for the 'lit' test runner.
 
@@ -26,6 +28,8 @@ config.suffixes = [
     ".c",
     ".cpp",
     ".cu",
+    ".f",
+    ".f90",
     ".hip",
     ".ll",
     ".s",
@@ -74,6 +78,11 @@ tools = [
     "opt",
     "llvm-lto",
     "llvm-lto2",
+    ToolSubst(
+        "%flang",
+        command=FindTool("flang-new"),
+        unresolved="fatal",
+    ),
 ]
 
 llvm_config.add_tool_substitutions(tools, tool_dirs)

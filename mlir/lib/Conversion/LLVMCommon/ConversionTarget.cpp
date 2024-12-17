@@ -8,11 +8,12 @@
 
 #include "mlir/Conversion/LLVMCommon/ConversionTarget.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
+#include "mlir/Dialect/LLVMIR/LLVMTapirDialect.h"
 
 using namespace mlir;
 
 mlir::LLVMConversionTarget::LLVMConversionTarget(MLIRContext &ctx)
     : ConversionTarget(ctx) {
-  this->addLegalDialect<LLVM::LLVMDialect>();
+  this->addLegalDialect<LLVM::LLVMDialect, LLVM::LLVMTapirDialect>();
   this->addLegalOp<UnrealizedConversionCastOp>();
 }

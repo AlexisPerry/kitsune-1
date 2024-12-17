@@ -57,6 +57,7 @@
 #include "flang/Semantics/symbol.h"
 #include "flang/Semantics/tools.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Matchers.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Parser/Parser.h"
@@ -69,6 +70,7 @@
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/Transforms/Tapir/TapirTargetIDs.h"
 #include <optional>
 
 #define DEBUG_TYPE "flang-lower-bridge"
@@ -2091,7 +2093,7 @@ private:
         builder->getContext(), /*disable=*/f, {}, {}, {}, {}, {}, {});
     mlir::LLVM::LoopAnnotationAttr la = mlir::LLVM::LoopAnnotationAttr::get(
         builder->getContext(), {}, /*vectorize=*/va, {}, {}, {}, {}, {}, {}, {},
-        {}, {}, {}, {}, {}, {});
+        {}, {}, {}, {}, {}, {}, /*tapir loop target*/{}, /*tapir loop spawning strategy*/{});
     info.doLoop.setLoopAnnotationAttr(la);
   }
 
@@ -2137,6 +2139,21 @@ private:
               loc, lowerValue, upperValue, stepValue, /*unordered=*/true,
               /*finalCountValue=*/false, /*iterArgs=*/std::nullopt,
               llvm::ArrayRef<mlir::Value>(reduceOperands), reduceAttrs);
+          // TapirTarget
+          mlir::ModuleOp mlirModule = builder->getModule();
+          if (mlirModule->hasAttr(fir::tapirLoopTargetAttrName)) {
+            info.doLoop->setAttr(fir::tapirLoopTargetAttrName,
+                                 fir::getTapirLoopTarget(mlirModule));
+	    info.doLoop->setAttr(fir::tapirLoopSpawnStrategyAttrName,
+				 fir::getTapirLoopSpawnStrategy(mlirModule));
+            llvm::dbgs() << "Bridge.cpp fir::getTapirLoopTarget(mlirModule) = "
+                         << fir::getTapirLoopTarget(mlirModule).getValue()
+                         << "\n";
+            llvm::dbgs() << "Bridge.cpp fir::getTapirLoopSpawnStrategy(mlirModule) = "
+                         << fir::getTapirLoopSpawnStrategy(mlirModule).getValue()
+                         << "\n";
+          }
+
           builder->setInsertionPointToStart(info.doLoop.getBody());
           loopValue = builder->createConvert(loc, loopVarType,
                                              info.doLoop.getInductionVar());
@@ -2171,6 +2188,58 @@ private:
                           &d) { addLoopAnnotationAttr(info); },
                   [&](const auto &) {}},
               dir->u);
+        }
+        if (info.doLoop->hasAttr(fir::tapirLoopTargetAttrName)) {
+          mlir::LLVM::LoopAnnotationAttr la =
+              info.doLoop.getLoopAnnotationAttr();
+          if (la) {
+            llvm::dbgs() << "Bridge.cpp: loop has LoopAnnotationAttr\n";
+            mlir::BoolAttr disableNonforced = la.getDisableNonforced();
+            mlir::LLVM::LoopVectorizeAttr vectorize = la.getVectorize();
+            mlir::LLVM::LoopInterleaveAttr interleave = la.getInterleave();
+            mlir::LLVM::LoopUnrollAttr unroll = la.getUnroll();
+            mlir::LLVM::LoopUnrollAndJamAttr unrollAndJam =
+                la.getUnrollAndJam();
+            mlir::LLVM::LoopLICMAttr licm = la.getLicm();
+            mlir::LLVM::LoopDistributeAttr distribute = la.getDistribute();
+            mlir::LLVM::LoopPipelineAttr pipeline = la.getPipeline();
+            mlir::LLVM::LoopPeeledAttr peeled = la.getPeeled();
+            mlir::LLVM::LoopUnswitchAttr unswitch = la.getUnswitch();
+            mlir::BoolAttr mustProgress = la.getMustProgress();
+            mlir::BoolAttr isVectorized = la.getIsVectorized();
+            mlir::FusedLoc startLoc = la.getStartLoc();
+            mlir::FusedLoc endLoc = la.getEndLoc();
+            llvm::ArrayRef<mlir::LLVM::AccessGroupAttr> parallelAccesses =
+                la.getParallelAccesses();
+            mlir::IntegerAttr tapirLoopTarget =
+                info.doLoop->getAttrOfType<mlir::IntegerAttr>(
+                    fir::tapirLoopTargetAttrName);
+	    mlir::IntegerAttr tapirLoopSpawnStrategy =
+	      info.doLoop->getAttrOfType<mlir::IntegerAttr>(fir::tapirLoopSpawnStrategyAttrName);
+							    
+            mlir::LLVM::LoopAnnotationAttr new_la =
+                mlir::LLVM::LoopAnnotationAttr::get(
+                    builder->getContext(), disableNonforced, vectorize,
+                    interleave, unroll, unrollAndJam, licm, distribute,
+                    pipeline, peeled, unswitch, mustProgress, isVectorized,
+                    startLoc, endLoc, parallelAccesses, tapirLoopTarget, tapirLoopSpawnStrategy);
+            info.doLoop.setLoopAnnotationAttr(new_la);
+          } else {
+            llvm::dbgs()
+                << "Bridge.cpp: loop does NOT have LoopAnnotationAttr, ergo "
+                   "creating defaults + tapirTarget\n";
+            mlir::IntegerAttr tapirLoopTarget =
+                info.doLoop->getAttrOfType<mlir::IntegerAttr>(
+                    fir::tapirLoopTargetAttrName);
+	    mlir::IntegerAttr tapirLoopSpawnStrategy =
+	      info.doLoop->getAttrOfType<mlir::IntegerAttr>(fir::tapirLoopSpawnStrategyAttrName);
+							    
+            mlir::LLVM::LoopAnnotationAttr new_la =
+                mlir::LLVM::LoopAnnotationAttr::get(
+                    builder->getContext(), {}, {}, {}, {}, {}, {}, {}, {}, {},
+                    {}, {}, {}, {}, {}, {}, tapirLoopTarget, tapirLoopSpawnStrategy);
+            info.doLoop.setLoopAnnotationAttr(new_la);
+          }
         }
         continue;
       }

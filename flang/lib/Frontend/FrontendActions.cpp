@@ -35,6 +35,7 @@
 #include "flang/Semantics/unparse-with-symbols.h"
 #include "flang/Tools/CrossToolHelpers.h"
 
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/Parser/Parser.h"
 #include "mlir/Pass/PassManager.h"
@@ -73,7 +74,9 @@
 #include "llvm/TargetParser/RISCVISAInfo.h"
 #include "llvm/TargetParser/RISCVTargetParser.h"
 #include "llvm/Transforms/IPO/Internalize.h"
+#include "llvm/Transforms/Tapir/TapirTargetIDs.h"
 #include "llvm/Transforms/Utils/ModuleUtils.h"
+
 #include <memory>
 #include <system_error>
 
@@ -269,6 +272,16 @@ bool CodeGenAction::beginSourceFileAction() {
     mlirModule = std::make_unique<mlir::ModuleOp>(module.release());
     const llvm::DataLayout &dl = targetMachine.createDataLayout();
     fir::support::setMLIRDataLayout(*mlirModule, dl);
+
+    // TapirTarget
+    std::optional<llvm::TapirTargetID> tapirID =
+        ci.getInvocation().getCodeGenOpts().kitsuneOpts.getTapirTarget();
+    if (tapirID) {
+      fir::setTapirLoopTarget(*mlirModule, *tapirID);
+      fir::setTapirLoopSpawnStrategy(*mlirModule);
+      llvm::dbgs() << "FrontendActions.cpp *tapirID = " << *tapirID << "\n";
+    }
+
     return true;
   }
 
@@ -278,6 +291,7 @@ bool CodeGenAction::beginSourceFileAction() {
         clang::DiagnosticsEngine::Error,
         "Invalid input type - expecting a Fortran file");
     ci.getDiagnostics().Report(diagID);
+
     return false;
   }
   bool res = runPrescan() && runParse(/*emitMessages=*/false) &&
@@ -302,6 +316,15 @@ bool CodeGenAction::beginSourceFileAction() {
 
   // Fetch module from lb, so we can set
   mlirModule = std::make_unique<mlir::ModuleOp>(lb.getModule());
+
+  // TapirTarget
+  std::optional<llvm::TapirTargetID> tapirID =
+      ci.getInvocation().getCodeGenOpts().kitsuneOpts.getTapirTarget();
+  if (tapirID) {
+    fir::setTapirLoopTarget(*mlirModule, *tapirID);
+    fir::setTapirLoopSpawnStrategy(*mlirModule);
+    llvm::dbgs() << "FrontendActions.cpp *tapirID = " << *tapirID << "\n";
+  }
 
   if (ci.getInvocation().getFrontendOpts().features.IsEnabled(
           Fortran::common::LanguageFeature::OpenMP)) {
@@ -934,6 +957,13 @@ static void generateMachineCodeOrAssemblyImpl(clang::DiagnosticsEngine &diags,
   llvm::Triple triple(llvmModule.getTargetTriple());
   llvm::TargetLibraryInfoImpl *tlii =
       llvm::driver::createTLII(triple, codeGenOpts.getVecLib());
+  std::optional<llvm::TapirTargetID> tapirID =
+      codeGenOpts.kitsuneOpts.getTapirTarget();
+  if (tapirID) {
+    tlii->setTapirTarget(*tapirID);
+    tlii->setTapirTargetOptions(codeGenOpts.kitsuneOpts.getOpenCilkABIOptions());
+    tlii->addTapirTargetLibraryFunctions();
+  }
   codeGenPasses.add(new llvm::TargetLibraryInfoWrapperPass(*tlii));
 
   llvm::CodeGenFileType cgft = (act == BackendActionTy::Backend_EmitAssembly)
@@ -992,6 +1022,13 @@ void CodeGenAction::runOptimizationPipeline(llvm::raw_pwrite_stream &os) {
   llvm::Triple triple(llvmModule->getTargetTriple());
   llvm::TargetLibraryInfoImpl *tlii =
       llvm::driver::createTLII(triple, opts.getVecLib());
+  std::optional<llvm::TapirTargetID> tapirID =
+      opts.kitsuneOpts.getTapirTarget();
+  if (tapirID) {
+    tlii->setTapirTarget(*tapirID);
+    tlii->setTapirTargetOptions(opts.kitsuneOpts.getOpenCilkABIOptions());
+    tlii->addTapirTargetLibraryFunctions();
+  }
   fam.registerPass([&] { return llvm::TargetLibraryAnalysis(*tlii); });
 
   // Register all the basic analyses with the managers.
@@ -1003,12 +1040,15 @@ void CodeGenAction::runOptimizationPipeline(llvm::raw_pwrite_stream &os) {
 
   // Create the pass manager.
   llvm::ModulePassManager mpm;
+  llvm::dbgs() << "FrontendActions.cpp: tlii->hasTapirTarget() = " << tlii->hasTapirTarget() << "\n";
   if (opts.PrepareForFullLTO)
     mpm = pb.buildLTOPreLinkDefaultPipeline(level);
   else if (opts.PrepareForThinLTO)
     mpm = pb.buildThinLTOPreLinkDefaultPipeline(level);
   else
-    mpm = pb.buildPerModuleDefaultPipeline(level);
+    mpm = pb.buildPerModuleDefaultPipeline(level,
+					   /* LTOPreLink */ false,
+					   tlii->hasTapirTarget());
 
   if (action == BackendActionTy::Backend_EmitBC)
     mpm.addPass(llvm::BitcodeWriterPass(os));

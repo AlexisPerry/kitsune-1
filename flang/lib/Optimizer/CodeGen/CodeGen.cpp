@@ -40,6 +40,7 @@
 #include "mlir/Dialect/DLTI/DLTI.h"
 #include "mlir/Dialect/LLVMIR/LLVMAttrs.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
+#include "mlir/Dialect/LLVMIR/LLVMTapirDialect.h"
 #include "mlir/Dialect/LLVMIR/Transforms/AddComdats.h"
 #include "mlir/Dialect/OpenACC/OpenACC.h"
 #include "mlir/Dialect/OpenMP/OpenMPDialect.h"
@@ -901,14 +902,24 @@ struct EmboxCharOpConversion : public fir::FIROpConversion<fir::EmboxCharOp> {
 /// Return the LLVMFuncOp corresponding to the standard malloc call.
 static mlir::SymbolRefAttr
 getMalloc(fir::AllocMemOp op, mlir::ConversionPatternRewriter &rewriter) {
-  static constexpr char mallocName[] = "malloc";
-  auto module = op->getParentOfType<mlir::ModuleOp>();
+  llvm::dbgs() << "calling getMalloc\n";
+    auto module = op->getParentOfType<mlir::ModuleOp>();
+  mlir::OpBuilder moduleBuilder(
+      op->getParentOfType<mlir::ModuleOp>().getBodyRegion());
+  //static constexpr char mallocName[] = "malloc";
+  const char* mallocName = "malloc";
+  if (module->hasAttr(fir::tapirLoopTargetAttrName)) {
+    mlir::IntegerAttr tapirTarget = fir::getTapirLoopTarget(module);
+    
+    if ((tapirTarget == mlir::IntegerAttr::get(moduleBuilder.getI32Type(), static_cast<int>(llvm::TapirTargetID::Cuda))) ||
+	(tapirTarget == mlir::IntegerAttr::get(moduleBuilder.getI32Type(), static_cast<int>(llvm::TapirTargetID::Hip))))
+      mallocName = "__kitcuda_mem_alloc_managed";
+  }
+  
   if (auto mallocFunc = module.lookupSymbol<mlir::LLVM::LLVMFuncOp>(mallocName))
     return mlir::SymbolRefAttr::get(mallocFunc);
   if (auto userMalloc = module.lookupSymbol<mlir::func::FuncOp>(mallocName))
     return mlir::SymbolRefAttr::get(userMalloc);
-  mlir::OpBuilder moduleBuilder(
-      op->getParentOfType<mlir::ModuleOp>().getBodyRegion());
   auto indexType = mlir::IntegerType::get(op.getContext(), 64);
   auto mallocDecl = moduleBuilder.create<mlir::LLVM::LLVMFuncOp>(
       op.getLoc(), mallocName,
@@ -995,8 +1006,19 @@ struct AllocMemOpConversion : public fir::FIROpConversion<fir::AllocMemOp> {
 /// Return the LLVMFuncOp corresponding to the standard free call.
 static mlir::SymbolRefAttr getFree(fir::FreeMemOp op,
                                    mlir::ConversionPatternRewriter &rewriter) {
-  static constexpr char freeName[] = "free";
+  //static constexpr char freeName[] = "free";
+  const char* freeName = "free";
   auto module = op->getParentOfType<mlir::ModuleOp>();
+  mlir::OpBuilder moduleBuilder(module.getBodyRegion());
+
+  if (module->hasAttr(fir::tapirLoopTargetAttrName)) {
+    mlir::IntegerAttr tapirTarget = fir::getTapirLoopTarget(module);
+    
+    if ((tapirTarget == mlir::IntegerAttr::get(moduleBuilder.getI32Type(), static_cast<int>(llvm::TapirTargetID::Cuda))) ||
+	(tapirTarget == mlir::IntegerAttr::get(moduleBuilder.getI32Type(), static_cast<int>(llvm::TapirTargetID::Hip))))
+      freeName = "__kitcuda_mem_free";
+  }  
+
   // Check if free already defined in the module.
   if (auto freeFunc = module.lookupSymbol<mlir::LLVM::LLVMFuncOp>(freeName))
     return mlir::SymbolRefAttr::get(freeFunc);
@@ -1004,7 +1026,6 @@ static mlir::SymbolRefAttr getFree(fir::FreeMemOp op,
           module.lookupSymbol<mlir::func::FuncOp>(freeName))
     return mlir::SymbolRefAttr::get(freeDefinedByUser);
   // Create llvm declaration for free.
-  mlir::OpBuilder moduleBuilder(module.getBodyRegion());
   auto voidType = mlir::LLVM::LLVMVoidType::get(op.getContext());
   auto freeDecl = moduleBuilder.create<mlir::LLVM::LLVMFuncOp>(
       rewriter.getUnknownLoc(), freeName,
@@ -3658,7 +3679,8 @@ public:
     fir::populateOpenMPFIRToLLVMConversionPatterns(typeConverter, pattern);
 
     mlir::ConversionTarget target{*context};
-    target.addLegalDialect<mlir::LLVM::LLVMDialect>();
+    target.addLegalDialect<mlir::LLVM::LLVMDialect,
+                           mlir::LLVM::LLVMTapirDialect>();
     // The OpenMP dialect is legal for Operations without regions, for those
     // which contains regions it is legal if the region contains only the
     // LLVM dialect. Add OpenMP dialect as a legal dialect for conversion and

@@ -124,3 +124,25 @@ std::string fir::determineTargetTriple(llvm::StringRef triple) {
   // TODO: normalize the triple?
   return triple.str();
 }
+
+void fir::setTapirLoopTarget(mlir::ModuleOp mod, llvm::TapirTargetID tapirTarget) {
+  mlir::OpBuilder builder = mlir::OpBuilder(mod.getContext());
+
+  mod->setAttr(tapirLoopTargetAttrName,
+               mlir::IntegerAttr::get(builder.getI32Type(), static_cast<int>(tapirTarget)));
+}
+
+mlir::IntegerAttr fir::getTapirLoopTarget(mlir::ModuleOp mod) {
+  return mod->getAttrOfType<mlir::IntegerAttr>(tapirLoopTargetAttrName);
+}
+
+void fir::setTapirLoopSpawnStrategy(mlir::ModuleOp mod) {
+  mlir::OpBuilder builder = mlir::OpBuilder(mod.getContext());
+
+  mod->setAttr(tapirLoopSpawnStrategyAttrName,
+	       mlir::IntegerAttr::get(builder.getI32Type(), 1)); //default to 1 for now
+}
+
+mlir::IntegerAttr fir::getTapirLoopSpawnStrategy(mlir::ModuleOp mod) {
+  return mod->getAttrOfType<mlir::IntegerAttr>(tapirLoopSpawnStrategyAttrName);
+}

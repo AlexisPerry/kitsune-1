@@ -57,7 +57,8 @@ int fc1_main(llvm::ArrayRef<const char *> argv, const char *argv0) {
   llvm::InitializeAllTargets();
   llvm::InitializeAllTargetMCs();
   llvm::InitializeAllAsmPrinters();
-
+  llvm::InitializeAllAsmParsers();
+  
   diagsBuffer->flushDiagnostics(flang->getDiagnostics());
 
   if (!success)

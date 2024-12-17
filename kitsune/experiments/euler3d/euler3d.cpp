@@ -80,7 +80,7 @@ void dump(float* variables, int nel, int nelr)
     file << nel << " " << nelr << endl;
     for(int i = 0; i < nel; i++) {
     	for(int j = 0; j != NDIM; j++)
-        file << variables[i + (VAR_MOMENTUM+j)*nelr] << " ";
+	  file << variables[i + (VAR_MOMENTUM+j)*nelr] << " ";
     	file << endl;
     }
   }

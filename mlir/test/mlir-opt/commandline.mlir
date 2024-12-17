@@ -21,6 +21,7 @@
 // CHECK-SAME: irdl
 // CHECK-SAME: linalg
 // CHECK-SAME: llvm
+// CHECK-SAME: llvm_tapir
 // CHECK-SAME: math
 // CHECK-SAME: memref
 // CHECK-SAME: ml_program

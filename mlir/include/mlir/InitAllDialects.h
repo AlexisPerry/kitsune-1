@@ -41,6 +41,7 @@
 #include "mlir/Dialect/IRDL/IR/IRDL.h"
 #include "mlir/Dialect/Index/IR/IndexDialect.h"
 #include "mlir/Dialect/LLVMIR/LLVMDialect.h"
+#include "mlir/Dialect/LLVMIR/LLVMTapirDialect.h"
 #include "mlir/Dialect/LLVMIR/NVVMDialect.h"
 #include "mlir/Dialect/LLVMIR/ROCDLDialect.h"
 #include "mlir/Dialect/Linalg/IR/Linalg.h"
@@ -124,6 +125,7 @@ inline void registerAllDialects(DialectRegistry &registry) {
                   irdl::IRDLDialect,
                   linalg::LinalgDialect,
                   LLVM::LLVMDialect,
+		  LLVM::LLVMTapirDialect,
                   math::MathDialect,
                   memref::MemRefDialect,
                   mesh::MeshDialect,

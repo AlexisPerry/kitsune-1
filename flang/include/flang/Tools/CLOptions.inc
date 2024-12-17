@@ -157,12 +157,16 @@ static void addCanonicalizerPassWithoutRegionSimplification(
 
 inline void addCfgConversionPass(
     mlir::PassManager &pm, const MLIRToLLVMPassPipelineConfig &config) {
-  if (config.NSWOnLoopVarInc)
-    addNestedPassToAllTopLevelOperationsConditionally(
-        pm, disableCfgConversion, fir::createCFGConversionPassWithNSW);
-  else
-    addNestedPassToAllTopLevelOperationsConditionally(
-        pm, disableCfgConversion, fir::createCFGConversion);
+  // NOTE: this lambda stuff is dubious but seems to work.  TODO: look at the
+  // email from Tarun about C++ Fun to work out if/why this works.
+  bool setNSW = config.NSWOnLoopVarInc;
+  std::optional<llvm::TapirTargetID> tapirTarget = config.TapirTarget;
+  llvm::dbgs() << "CLOptions.inc tapirTarget = " << tapirTarget << "\n";
+  static auto createCFGConversionPassLambda = [setNSW, tapirTarget]() {
+    return fir::createCFGConversionPassWithOptions(setNSW, tapirTarget);
+  };
+  addNestedPassToAllTopLevelOperationsConditionally(pm, disableCfgConversion,
+      []() { return createCFGConversionPassLambda(); });
 }
 
 inline void addAVC(
