@@ -4,7 +4,7 @@
 // RUN: %kitxx -ftapir=none -fsyntax-only %s
 // RUN: %kitxx -ftapir=serial -fsyntax-only %s
 
-// The -ftapir flag is not case sensitive.
+// The -ftapir flag is case sensitive.
 // RUN: not %kitxx -ftapir=None -fsyntax-only %s 2>&1 | FileCheck %s -check-prefix CHECK-BAD-TARGET
 // RUN: not %kitxx -ftapir=Serial -fsyntax-only %s 2>&1 | FileCheck %s -check-prefix CHECK-BAD-TARGET
 

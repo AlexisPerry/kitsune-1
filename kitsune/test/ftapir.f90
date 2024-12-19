@@ -4,7 +4,7 @@
 ! RUN: %flang -ftapir=none -fsyntax-only %s
 ! RUN: %flang -ftapir=serial -fsyntax-only %s
 
-! The -ftapir flag is not case sensitive.
+! The -ftapir flag is case sensitive.
 ! RUN: not %flang -ftapir=None -fsyntax-only %s 2>&1 | FileCheck %s -check-prefix CHECK-BAD-TARGET
 ! RUN: not %flang -ftapir=Serial -fsyntax-only %s 2>&1 | FileCheck %s -check-prefix CHECK-BAD-TARGET
 

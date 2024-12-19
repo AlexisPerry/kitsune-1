@@ -42,6 +42,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/TargetParser/Host.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/Transforms/Tapir/TapirTargetIDs.h"
 #include <cstdlib>
 #include <memory>
 #include <optional>
@@ -251,8 +252,11 @@ static void parseCodeGenArgs(Fortran::frontend::CodeGenOptions &opts,
 
   // TapirTarget
   if (std::optional<llvm::TapirTargetID> tapirTarget =
-          clang::parseTapirTarget(args))
+          clang::parseTapirTarget(args)) {
+    llvm::dbgs() << "CompilerInvocation.cpp tapirTarget = " << tapirTarget
+                 << "\n";
     opts.kitsuneOpts.setTapirTarget(*tapirTarget);
+  }
 
   // -mframe-pointer=none/non-leaf/all option.
   if (const llvm::opt::Arg *a =

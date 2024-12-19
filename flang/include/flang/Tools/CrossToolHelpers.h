@@ -24,6 +24,7 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/Frontend/Debug/Options.h"
 #include "llvm/Passes/OptimizationLevel.h"
+#include "llvm/Transforms/Tapir/TapirTargetIDs.h"
 
 // Flang Extension Point Callbacks
 class FlangEPCallBacks {
@@ -93,6 +94,8 @@ struct MLIRToLLVMPassPipelineConfig : public FlangEPCallBacks {
     DebugInfo = opts.getDebugInfo();
     AliasAnalysis = opts.AliasAnalysis;
     FramePointerKind = opts.getFramePointer();
+    TapirTarget = opts.kitsuneOpts.getTapirTargetOrInvalid();
+    llvm::dbgs() << "CrossToolHelpers.h tapirTarget = " << TapirTarget << "\n";
     // The logic for setting these attributes is intended to match the logic
     // used in Clang.
     NoInfsFPMath = mathOpts.getNoHonorInfs();
@@ -113,6 +116,8 @@ struct MLIRToLLVMPassPipelineConfig : public FlangEPCallBacks {
       llvm::codegenoptions::NoDebugInfo; ///< Debug info generation.
   llvm::FramePointerKind FramePointerKind =
       llvm::FramePointerKind::None; ///< Add frame pointer to functions.
+  std::optional<llvm::TapirTargetID> TapirTarget =
+      std::nullopt; ///< Tapir runtime target for lowering
   unsigned VScaleMin = 0; ///< SVE vector range minimum.
   unsigned VScaleMax = 0; ///< SVE vector range maximum.
   bool NoInfsFPMath = false; ///< Set no-infs-fp-math attribute for functions.

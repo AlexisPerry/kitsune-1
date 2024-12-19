@@ -154,7 +154,10 @@ def CFGConversion : Pass<"cfg-conversion"> {
            "force the body of a loop to execute at least once">,
     Option<"setNSW", "set-nsw", "bool",
            /*default=*/"false",
-           "set nsw on loop variable increment">
+           "set nsw on loop variable increment">,
+    Option<"tapirTarget", "tapir-target", "std::optional<llvm::TapirTargetID>",
+           /*default=*/"std::nullopt",
+           "set Tapir target on loop backedge">
   ];
 }
 

@@ -14,6 +14,7 @@
 #include "mlir/Dialect/OpenMP/OpenMPDialect.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassRegistry.h"
+#include "llvm/Transforms/Tapir/TapirTargetIDs.h"
 #include <memory>
 
 namespace mlir {
@@ -64,7 +65,8 @@ namespace fir {
 std::unique_ptr<mlir::Pass> createAffineDemotionPass();
 std::unique_ptr<mlir::Pass>
 createArrayValueCopyPass(fir::ArrayValueCopyOptions options = {});
-std::unique_ptr<mlir::Pass> createCFGConversionPassWithNSW();
+std::unique_ptr<mlir::Pass> createCFGConversionPassWithOptions(
+    bool setNSW, std::optional<llvm::TapirTargetID> tapirTarget);
 std::unique_ptr<mlir::Pass> createMemDataFlowOptPass();
 std::unique_ptr<mlir::Pass> createPromoteToAffinePass();
 std::unique_ptr<mlir::Pass>
@@ -79,9 +81,10 @@ std::unique_ptr<mlir::Pass> createVScaleAttrPass();
 std::unique_ptr<mlir::Pass>
 createVScaleAttrPass(std::pair<unsigned, unsigned> vscaleAttr);
 
-void populateCfgConversionRewrites(mlir::RewritePatternSet &patterns,
-                                   bool forceLoopToExecuteOnce = false,
-                                   bool setNSW = false);
+void populateCfgConversionRewrites(
+    mlir::RewritePatternSet &patterns, bool forceLoopToExecuteOnce = false,
+    bool setNSW = false,
+    std::optional<llvm::TapirTargetID> tapirTarget = std::nullopt);
 
 // declarative passes
 #define GEN_PASS_REGISTRATION
