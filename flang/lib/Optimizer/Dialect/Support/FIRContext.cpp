@@ -124,3 +124,17 @@ std::string fir::determineTargetTriple(llvm::StringRef triple) {
   // TODO: normalize the triple?
   return triple.str();
 }
+
+void fir::setTapirLoopTarget(mlir::ModuleOp mod, int64_t tapirTarget) {
+  if (tapirTarget == 0)
+    return;
+
+  mlir::OpBuilder builder = mlir::OpBuilder(mod.getContext());
+
+  mod->setAttr(tapirLoopTargetAttrName,
+               mlir::IntegerAttr::get(builder.getI64Type(), tapirTarget));
+}
+
+mlir::IntegerAttr fir::getTapirLoopTarget(mlir::ModuleOp mod) {
+  return mod->getAttrOfType<mlir::IntegerAttr>(tapirLoopTargetAttrName);
+}

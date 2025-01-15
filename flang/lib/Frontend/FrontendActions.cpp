@@ -35,6 +35,7 @@
 #include "flang/Semantics/unparse-with-symbols.h"
 #include "flang/Tools/CrossToolHelpers.h"
 
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/Parser/Parser.h"
 #include "mlir/Pass/PassManager.h"
@@ -73,7 +74,9 @@
 #include "llvm/TargetParser/RISCVISAInfo.h"
 #include "llvm/TargetParser/RISCVTargetParser.h"
 #include "llvm/Transforms/IPO/Internalize.h"
+#include "llvm/Transforms/Tapir/TapirTargetIDs.h"
 #include "llvm/Transforms/Utils/ModuleUtils.h"
+
 #include <memory>
 #include <system_error>
 
@@ -269,6 +272,13 @@ bool CodeGenAction::beginSourceFileAction() {
     mlirModule = std::make_unique<mlir::ModuleOp>(module.release());
     const llvm::DataLayout &dl = targetMachine.createDataLayout();
     fir::support::setMLIRDataLayout(*mlirModule, dl);
+
+    // TapirTarget
+    int tapirID = static_cast<int>(ci.getInvocation()
+                                       .getCodeGenOpts()
+                                       .kitsuneOpts.getTapirTargetOrInvalid());
+    fir::setTapirLoopTarget(*mlirModule, tapirID);
+
     return true;
   }
 

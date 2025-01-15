@@ -79,6 +79,13 @@ mlir::LLVM::TargetFeaturesAttr getTargetFeatures(mlir::ModuleOp mod);
 /// construct the triple.
 std::string determineTargetTriple(llvm::StringRef triple);
 
+static constexpr const char *tapirLoopTargetAttrName = "tapir.target";
+
+// Set the Tapir Target for the module.
+void setTapirLoopTarget(mlir::ModuleOp mod, int64_t tapirTarget);
+
+// Get the Tapir Target from the module.
+mlir::IntegerAttr getTapirLoopTarget(mlir::ModuleOp mod);
 } // namespace fir
 
 #endif // FORTRAN_OPTIMIZER_SUPPORT_FIRCONTEXT_H

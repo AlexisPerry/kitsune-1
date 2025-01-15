@@ -2174,7 +2174,9 @@ def fir_DoLoopOp : region_Op<"do_loop", [AttrSizedOperandSegments,
     OptionalAttr<UnitAttr>:$unordered,
     OptionalAttr<UnitAttr>:$finalValue,
     OptionalAttr<ArrayAttr>:$reduceAttrs,
-    OptionalAttr<LoopAnnotationAttr>:$loopAnnotation
+    OptionalAttr<LoopAnnotationAttr>:$loopAnnotation,
+    OptionalAttr<I32Attr>:$tapirLoopGrainsize,
+    OptionalAttr<I32Attr>:$tapirLoopTarget
   );
   let results = (outs Variadic<AnyType>:$results);
   let regions = (region SizedRegion<1>:$region);

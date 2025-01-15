@@ -57,6 +57,7 @@
 #include "flang/Semantics/symbol.h"
 #include "flang/Semantics/tools.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Matchers.h"
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Parser/Parser.h"
@@ -69,6 +70,7 @@
 #include "llvm/Support/FileSystem.h"
 #include "llvm/Support/Path.h"
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/Transforms/Tapir/TapirTargetIDs.h"
 #include <optional>
 
 #define DEBUG_TYPE "flang-lower-bridge"
@@ -2137,6 +2139,12 @@ private:
               loc, lowerValue, upperValue, stepValue, /*unordered=*/true,
               /*finalCountValue=*/false, /*iterArgs=*/std::nullopt,
               llvm::ArrayRef<mlir::Value>(reduceOperands), reduceAttrs);
+          // Tapir Target
+          mlir::ModuleOp mlirModule = builder->getModule();
+          if (mlirModule->hasAttr(fir::tapirLoopTargetAttrName))
+            info.doLoop->setAttr(fir::tapirLoopTargetAttrName,
+                                 fir::getTapirLoopTarget(mlirModule));
+
           builder->setInsertionPointToStart(info.doLoop.getBody());
           loopValue = builder->createConvert(loc, loopVarType,
                                              info.doLoop.getInductionVar());

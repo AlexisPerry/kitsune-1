@@ -134,7 +134,10 @@ public:
                                         : terminator->operand_begin();
       loopCarried.append(begin, terminator->operand_end());
       loopCarried.push_back(itersMinusOne);
-      rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopCarried);
+      auto branchOp = rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock,
+                                                          loopCarried);
+      // branchOp->setAttr(loop.getTapirLoopTargetAttrName(),
+      // loop->getAttr(loop.getTapirLoopTargetAttrName()));
       rewriter.eraseOp(terminator);
 
       // Conditional block
