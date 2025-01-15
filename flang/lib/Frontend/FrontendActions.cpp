@@ -278,6 +278,7 @@ bool CodeGenAction::beginSourceFileAction() {
                                        .getCodeGenOpts()
                                        .kitsuneOpts.getTapirTargetOrInvalid());
     fir::setTapirLoopTarget(*mlirModule, tapirID);
+    llvm::dbgs() << "FrontendActions.cpp tapirID = " << tapirID << "\n";
 
     return true;
   }
@@ -288,6 +289,7 @@ bool CodeGenAction::beginSourceFileAction() {
         clang::DiagnosticsEngine::Error,
         "Invalid input type - expecting a Fortran file");
     ci.getDiagnostics().Report(diagID);
+
     return false;
   }
   bool res = runPrescan() && runParse(/*emitMessages=*/false) &&
@@ -312,6 +314,13 @@ bool CodeGenAction::beginSourceFileAction() {
 
   // Fetch module from lb, so we can set
   mlirModule = std::make_unique<mlir::ModuleOp>(lb.getModule());
+
+  // TapirTarget
+  int tapirID = static_cast<int>(ci.getInvocation()
+                                     .getCodeGenOpts()
+                                     .kitsuneOpts.getTapirTargetOrInvalid());
+  fir::setTapirLoopTarget(*mlirModule, tapirID);
+  llvm::dbgs() << "FrontendActions.cpp tapirID = " << tapirID << "\n";
 
   if (ci.getInvocation().getFrontendOpts().features.IsEnabled(
           Fortran::common::LanguageFeature::OpenMP)) {

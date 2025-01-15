@@ -2139,11 +2139,15 @@ private:
               loc, lowerValue, upperValue, stepValue, /*unordered=*/true,
               /*finalCountValue=*/false, /*iterArgs=*/std::nullopt,
               llvm::ArrayRef<mlir::Value>(reduceOperands), reduceAttrs);
-          // Tapir Target
+          // TapirTarget
           mlir::ModuleOp mlirModule = builder->getModule();
-          if (mlirModule->hasAttr(fir::tapirLoopTargetAttrName))
+          if (mlirModule->hasAttr(fir::tapirLoopTargetAttrName)) {
             info.doLoop->setAttr(fir::tapirLoopTargetAttrName,
                                  fir::getTapirLoopTarget(mlirModule));
+            llvm::dbgs() << "Bridge.cpp fir::getTapirLoopTarget(mlirModule) = "
+                         << fir::getTapirLoopTarget(mlirModule).getValue()
+                         << "\n";
+          }
 
           builder->setInsertionPointToStart(info.doLoop.getBody());
           loopValue = builder->createConvert(loc, loopVarType,
