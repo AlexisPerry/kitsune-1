@@ -274,11 +274,12 @@ bool CodeGenAction::beginSourceFileAction() {
     fir::support::setMLIRDataLayout(*mlirModule, dl);
 
     // TapirTarget
-    int tapirID = static_cast<int>(ci.getInvocation()
-                                       .getCodeGenOpts()
-                                       .kitsuneOpts.getTapirTargetOrInvalid());
-    fir::setTapirLoopTarget(*mlirModule, tapirID);
-    llvm::dbgs() << "FrontendActions.cpp tapirID = " << tapirID << "\n";
+    std::optional<llvm::TapirTargetID> tapirID =
+        ci.getInvocation().getCodeGenOpts().kitsuneOpts.getTapirTarget();
+    if (tapirID) {
+      fir::setTapirLoopTarget(*mlirModule, *tapirID);
+      llvm::dbgs() << "FrontendActions.cpp *tapirID = " << *tapirID << "\n";
+    }
 
     return true;
   }
@@ -316,11 +317,12 @@ bool CodeGenAction::beginSourceFileAction() {
   mlirModule = std::make_unique<mlir::ModuleOp>(lb.getModule());
 
   // TapirTarget
-  int tapirID = static_cast<int>(ci.getInvocation()
-                                     .getCodeGenOpts()
-                                     .kitsuneOpts.getTapirTargetOrInvalid());
-  fir::setTapirLoopTarget(*mlirModule, tapirID);
-  llvm::dbgs() << "FrontendActions.cpp tapirID = " << tapirID << "\n";
+  std::optional<llvm::TapirTargetID> tapirID =
+      ci.getInvocation().getCodeGenOpts().kitsuneOpts.getTapirTarget();
+  if (tapirID) {
+    fir::setTapirLoopTarget(*mlirModule, *tapirID);
+    llvm::dbgs() << "FrontendActions.cpp *tapirID = " << *tapirID << "\n";
+  }
 
   if (ci.getInvocation().getFrontendOpts().features.IsEnabled(
           Fortran::common::LanguageFeature::OpenMP)) {
@@ -953,7 +955,10 @@ static void generateMachineCodeOrAssemblyImpl(clang::DiagnosticsEngine &diags,
   llvm::Triple triple(llvmModule.getTargetTriple());
   llvm::TargetLibraryInfoImpl *tlii =
       llvm::driver::createTLII(triple, codeGenOpts.getVecLib());
-  tlii->setTapirTarget(codeGenOpts.kitsuneOpts.getTapirTargetOrInvalid());
+  std::optional<llvm::TapirTargetID> tapirID =
+      codeGenOpts.kitsuneOpts.getTapirTarget();
+  if (tapirID)
+    tlii->setTapirTarget(*tapirID);
   codeGenPasses.add(new llvm::TargetLibraryInfoWrapperPass(*tlii));
 
   llvm::CodeGenFileType cgft = (act == BackendActionTy::Backend_EmitAssembly)
@@ -1012,7 +1017,10 @@ void CodeGenAction::runOptimizationPipeline(llvm::raw_pwrite_stream &os) {
   llvm::Triple triple(llvmModule->getTargetTriple());
   llvm::TargetLibraryInfoImpl *tlii =
       llvm::driver::createTLII(triple, opts.getVecLib());
-  tlii->setTapirTarget(opts.kitsuneOpts.getTapirTargetOrInvalid());
+  std::optional<llvm::TapirTargetID> tapirID =
+      opts.kitsuneOpts.getTapirTarget();
+  if (tapirID)
+    tlii->setTapirTarget(*tapirID);
   fam.registerPass([&] { return llvm::TargetLibraryAnalysis(*tlii); });
 
   // Register all the basic analyses with the managers.

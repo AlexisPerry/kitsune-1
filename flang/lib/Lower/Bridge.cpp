@@ -2093,7 +2093,7 @@ private:
         builder->getContext(), /*disable=*/f, {}, {}, {}, {}, {}, {});
     mlir::LLVM::LoopAnnotationAttr la = mlir::LLVM::LoopAnnotationAttr::get(
         builder->getContext(), {}, /*vectorize=*/va, {}, {}, {}, {}, {}, {}, {},
-        {}, {}, {}, {}, {}, {});
+        {}, {}, {}, {}, {}, {}, {});
     info.doLoop.setLoopAnnotationAttr(la);
   }
 
@@ -2183,6 +2183,52 @@ private:
                           &d) { addLoopAnnotationAttr(info); },
                   [&](const auto &) {}},
               dir->u);
+        }
+        if (info.doLoop->hasAttr(fir::tapirLoopTargetAttrName)) {
+          mlir::LLVM::LoopAnnotationAttr la =
+              info.doLoop.getLoopAnnotationAttr();
+          if (la) {
+            llvm::dbgs() << "Bridge.cpp: loop has LoopAnnotationAttr\n";
+            mlir::BoolAttr disableNonforced = la.getDisableNonforced();
+            mlir::LLVM::LoopVectorizeAttr vectorize = la.getVectorize();
+            mlir::LLVM::LoopInterleaveAttr interleave = la.getInterleave();
+            mlir::LLVM::LoopUnrollAttr unroll = la.getUnroll();
+            mlir::LLVM::LoopUnrollAndJamAttr unrollAndJam =
+                la.getUnrollAndJam();
+            mlir::LLVM::LoopLICMAttr licm = la.getLicm();
+            mlir::LLVM::LoopDistributeAttr distribute = la.getDistribute();
+            mlir::LLVM::LoopPipelineAttr pipeline = la.getPipeline();
+            mlir::LLVM::LoopPeeledAttr peeled = la.getPeeled();
+            mlir::LLVM::LoopUnswitchAttr unswitch = la.getUnswitch();
+            mlir::BoolAttr mustProgress = la.getMustProgress();
+            mlir::BoolAttr isVectorized = la.getIsVectorized();
+            mlir::FusedLoc startLoc = la.getStartLoc();
+            mlir::FusedLoc endLoc = la.getEndLoc();
+            llvm::ArrayRef<mlir::LLVM::AccessGroupAttr> parallelAccesses =
+                la.getParallelAccesses();
+            mlir::IntegerAttr tapirLoopTarget =
+                info.doLoop->getAttrOfType<mlir::IntegerAttr>(
+                    fir::tapirLoopTargetAttrName);
+            mlir::LLVM::LoopAnnotationAttr new_la =
+                mlir::LLVM::LoopAnnotationAttr::get(
+                    builder->getContext(), disableNonforced, vectorize,
+                    interleave, unroll, unrollAndJam, licm, distribute,
+                    pipeline, peeled, unswitch, mustProgress, isVectorized,
+                    startLoc, endLoc, parallelAccesses, tapirLoopTarget);
+            info.doLoop.setLoopAnnotationAttr(new_la);
+          } else {
+            llvm::dbgs()
+                << "Bridge.cpp: loop does NOT have LoopAnnotationAttr, ergo "
+                   "creating defaults + tapirTarget\n";
+            mlir::IntegerAttr tapirLoopTarget =
+                info.doLoop->getAttrOfType<mlir::IntegerAttr>(
+                    fir::tapirLoopTargetAttrName);
+            mlir::LLVM::LoopAnnotationAttr new_la =
+                mlir::LLVM::LoopAnnotationAttr::get(
+                    builder->getContext(), {}, {}, {}, {}, {}, {}, {}, {}, {},
+                    {}, {}, {}, {}, {}, {}, tapirLoopTarget);
+            info.doLoop.setLoopAnnotationAttr(new_la);
+          }
         }
         continue;
       }

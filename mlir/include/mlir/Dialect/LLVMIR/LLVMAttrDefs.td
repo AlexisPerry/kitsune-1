@@ -228,7 +228,8 @@ def LoopAnnotationAttr : LLVM_Attr<"LoopAnnotation", "loop_annotation"> {
     OptionalParameter<"BoolAttr">:$isVectorized,
     OptionalParameter<"FusedLoc">:$startLoc,
     OptionalParameter<"FusedLoc">:$endLoc,
-    OptionalArrayRefParameter<"AccessGroupAttr">:$parallelAccesses
+    OptionalArrayRefParameter<"AccessGroupAttr">:$parallelAccesses,
+    OptionalParameter<"IntegerAttr">:$tapirLoopTarget
   );
 
   let assemblyFormat = "`<` struct(params) `>`";

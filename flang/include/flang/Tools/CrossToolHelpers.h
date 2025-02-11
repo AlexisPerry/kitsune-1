@@ -83,6 +83,8 @@ private:
 struct MLIRToLLVMPassPipelineConfig : public FlangEPCallBacks {
   explicit MLIRToLLVMPassPipelineConfig(llvm::OptimizationLevel level) {
     OptLevel = level;
+    llvm::dbgs()
+        << "CrossToolHelpers.h NO CodeGenOptions, ergo NO TAPIR TARGET.\n";
   }
   explicit MLIRToLLVMPassPipelineConfig(llvm::OptimizationLevel level,
       const Fortran::frontend::CodeGenOptions &opts,
@@ -94,7 +96,7 @@ struct MLIRToLLVMPassPipelineConfig : public FlangEPCallBacks {
     DebugInfo = opts.getDebugInfo();
     AliasAnalysis = opts.AliasAnalysis;
     FramePointerKind = opts.getFramePointer();
-    TapirTarget = opts.kitsuneOpts.getTapirTargetOrInvalid();
+    TapirTarget = opts.kitsuneOpts.getTapirTarget();
     llvm::dbgs() << "CrossToolHelpers.h tapirTarget = " << TapirTarget << "\n";
     // The logic for setting these attributes is intended to match the logic
     // used in Clang.

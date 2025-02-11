@@ -47,13 +47,19 @@ public:
   CfgLoopConv(mlir::MLIRContext *ctx, bool forceLoopToExecuteOnce, bool setNSW)
       : mlir::OpRewritePattern<fir::DoLoopOp>(ctx),
         forceLoopToExecuteOnce(forceLoopToExecuteOnce), setNSW(setNSW),
-        tapirTarget(std::nullopt) {}
+        tapirTarget(std::nullopt) {
+    llvm::dbgs() << "CfgLoopConv: NON-tapirTarget constructor so setting "
+                    "tapirTarget to std::nullopt\n";
+  }
 
   CfgLoopConv(mlir::MLIRContext *ctx, bool forceLoopToExecuteOnce, bool setNSW,
               std::optional<llvm::TapirTargetID> tapirTarget)
       : mlir::OpRewritePattern<fir::DoLoopOp>(ctx),
         forceLoopToExecuteOnce(forceLoopToExecuteOnce), setNSW(setNSW),
-        tapirTarget(tapirTarget) {}
+        tapirTarget(tapirTarget) {
+    llvm::dbgs() << "CfgLoopConv: constructor tapirTarget = " << tapirTarget
+                 << "\n";
+  }
 
   llvm::LogicalResult
   matchAndRewrite(DoLoopOp loop,
@@ -89,8 +95,12 @@ public:
     assert(low && high && "must be a Value");
     auto step = loop.getStep();
 
-    if (loop.getUnordered() && tapirTarget) { // DO CONCURRENT
-      llvm::dbgs() << "Entering DO CONCURRENT loop conversion path...\n";
+    if (loop.getUnordered() &&
+        (tapirTarget ||
+         loop->hasAttr(fir::tapirLoopTargetAttrName))) { // DO CONCURRENT
+      llvm::dbgs()
+          << "Entering DO CONCURRENT loop conversion path... tapirTarget = "
+          << tapirTarget << "\n";
 
       // Initalization block
       rewriter.setInsertionPointToEnd(initBlock);
@@ -134,10 +144,8 @@ public:
                                         : terminator->operand_begin();
       loopCarried.append(begin, terminator->operand_end());
       loopCarried.push_back(itersMinusOne);
-      auto branchOp = rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock,
-                                                          loopCarried);
-      // branchOp->setAttr(loop.getTapirLoopTargetAttrName(),
-      // loop->getAttr(loop.getTapirLoopTargetAttrName()));
+      rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopCarried);
+
       rewriter.eraseOp(terminator);
 
       // Conditional block

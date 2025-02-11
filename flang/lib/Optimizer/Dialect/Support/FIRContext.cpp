@@ -16,7 +16,6 @@
 #include "mlir/IR/BuiltinAttributes.h"
 #include "mlir/IR/BuiltinOps.h"
 #include "llvm/TargetParser/Host.h"
-#include "llvm/Transforms/Tapir/TapirTargetIDs.h"
 
 void fir::setTargetTriple(mlir::ModuleOp mod, llvm::StringRef triple) {
   auto target = fir::determineTargetTriple(triple);
@@ -126,14 +125,11 @@ std::string fir::determineTargetTriple(llvm::StringRef triple) {
   return triple.str();
 }
 
-void fir::setTapirLoopTarget(mlir::ModuleOp mod, int64_t tapirTarget) {
-  if (tapirTarget == static_cast<int64_t>(llvm::TapirTargetID::Last_TapirTargetID))
-    return;
-
+void fir::setTapirLoopTarget(mlir::ModuleOp mod, llvm::TapirTargetID tapirTarget) {
   mlir::OpBuilder builder = mlir::OpBuilder(mod.getContext());
 
   mod->setAttr(tapirLoopTargetAttrName,
-               mlir::IntegerAttr::get(builder.getI64Type(), tapirTarget));
+               mlir::IntegerAttr::get(builder.getI32Type(), static_cast<int>(tapirTarget)));
 }
 
 mlir::IntegerAttr fir::getTapirLoopTarget(mlir::ModuleOp mod) {

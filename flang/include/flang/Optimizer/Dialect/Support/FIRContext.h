@@ -20,6 +20,7 @@
 #include "mlir/Dialect/LLVMIR/LLVMAttrs.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/TargetParser/Triple.h"
+#include "llvm/Transforms/Tapir/TapirTargetIDs.h"
 
 namespace mlir {
 class ModuleOp;
@@ -79,10 +80,10 @@ mlir::LLVM::TargetFeaturesAttr getTargetFeatures(mlir::ModuleOp mod);
 /// construct the triple.
 std::string determineTargetTriple(llvm::StringRef triple);
 
-static constexpr const char *tapirLoopTargetAttrName = "tapir.target";
+static constexpr const char *tapirLoopTargetAttrName = "tapir.loop.target";
 
 // Set the Tapir Target for the module.
-void setTapirLoopTarget(mlir::ModuleOp mod, int64_t tapirTarget);
+void setTapirLoopTarget(mlir::ModuleOp mod, llvm::TapirTargetID tapirTarget);
 
 // Get the Tapir Target from the module.
 mlir::IntegerAttr getTapirLoopTarget(mlir::ModuleOp mod);
