@@ -424,6 +424,7 @@ class LLVMTapirDialectLLVMIRTranslationInterface
     : public LLVMTranslationDialectInterface {
 public:
   using LLVMTranslationDialectInterface::LLVMTranslationDialectInterface;
+
   /// Translates the given operation to LLVM IR using the provided IR builder
   /// and saving the state in `moduleTranslation`.
   LogicalResult
