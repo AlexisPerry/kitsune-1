@@ -2,10 +2,10 @@
 
 // CHECK: @tapir_ops()
 // CHECK: %[[SYNCREG:[0-9]+]] = call token @llvm.syncregion.start()
-// CHECK: detach within %[[SYNCREG]], label %[[bb1:[0-9]+]], label %[[bb2:[0-9]+]]
-// CHECK: [[bb1]]:
-// CHECK: reattach within %[[SYNCREG]], label %[[bb2]]
-// CHECK: [[bb2]]:
+// CHECK: detach within %[[SYNCREG]], label %[[BB1:[0-9]+]], label %[[BB2:[0-9]+]]
+// CHECK: [[BB1]]:
+// CHECK: reattach within %[[SYNCREG]], label %[[BB2]]
+// CHECK: [[BB2]]:
 // CHECK: sync within %[[SYNCREG]], label {{.*}}
 
 llvm.func @tapir_ops() {

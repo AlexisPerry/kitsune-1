@@ -3,11 +3,11 @@
 
 // CHECK-LABEL: @tapir_ops
 // CHECK: %[[SYNCREG:.*]] = llvm_tapir.tapir_syncregion_start
-// CHECK: llvm_tapir.detach %[[SYNCREG]], ^bb1, ^bb2
-// CHECK: ^bb1: 
-// CHECK: llvm_tapir.reattach %[[SYNCREG]], ^bb2
-// CHECK: ^bb2:
-// CHECK: llvm_tapir.sync %[[SYNCREG]], ^bb3
+// CHECK: llvm_tapir.detach %[[SYNCREG]], ^[[BB1:bb[0-9]+]], ^[[BB2:bb[0-9]+]]
+// CHECK: ^[[BB1]]: 
+// CHECK: llvm_tapir.reattach %[[SYNCREG]], ^[[BB2]]
+// CHECK: ^[[BB2]]:
+// CHECK: llvm_tapir.sync %[[SYNCREG]], ^bb{{[0-9]+}}
 llvm.func @tapir_ops() {
   %sr = "llvm_tapir.tapir_syncregion_start"() : () -> !llvm.token
   llvm_tapir.detach %sr, ^bb1, ^bb2
