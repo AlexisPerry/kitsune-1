@@ -18,6 +18,7 @@
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/ControlFlow/IR/ControlFlowOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
+#include "mlir/Dialect/LLVMIR/LLVMTapirDialect.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "llvm/ADT/SmallSet.h"
@@ -439,9 +440,9 @@ public:
     fir::populateCfgConversionRewrites(patterns, this->forceLoopToExecuteOnce,
                                        this->setNSW, this->tapirTarget);
     mlir::ConversionTarget target(*context);
-    target.addLegalDialect<mlir::affine::AffineDialect,
-                           mlir::cf::ControlFlowDialect, FIROpsDialect,
-                           mlir::func::FuncDialect>();
+    target.addLegalDialect<
+        mlir::affine::AffineDialect, mlir::cf::ControlFlowDialect,
+        FIROpsDialect, mlir::func::FuncDialect, mlir::LLVM::LLVMTapirDialect>();
 
     // apply the patterns
     target.addIllegalOp<ResultOp, DoLoopOp, IfOp, IterWhileOp>();
