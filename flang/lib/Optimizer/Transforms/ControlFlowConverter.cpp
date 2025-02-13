@@ -105,6 +105,12 @@ public:
 
       // Initalization block
       rewriter.setInsertionPointToEnd(initBlock);
+
+      // syncregion.start
+      rewriter.getContext()->loadDialect<mlir::LLVM::LLVMTapirDialect>();
+      auto syncreg = rewriter.create<mlir::LLVM::Tapir_syncregion_start>(
+          loc, mlir::LLVM::LLVMTokenType::get(rewriter.getContext()));
+
       auto diff = rewriter.create<mlir::arith::SubIOp>(loc, high, low);
       auto distance = rewriter.create<mlir::arith::AddIOp>(loc, diff, step);
       mlir::Value iters =
@@ -126,9 +132,67 @@ public:
 
       rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopOperands);
 
+      // detach and reattach
+      auto *detachedBlock =
+          rewriter.splitBlock(firstBlock, firstBlock->begin());
+
+      mlir::Operation *terminator = nullptr;
+      if (firstBlock == lastBlock) {
+        terminator = detachedBlock->getTerminator();
+      } else {
+        terminator = lastBlock->getTerminator(); // Tapir need to change this to
+                                                 // be not lastBlock?
+      }
+
+      // set split point for the reattach block
+      mlir::Block *reattachBlock = nullptr;
+
+      // if the terminator is a fir.result, must split block before the
+      // earliest operation being returned by the fir.result to ensure
+      // that all the passed along values are contained in the block that
+      // will be passing them along to the conditional block
+      if (fir::ResultOp resOp = dyn_cast<fir::ResultOp>(terminator)) {
+        auto results = resOp.getResults();
+        mlir::Operation *firstOp = nullptr;
+        mlir::DominanceInfo domInfo;
+        for (mlir::Value i : results) {
+          mlir::Operation *iOp = i.getDefiningOp();
+          if (iOp && firstOp) {
+            if (domInfo.dominates(iOp, firstOp))
+              firstOp = iOp;
+          } else if (iOp)
+            firstOp = iOp;
+        }
+
+        if (firstOp)
+          reattachBlock = firstOp->getBlock()->splitBlock(firstOp);
+        else if (firstBlock == lastBlock)
+          reattachBlock =
+              rewriter.splitBlock(detachedBlock, detachedBlock->end());
+        else
+          reattachBlock = rewriter.splitBlock(
+              lastBlock,
+              lastBlock
+                  ->end()); // Tapir TODO: need to change to not be lastBlock?
+      } else if (firstBlock == lastBlock)
+        reattachBlock =
+            rewriter.splitBlock(detachedBlock, detachedBlock->end());
+      else
+        reattachBlock = rewriter.splitBlock(
+            lastBlock,
+            lastBlock
+                ->end()); // Tapir TODO: need to change to not be lastBlock?
+
+      // insert tapir_detach
+      rewriter.setInsertionPointToEnd(firstBlock);
+      rewriter.create<LLVM::Tapir_detach>(loc, syncreg, ArrayRef<Value>(),
+                                          ArrayRef<Value>(), detachedBlock,
+                                          reattachBlock);
+
+      // populate reattachBlock
+      rewriter.setInsertionPointToEnd(reattachBlock);
+
       // Last loop block
-      auto *terminator = lastBlock->getTerminator();
-      rewriter.setInsertionPointToEnd(lastBlock);
       auto iv = conditionalBlock->getArgument(0);
       mlir::Value steppedIndex =
           rewriter.create<mlir::arith::AddIOp>(loc, iv, step, iofAttr);
@@ -147,6 +211,11 @@ public:
       loopCarried.push_back(itersMinusOne);
       rewriter.create<mlir::cf::BranchOp>(loc, conditionalBlock, loopCarried);
 
+      // insert tapir_reattach
+      rewriter.setInsertionPointToEnd(detachedBlock);
+      rewriter.create<LLVM::Tapir_reattach>(loc, syncreg, ArrayRef<Value>(),
+                                            reattachBlock);
+
       rewriter.eraseOp(terminator);
 
       // Conditional block
@@ -161,7 +230,13 @@ public:
 
       // Copy loop annotations from the do loop to the loop entry condition.
       if (auto ann = loop.getLoopAnnotation())
-        cond->setAttr("loop_annotation", *ann);
+	cond->setAttr("loop_annotation", *ann);
+
+      // sync
+      auto syncBlock = rewriter.splitBlock(endBlock, endBlock->begin());
+      rewriter.setInsertionPointToEnd(endBlock);
+      rewriter.create<mlir::LLVM::Tapir_sync>(loc, syncreg, ArrayRef<Value>(),
+                                              syncBlock);
 
       // The result of the loop operation is the values of the condition block
       // arguments except the induction variable on the last iteration.
