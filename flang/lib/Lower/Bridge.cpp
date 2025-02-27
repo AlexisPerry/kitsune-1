@@ -2093,7 +2093,7 @@ private:
         builder->getContext(), /*disable=*/f, {}, {}, {}, {}, {}, {});
     mlir::LLVM::LoopAnnotationAttr la = mlir::LLVM::LoopAnnotationAttr::get(
         builder->getContext(), {}, /*vectorize=*/va, {}, {}, {}, {}, {}, {}, {},
-        {}, {}, {}, {}, {}, {}, {});
+        {}, {}, {}, {}, {}, {}, /*tapir loop target*/{}, /*tapir loop spawning strategy*/{});
     info.doLoop.setLoopAnnotationAttr(la);
   }
 
@@ -2144,8 +2144,13 @@ private:
           if (mlirModule->hasAttr(fir::tapirLoopTargetAttrName)) {
             info.doLoop->setAttr(fir::tapirLoopTargetAttrName,
                                  fir::getTapirLoopTarget(mlirModule));
+	    info.doLoop->setAttr(fir::tapirLoopSpawnStrategyAttrName,
+				 fir::getTapirLoopSpawnStrategy(mlirModule));
             llvm::dbgs() << "Bridge.cpp fir::getTapirLoopTarget(mlirModule) = "
                          << fir::getTapirLoopTarget(mlirModule).getValue()
+                         << "\n";
+            llvm::dbgs() << "Bridge.cpp fir::getTapirLoopSpawnStrategy(mlirModule) = "
+                         << fir::getTapirLoopSpawnStrategy(mlirModule).getValue()
                          << "\n";
           }
 
@@ -2209,12 +2214,15 @@ private:
             mlir::IntegerAttr tapirLoopTarget =
                 info.doLoop->getAttrOfType<mlir::IntegerAttr>(
                     fir::tapirLoopTargetAttrName);
+	    mlir::IntegerAttr tapirLoopSpawnStrategy =
+	      info.doLoop->getAttrOfType<mlir::IntegerAttr>(fir::tapirLoopSpawnStrategyAttrName);
+							    
             mlir::LLVM::LoopAnnotationAttr new_la =
                 mlir::LLVM::LoopAnnotationAttr::get(
                     builder->getContext(), disableNonforced, vectorize,
                     interleave, unroll, unrollAndJam, licm, distribute,
                     pipeline, peeled, unswitch, mustProgress, isVectorized,
-                    startLoc, endLoc, parallelAccesses, tapirLoopTarget);
+                    startLoc, endLoc, parallelAccesses, tapirLoopTarget, tapirLoopSpawnStrategy);
             info.doLoop.setLoopAnnotationAttr(new_la);
           } else {
             llvm::dbgs()
@@ -2223,10 +2231,13 @@ private:
             mlir::IntegerAttr tapirLoopTarget =
                 info.doLoop->getAttrOfType<mlir::IntegerAttr>(
                     fir::tapirLoopTargetAttrName);
+	    mlir::IntegerAttr tapirLoopSpawnStrategy =
+	      info.doLoop->getAttrOfType<mlir::IntegerAttr>(fir::tapirLoopSpawnStrategyAttrName);
+							    
             mlir::LLVM::LoopAnnotationAttr new_la =
                 mlir::LLVM::LoopAnnotationAttr::get(
                     builder->getContext(), {}, {}, {}, {}, {}, {}, {}, {}, {},
-                    {}, {}, {}, {}, {}, {}, tapirLoopTarget);
+                    {}, {}, {}, {}, {}, {}, tapirLoopTarget, tapirLoopSpawnStrategy);
             info.doLoop.setLoopAnnotationAttr(new_la);
           }
         }

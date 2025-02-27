@@ -251,13 +251,19 @@ llvm::MDNode *LoopAnnotationConversion::convert() {
     metadataNodes.push_back(llvm::MDNode::get(ctx, parallelAccess));
   }
 
-  llvm::dbgs() << "LoopAnnotationTranslation.cpp: ";
+  llvm::dbgs() << "LoopAnnotationTranslation.cpp: "; 
   if (IntegerAttr tapirLoopTarget = attr.getTapirLoopTarget()) {
     addI32NodeWithVal("tapir.loop.target", *(tapirLoopTarget.getValue().getRawData()));
     llvm::dbgs() << "added metadata node for tapir.loop.target\n" ;
   } else
     llvm::dbgs() << "did NOT add metadata node for tapir.loop.target\n";
-  
+
+  if (IntegerAttr tapirLoopSpawnStrategy = attr.getTapirLoopSpawnStrategy()) {
+    addI32NodeWithVal("tapir.loop.spawn.strategy", *(tapirLoopSpawnStrategy.getValue().getRawData()));
+    llvm::dbgs() << "added metadata node for tapir.loop.spawn.strategy\n" ;
+  } else
+    llvm::dbgs() << "did NOT add metadata node for tapir.loop.spawn.strategy\n";
+    
   // Create loop options and set the first operand to itself.
   llvm::MDNode *loopMD = llvm::MDNode::get(ctx, metadataNodes);
   loopMD->replaceOperandWith(0, loopMD);

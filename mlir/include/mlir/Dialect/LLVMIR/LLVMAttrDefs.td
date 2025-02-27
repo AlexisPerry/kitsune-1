@@ -229,7 +229,8 @@ def LoopAnnotationAttr : LLVM_Attr<"LoopAnnotation", "loop_annotation"> {
     OptionalParameter<"FusedLoc">:$startLoc,
     OptionalParameter<"FusedLoc">:$endLoc,
     OptionalArrayRefParameter<"AccessGroupAttr">:$parallelAccesses,
-    OptionalParameter<"IntegerAttr">:$tapirLoopTarget
+    OptionalParameter<"IntegerAttr">:$tapirLoopTarget,
+    OptionalParameter<"IntegerAttr">:$tapirLoopSpawnStrategy
   );
 
   let assemblyFormat = "`<` struct(params) `>`";

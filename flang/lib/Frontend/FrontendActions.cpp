@@ -278,6 +278,7 @@ bool CodeGenAction::beginSourceFileAction() {
         ci.getInvocation().getCodeGenOpts().kitsuneOpts.getTapirTarget();
     if (tapirID) {
       fir::setTapirLoopTarget(*mlirModule, *tapirID);
+      fir::setTapirLoopSpawnStrategy(*mlirModule);
       llvm::dbgs() << "FrontendActions.cpp *tapirID = " << *tapirID << "\n";
     }
 
@@ -321,6 +322,7 @@ bool CodeGenAction::beginSourceFileAction() {
       ci.getInvocation().getCodeGenOpts().kitsuneOpts.getTapirTarget();
   if (tapirID) {
     fir::setTapirLoopTarget(*mlirModule, *tapirID);
+    fir::setTapirLoopSpawnStrategy(*mlirModule);
     llvm::dbgs() << "FrontendActions.cpp *tapirID = " << *tapirID << "\n";
   }
 
@@ -1032,12 +1034,15 @@ void CodeGenAction::runOptimizationPipeline(llvm::raw_pwrite_stream &os) {
 
   // Create the pass manager.
   llvm::ModulePassManager mpm;
+  llvm::dbgs() << "FrontendActions.cpp: tlii->hasTapirTarget() = " << tlii->hasTapirTarget() << "\n";
   if (opts.PrepareForFullLTO)
     mpm = pb.buildLTOPreLinkDefaultPipeline(level);
   else if (opts.PrepareForThinLTO)
     mpm = pb.buildThinLTOPreLinkDefaultPipeline(level);
   else
-    mpm = pb.buildPerModuleDefaultPipeline(level);
+    mpm = pb.buildPerModuleDefaultPipeline(level,
+					   /* LTOPreLink */ false,
+					   tlii->hasTapirTarget());
 
   if (action == BackendActionTy::Backend_EmitBC)
     mpm.addPass(llvm::BitcodeWriterPass(os));

@@ -135,3 +135,14 @@ void fir::setTapirLoopTarget(mlir::ModuleOp mod, llvm::TapirTargetID tapirTarget
 mlir::IntegerAttr fir::getTapirLoopTarget(mlir::ModuleOp mod) {
   return mod->getAttrOfType<mlir::IntegerAttr>(tapirLoopTargetAttrName);
 }
+
+void fir::setTapirLoopSpawnStrategy(mlir::ModuleOp mod) {
+  mlir::OpBuilder builder = mlir::OpBuilder(mod.getContext());
+
+  mod->setAttr(tapirLoopSpawnStrategyAttrName,
+	       mlir::IntegerAttr::get(builder.getI32Type(), 1)); //default to 1 for now
+}
+
+mlir::IntegerAttr fir::getTapirLoopSpawnStrategy(mlir::ModuleOp mod) {
+  return mod->getAttrOfType<mlir::IntegerAttr>(tapirLoopSpawnStrategyAttrName);
+}

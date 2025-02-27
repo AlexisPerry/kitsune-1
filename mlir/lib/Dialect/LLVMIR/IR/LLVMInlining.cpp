@@ -552,8 +552,10 @@ handleLoopAnnotations(Operation *call,
         loopAnnotation.getPipeline(), loopAnnotation.getPeeled(),
         loopAnnotation.getUnswitch(), loopAnnotation.getMustProgress(),
         loopAnnotation.getIsVectorized(), newStartLoc, newEndLoc,
-        loopAnnotation.getParallelAccesses(), loopAnnotation.getTapirLoopTarget());
+        loopAnnotation.getParallelAccesses(), loopAnnotation.getTapirLoopTarget(),
+	loopAnnotation.getTapirLoopSpawnStrategy());
     llvm::dbgs() << "LLVMInlining.cpp: loopAnnotation.getTapirLoopTarget() = " << loopAnnotation.getTapirLoopTarget() << "\n";
+    llvm::dbgs() << "LLVMInlining.cpp: loopAnnotation.getTapirLoopSpawnStrategy() = " << loopAnnotation.getTapirLoopSpawnStrategy() << "\n";
     // Needs to advance, as loop annotations can be nested.
     return {newLoopAnnotation, WalkResult::advance()};
   });

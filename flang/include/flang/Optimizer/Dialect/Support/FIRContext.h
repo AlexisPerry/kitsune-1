@@ -87,6 +87,14 @@ void setTapirLoopTarget(mlir::ModuleOp mod, llvm::TapirTargetID tapirTarget);
 
 // Get the Tapir Target from the module.
 mlir::IntegerAttr getTapirLoopTarget(mlir::ModuleOp mod);
+
+static constexpr const char *tapirLoopSpawnStrategyAttrName = "tapir.loop.spawn.strategy";
+
+// Set the Tapir Loop Spawning Strategy for the module.
+void setTapirLoopSpawnStrategy(mlir::ModuleOp mod);
+
+// Get the Tapir Loop Spawning Strategy from the module.
+mlir::IntegerAttr getTapirLoopSpawnStrategy(mlir::ModuleOp mod);
 } // namespace fir
 
 #endif // FORTRAN_OPTIMIZER_SUPPORT_FIRCONTEXT_H
