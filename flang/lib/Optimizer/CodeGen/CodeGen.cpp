@@ -907,15 +907,14 @@ getMalloc(fir::AllocMemOp op, mlir::ConversionPatternRewriter &rewriter) {
   mlir::OpBuilder moduleBuilder(
       op->getParentOfType<mlir::ModuleOp>().getBodyRegion());
   //static constexpr char mallocName[] = "malloc";
-  const char* mallocName;
+  const char* mallocName = "malloc";
   if (module->hasAttr(fir::tapirLoopTargetAttrName)) {
     mlir::IntegerAttr tapirTarget = fir::getTapirLoopTarget(module);
     
     if ((tapirTarget == mlir::IntegerAttr::get(moduleBuilder.getI32Type(), static_cast<int>(llvm::TapirTargetID::Cuda))) ||
 	(tapirTarget == mlir::IntegerAttr::get(moduleBuilder.getI32Type(), static_cast<int>(llvm::TapirTargetID::Hip))))
       mallocName = "__kitcuda_mem_alloc_managed";
-  } else
-    mallocName = "malloc";
+  }
   
   if (auto mallocFunc = module.lookupSymbol<mlir::LLVM::LLVMFuncOp>(mallocName))
     return mlir::SymbolRefAttr::get(mallocFunc);
@@ -1008,7 +1007,7 @@ struct AllocMemOpConversion : public fir::FIROpConversion<fir::AllocMemOp> {
 static mlir::SymbolRefAttr getFree(fir::FreeMemOp op,
                                    mlir::ConversionPatternRewriter &rewriter) {
   //static constexpr char freeName[] = "free";
-  const char* freeName;
+  const char* freeName = "free";
   auto module = op->getParentOfType<mlir::ModuleOp>();
   mlir::OpBuilder moduleBuilder(module.getBodyRegion());
 
@@ -1018,9 +1017,7 @@ static mlir::SymbolRefAttr getFree(fir::FreeMemOp op,
     if ((tapirTarget == mlir::IntegerAttr::get(moduleBuilder.getI32Type(), static_cast<int>(llvm::TapirTargetID::Cuda))) ||
 	(tapirTarget == mlir::IntegerAttr::get(moduleBuilder.getI32Type(), static_cast<int>(llvm::TapirTargetID::Hip))))
       freeName = "__kitcuda_mem_free";
-  } else
-    freeName = "free";
-  
+  }  
 
   // Check if free already defined in the module.
   if (auto freeFunc = module.lookupSymbol<mlir::LLVM::LLVMFuncOp>(freeName))
