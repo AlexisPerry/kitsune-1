@@ -5,23 +5,23 @@ program euler3d
      real :: x, y, z
   end type Float3
 
-  integer :: block_length = 1
+  integer, parameter :: block_length = 1
 !
 !  Options
 !
-  real :: GAMMA = 1.4
-  integer :: NDIM = 3
-  integer :: NNB =4
-  integer :: RK = 3	! 3rd order RK
-  real :: ff_mach = 1.2
-  real :: deg_angle_of_attack = 0.0
+  real, parameter :: GAMMA = 1.4
+  integer, parameter :: NDIM = 3
+  integer, parameter :: NNB = 4
+  integer, parameter :: RK = 3	! 3rd order RK
+  real, parameter :: ff_mach = 1.2
+  real, parameter :: deg_angle_of_attack = 0.0
 !
 ! not options
 !
-  integer :: VAR_DENSITY = 1
-  integer :: VAR_MOMENTUM = 2
-  integer :: VAR_DENSITY_ENERGY ! must equal VAR_MOMENTUM + NDIM
-  integer :: NVAR ! must equal VAR_DENSITY_ENERGY + 1
+  integer, parameter :: VAR_DENSITY = 1
+  integer, parameter :: VAR_MOMENTUM = 2
+  integer, parameter :: VAR_DENSITY_ENERGY = VAR_MOMENTUM + NDIM
+  integer, parameter :: NVAR = VAR_DENSITY_ENERGY + 1
 
   !Command line parsing
   integer :: num_args, ix
@@ -63,8 +63,8 @@ program euler3d
   real, dimension(:), allocatable :: step_factors
   
   ! setting parameters that would be #defined in c-style
-  VAR_DENSITY_ENERGY = VAR_MOMENTUM + NDIM
-  NVAR = VAR_DENSITY_ENERGY + 1
+  !VAR_DENSITY_ENERGY = VAR_MOMENTUM + NDIM
+  !NVAR = VAR_DENSITY_ENERGY + 1
 
   num_args = command_argument_count()
   if (num_args < 1) then
@@ -157,6 +157,8 @@ program euler3d
   print *, "  Starting benchmark..."
   call cpu_time(start_time)
   call initialize_variables(nelr, variables, ff_variable)
+  print *, "VAR_DENSITY = ", VAR_DENSITY
+  print *, "variables(1,1) = ", variables(1,1)
   allocate(old_variables(nelr,NVAR))
   allocate(fluxes(nelr,NVAR))
   allocate(step_factors(nelr))
@@ -168,8 +170,9 @@ program euler3d
   rk_total = 0.0
 
   DO i = 1, iterations
+     print *, "--- Iteration ", i, " ---"
      call cpu_time(copy_start)
-     !cpy(old_variables, variables, nelr, NVAR)
+     !call cpy(old_variables, variables, nelr, NVAR)
      old_variables = variables
      call cpu_time(copy_end)
      time = copy_end - copy_start
@@ -178,17 +181,20 @@ program euler3d
      ! for the first iteration we compute the time step
      call cpu_time(sf_start)
      call compute_step_factor(nelr, variables, areas, step_factors)
+     print *, "after compute_step_factor: variables(1,1) = ", variables(1,1)
      call cpu_time(sf_end)
      time = sf_end - sf_start
      call increment_real8(sf_total, time)
 
      call cpu_time(rk_start)
-     DO j = 1, RK 
+     DO j = 1, RK
         call compute_flux ( nelr, elements_surrounding_elements, normals, &
              variables, fluxes, ff_variable, ff_flux_contribution_momentum_x, &
              ff_flux_contribution_momentum_y, ff_flux_contribution_momentum_z, &
              ff_flux_contribution_density_energy )
+        print *, "after compute_flux: variables(1,1) = ", variables(1,1)
         call time_step (j, nelr, old_variables, variables, step_factors, fluxes)
+        print *, "after time_step: variables(1,1) = ", variables(1,1)
      end DO
      call cpu_time(rk_end)
      time = rk_end - rk_start
@@ -281,7 +287,7 @@ contains
   end subroutine readline
 
   !NOTE: might be able to get rid of this in favor of simply assigning src to dst
-  pure subroutine cpy (dst, src, N, M)
+  subroutine cpy (dst, src, N, M)
     real, dimension(:,:), intent(inout) :: dst
     real, dimension(:,:), intent(in) :: src
     integer, intent(in) :: N, M
@@ -325,7 +331,7 @@ contains
     
   end subroutine dump
 
-  pure subroutine initialize_variables (nelr, variables, ff_variable)
+  subroutine initialize_variables (nelr, variables, ff_variable)
     integer, intent(in) :: nelr
     real, dimension (:,:), intent(inout) :: variables
     real, dimension (:), intent(in) ::ff_variable
@@ -341,8 +347,8 @@ contains
        fc_density_energy)
     real, intent(in) :: density, density_energy, pressure
     type(Float3), intent(in) :: momentum, velocity
-    type(Float3), intent(inout) :: fc_momentum_x, fc_momentum_y, fc_momentum_z
-    type(Float3), intent(inout) :: fc_density_energy
+    type(Float3), intent(out) :: fc_momentum_x, fc_momentum_y, fc_momentum_z
+    type(Float3), intent(out) :: fc_density_energy
     real de_p
 
     fc_momentum_x%x = (velocity%x * momentum%x) + pressure
@@ -363,17 +369,17 @@ contains
     fc_density_energy%z = velocity%z * de_p
 
   end subroutine compute_flux_contribution
-
-  pure subroutine compute_velocity (density, momentum, velocity)
+  
+  pure function compute_velocity (density, momentum) result (velocity)
     real, intent(in) :: density
     type(Float3), intent(in) :: momentum
-    type(Float3), intent(inout) :: velocity
+    type(Float3) :: velocity
 
     velocity%x = momentum%x / density
     velocity%y = momentum%y / density
     velocity%z = momentum%z / density
 
-  end subroutine compute_velocity
+  end function compute_velocity
 
   pure function compute_speed_sqd (velocity) result (v2)
     type(Float3), intent(in) :: velocity
@@ -399,7 +405,7 @@ contains
   end function compute_speed_of_sound
 
   !NOTE: need to check all my procedures to see if stuff is really inout and not simly out
-  pure subroutine compute_step_factor(nelr, variables, areas, step_factors)
+  subroutine compute_step_factor(nelr, variables, areas, step_factors)
     integer, intent(in) :: nelr
     real, dimension(:,:), intent(in) :: variables
     real, dimension(:), intent(in) :: areas
@@ -425,7 +431,7 @@ contains
           momentum%z = variables(i, VAR_MOMENTUM+2)
 
           density_energy = variables(i, VAR_DENSITY_ENERGY)
-          call compute_velocity(density, momentum, velocity)
+          velocity = compute_velocity(density, momentum)
           speed_sqd = compute_speed_sqd(velocity)
           pressure = compute_pressure(density, density_energy, speed_sqd)
           speed_of_sound = compute_speed_of_sound(density, pressure)
@@ -433,8 +439,8 @@ contains
           ! dt = 0.5 * sqrt(areas(i() / (||v|| + c).... but
           ! when we do time stepping, this later would need to be divided
           ! by the area, so we just do it all at once
-          step_factors(i) = 0.5 / &
-               ((sqrt(areas(i)) * (sqrt(speed_sqd)) + speed_of_sound))
+          step_factors(i) = 0.5 / (sqrt(areas(i)) * &
+               (sqrt(speed_sqd) + speed_of_sound))
        end DO
     end DO !concurrent
   end subroutine compute_step_factor
@@ -445,13 +451,13 @@ contains
     a = a + b
   end subroutine increment
 
-  pure subroutine increment_real8(a, b)
+  subroutine increment_real8(a, b)
     real(8), intent(inout) :: a
     real(8), intent(in) :: b
     a = a + b
   end subroutine increment_real8
 
-  pure subroutine compute_flux(nelr, elements_surrounding_elements, normals, &
+  subroutine compute_flux(nelr, elements_surrounding_elements, normals, &
        variables, fluxes, ff_variable, ff_flux_contribution_momentum_x, &
        ff_flux_contribution_momentum_y, ff_flux_contribution_momentum_z, &
        ff_flux_contribution_density_energy)
@@ -507,7 +513,7 @@ contains
 
           density_energy_i = variables(i, VAR_DENSITY_ENERGY)
 
-          call compute_velocity(density_i, momentum_i, velocity_i)
+          velocity_i = compute_velocity(density_i, momentum_i)
           speed_sqd_i = compute_speed_sqd(velocity_i)
           speed_i = sqrt(speed_sqd_i)
           pressure_i = compute_pressure(density_i, density_energy_i, speed_sqd_i)
@@ -542,7 +548,7 @@ contains
                 momentum_nb%y = variables(nb, VAR_MOMENTUM+1)
                 momentum_nb%z = variables(nb, VAR_MOMENTUM+2)
                 density_energy_nb = variables(nb, VAR_DENSITY_ENERGY)
-                call compute_velocity(density_nb, momentum_nb, velocity_nb)
+                velocity_nb = compute_velocity(density_nb, momentum_nb)
                 speed_sqd_nb = compute_speed_sqd(velocity_nb)
                 pressure_nb = compute_pressure(density_nb, density_energy_nb, &
                      speed_sqd_nb)
@@ -681,16 +687,16 @@ contains
           fluxes(i, VAR_DENSITY_ENERGY) = flux_i_density_energy
           
        end DO
-    end DO
+    end DO !concurrent
   end subroutine compute_flux
-
-  pure subroutine time_step(j, nelr, old_variables, variables, &
+  
+  subroutine time_step(j, nelr, old_variables, variables, &
        step_factors, fluxes)
     integer, intent(in) :: j, nelr
     real, dimension(:), intent(in) :: step_factors
     real, dimension(:,:), intent(in) :: old_variables, fluxes
     real, dimension(:,:), intent(inout) :: variables
-    integer :: blk, b_start, b_end, i, denom
+    integer :: blk, b_start, b_end, i
     real :: factor
 
     DO CONCURRENT (blk = 1:nelr/block_length)
@@ -702,8 +708,7 @@ contains
        end if
 
        DO i = b_start, b_end
-          denom = RK +1 -j
-          factor = step_factors(i) / real (denom)
+          factor = step_factors(i) / real (RK +j)
           variables(i, VAR_DENSITY) = old_variables(i, VAR_DENSITY) + &
                factor*fluxes(i, VAR_DENSITY)
           variables(i, VAR_MOMENTUM) = old_variables(i, VAR_MOMENTUM) + &

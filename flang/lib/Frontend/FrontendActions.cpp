@@ -959,8 +959,11 @@ static void generateMachineCodeOrAssemblyImpl(clang::DiagnosticsEngine &diags,
       llvm::driver::createTLII(triple, codeGenOpts.getVecLib());
   std::optional<llvm::TapirTargetID> tapirID =
       codeGenOpts.kitsuneOpts.getTapirTarget();
-  if (tapirID)
+  if (tapirID) {
     tlii->setTapirTarget(*tapirID);
+    tlii->setTapirTargetOptions(codeGenOpts.kitsuneOpts.getOpenCilkABIOptions());
+    tlii->addTapirTargetLibraryFunctions();
+  }
   codeGenPasses.add(new llvm::TargetLibraryInfoWrapperPass(*tlii));
 
   llvm::CodeGenFileType cgft = (act == BackendActionTy::Backend_EmitAssembly)
@@ -1021,8 +1024,11 @@ void CodeGenAction::runOptimizationPipeline(llvm::raw_pwrite_stream &os) {
       llvm::driver::createTLII(triple, opts.getVecLib());
   std::optional<llvm::TapirTargetID> tapirID =
       opts.kitsuneOpts.getTapirTarget();
-  if (tapirID)
+  if (tapirID) {
     tlii->setTapirTarget(*tapirID);
+    tlii->setTapirTargetOptions(opts.kitsuneOpts.getOpenCilkABIOptions());
+    tlii->addTapirTargetLibraryFunctions();
+  }
   fam.registerPass([&] { return llvm::TargetLibraryAnalysis(*tlii); });
 
   // Register all the basic analyses with the managers.
